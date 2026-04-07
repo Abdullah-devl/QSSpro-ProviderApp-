@@ -95,9 +95,16 @@ class ProfileModel {
           double.tryParse(userJson['paid_points']?.toString() ?? '0') ?? 0.0,
 
       // 🎨 بيانات البروفايل المباشرة
-      jobTitle: json['job_title'] ?? 'فني محترف',
-      bio: json['bio'] ?? '',
-      avatarUrl: json['image_url'] != null
+      jobTitle: json['job-title']?.toString() ?? 
+                json['job_title']?.toString() ?? 
+                userJson['job-title']?.toString() ?? 
+                userJson['job_title']?.toString() ?? 
+                json['position']?.toString() ?? 
+                '',
+      bio: json['bio']?.toString() ?? 
+           userJson['bio']?.toString() ?? 
+           '',
+      avatarUrl: (json['image_url'] ?? json['avatar'] ?? userJson['avatar']) != null
           ? (json['image_url'].toString().startsWith('http')
                 ? json['image_url']
                 : '${ApiEndpoints.domain}${json['image_url']}') // إتصال مع نقطة النهاية الموحدة

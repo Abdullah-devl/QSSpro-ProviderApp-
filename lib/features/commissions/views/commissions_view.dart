@@ -21,7 +21,7 @@ class CommissionsView extends StatelessWidget {
   Widget build(BuildContext context) {
     // نفترض أن ViewModel تم توفيره عبر Provider (مثلاً في main.dart)
     final viewModel = Provider.of<CommissionsViewModel>(context);
-
+    // viewModel.fetchCommissionsData();
     // لون الخلفية الرمادي الفاتح جداً
     final Color bgColor = const Color(0xFFF8F9FA);
 
@@ -56,7 +56,7 @@ class CommissionsView extends StatelessWidget {
       body: RefreshIndicator(
         onRefresh: () async {
           await Future.wait([
-            // viewModel.fetchCommissionsData(),
+            viewModel.fetchCommissionsData(),
             context.read<CommissionsStatsViewModel>().fetchStatsData(),
             context.read<PaymentsHistoryViewModel>().fetchAllHistory(),
           ]);

@@ -1,6 +1,7 @@
 // مسار الملف: lib/features/points/repositories/points_repository.dart
 
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:service_provider_app/core/network/api_client.dart';
@@ -22,7 +23,7 @@ class PointsRepository {
     var box = Hive.box(HiveKeys.settingsBox);
     try {
       final response = await _apiService.get(ApiEndpoints.getPointsPackages);
-      
+
       // استخدام handleResponse لتنقية البيانات
       final data = ApiErrorHandler.handleResponse(response);
 
@@ -36,13 +37,20 @@ class PointsRepository {
       // 💾 تحديث الكاش
       await box.put(_packagesCacheKey, responseList);
 
-      return responseList.map((json) => PointsPackageModel.fromJson(json)).toList();
+      return responseList
+          .map((json) => PointsPackageModel.fromJson(json))
+          .toList();
     } catch (e) {
       // 🔄 جلب من الكاش في حال الفشل
       final cachedData = box.get(_packagesCacheKey);
       if (cachedData != null) {
         final List list = List.from(cachedData);
-        return list.map((json) => PointsPackageModel.fromJson(Map<String, dynamic>.from(json))).toList();
+        return list
+            .map(
+              (json) =>
+                  PointsPackageModel.fromJson(Map<String, dynamic>.from(json)),
+            )
+            .toList();
       }
       throw ApiErrorHandler.handle(e);
     }
@@ -80,24 +88,33 @@ class PointsRepository {
     var box = Hive.box(HiveKeys.settingsBox);
     try {
       final response = await _apiService.get(ApiEndpoints.pointsBalance);
+      // ✅ ApiErrorHandler.handleResponse already handles the 'data' unwrapping
       final data = ApiErrorHandler.handleResponse(response);
+      debugPrint('🔍 PointsRepository: Raw data from handleResponse: $data');
       
-      final Map<String, dynamic> responseData = data['data'] ?? data;
+      final Map<String, dynamic> responseData = Map<String, dynamic>.from(data);
+      debugPrint('🔍 PointsRepository: responseData keys: ${responseData.keys.toList()}');
 
       // 💾 تحديث الكاش
       await box.put(_balanceCacheKey, responseData);
 
-      return PointsBalanceModel.fromJson(responseData);
+      final model = PointsBalanceModel.fromJson(responseData);
+      debugPrint('🔍 PointsRepository: Parsed Model - Bonus: ${model.bonusPoints}, Paid: ${model.paidPoints}');
+      
+      return model;
     } catch (e) {
+
       // 🔄 جلب من الكاش في حال الفشل
       final cachedData = box.get(_balanceCacheKey);
       if (cachedData != null) {
-        return PointsBalanceModel.fromJson(Map<String, dynamic>.from(cachedData));
+        return PointsBalanceModel.fromJson(
+          Map<String, dynamic>.from(cachedData),
+        );
       }
       throw ApiErrorHandler.handle(e);
     }
   }
-  
+
   /// 🔄 تحويل الأرباح إلى نقاط مكافأة (+1%)
   Future<void> convertPoints(double amount) async {
     try {

@@ -40,10 +40,15 @@ class ProfileRepository {
 
       if (finalMap.isEmpty) throw 'البيانات المستلمة فارغة';
 
+      debugPrint('🔍 ProfileRepository: finalMap keys: ${finalMap.keys.toList()}');
+      debugPrint('🔍 ProfileRepository: job_title in finalMap: ${finalMap['job_title']}');
+
       // 💾 التخزين في Hive ليعمل التطبيق بدون إنترنت
       await box.put(_profileCacheKey, finalMap);
 
-      return ProfileModel.fromJson(finalMap);
+      final model = ProfileModel.fromJson(finalMap);
+      debugPrint('🔍 ProfileRepository: Parsed jobTitle: ${model.jobTitle}');
+      return model;
     } catch (e) {
       print('❌ API Error: $e');
 
@@ -72,7 +77,7 @@ class ProfileRepository {
       FormData formData = FormData.fromMap({
         '_method': 'PUT',
         'name': name,
-        'job_title': jobTitle,
+        'job-title': jobTitle,
         'bio': bio,
         'is_available': isAvailable ? 1 : 0,
       });
@@ -89,11 +94,16 @@ class ProfileRepository {
         );
       }
 
+      debugPrint('🚀 ProfileRepository: Updating Profile ID: $id');
+      debugPrint('🚀 ProfileRepository: FormData fields: ${formData.fields}');
+
       // 🚀 نرسل التحديث لرابط البروفايل في لارافل
       final response = await _apiService.post('profiles/$id', data: formData);
+      debugPrint('✅ ProfileRepository: Update Response: ${response.data}');
 
       ApiErrorHandler.handleResponse(response);
     } catch (e) {
+      debugPrint('❌ ProfileRepository: Update Error: $e');
       throw ApiErrorHandler.handle(e);
     }
   }
@@ -459,7 +469,8 @@ class ProfileRepository {
         debugPrint('🏦 Banks MAP keys: ${data.keys.toList()}');
 
         // استخراج القائمة بطريقة صريحة لتجنب مشاكل الـ type casting
-        final rawList = data['userBanks'] ??
+        final rawList =
+            data['userBanks'] ??
             data['data'] ??
             data['banks'] ??
             data['bank'] ??
@@ -527,8 +538,8 @@ class ProfileRepository {
   }
 
   Future<void> updateBank({
-    required int id,       // id السجل في user_banks (لاستخدامه في الـ URL)
-    required int bankId,   // id البنك في جدول banks
+    required int id, // id السجل في user_banks (لاستخدامه في الـ URL)
+    required int bankId, // id البنك في جدول banks
     required String bankAccount,
     required bool isActive,
   }) async {

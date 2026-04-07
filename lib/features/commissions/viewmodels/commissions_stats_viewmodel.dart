@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:service_provider_app/features/points/repositories/points_repository.dart';
 import 'package:service_provider_app/features/profile/repositories/profile_repository.dart';
-import 'package:service_provider_app/core/network/error/failure.dart';
+
 import '../models/provider_commission_summary_model.dart';
 import '../../points/models/points_balance_model.dart';
 import '../repositories/commissions_repository.dart';
@@ -46,27 +46,38 @@ class CommissionsStatsViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 🚀 جلب البيانات الثلاثة (ملخص العمولة، رصيد النقاط، والبروفايل) بشكل متزامن
-      final results = await Future.wait([
-        _repository.getProviderCommissionSummary(),
-        _pointsRepository.getPointsBalance(),
-        _profileRepository.getMyProfile(),
-      ]);
-
-      _statsSummary = results[0] as ProviderCommissionSummaryModel;
-      _pointsBalance = results[1] as PointsBalanceModel;
+      // 🚀 جلب البيانات بشكل مستقل لضمان استقرار العرض حتى لو فشل أحد الطلبات
       
-      final profile = results[2] as dynamic; 
-      _isVerified = profile.verificationProvider ?? false;
-      _calculateVerificationDays(profile.providerVerifiedUntil);
+      // 1. ملخص العمولات
+      try {
+        _statsSummary = await _repository.getProviderCommissionSummary();
+        debugPrint('✅ CommissionsStatsViewModel: statsSummary loaded');
+      } catch (e) {
+        debugPrint('❌ CommissionsStatsViewModel: Error loading statsSummary: $e');
+      }
+
+      // 2. رصيد النقاط
+      try {
+        _pointsBalance = await _pointsRepository.getPointsBalance();
+        debugPrint('✅ CommissionsStatsViewModel: pointsBalance loaded: ${_pointsBalance?.bonusPoints} pts');
+      } catch (e) {
+        debugPrint('❌ CommissionsStatsViewModel: Error loading pointsBalance: $e');
+      }
+      
+      // 3. بيانات البروفايل
+      try {
+        final profile = await _profileRepository.getMyProfile();
+        _isVerified = profile.verificationProvider;
+        _calculateVerificationDays(profile.providerVerifiedUntil);
+        debugPrint('✅ CommissionsStatsViewModel: Profile loaded (Verified: $_isVerified)');
+      } catch (e) {
+        debugPrint('❌ CommissionsStatsViewModel: Error loading profile: $e');
+      }
 
       _isLoading = false;
-      notifyListeners();
-    } on Failure catch (failure) {
-      _isLoading = false;
-      _errorMessage = failure.message;
       notifyListeners();
     } catch (e) {
+      debugPrint('❌ CommissionsStatsViewModel: Global Error in fetchStatsData: $e');
       _isLoading = false;
       _errorMessage = 'error_unexpected_fetch_data';
       notifyListeners();

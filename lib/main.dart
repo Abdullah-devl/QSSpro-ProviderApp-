@@ -24,6 +24,8 @@ import 'features/home/repositories/home_repository.dart';
 // 2. استدعاء الـ ViewModels 🧠
 import 'features/settings/viewmodels/settings_provider.dart';
 import 'features/home/viewmodels/main_viewmodel.dart';
+import 'features/orders/Repository/orders_repository.dart';
+import 'features/orders/ViewModels/orders_viewmodel.dart';
 
 // 3. استدعاء الثيم، الترجمة، وشاشة البداية 🎨
 import 'core/storage/hive_helper.dart';
@@ -50,6 +52,7 @@ void main() async {
   final profileRepository = ProfileRepository(apiService);
   final withdrawRepository = WithdrawRepository(apiService);
   final pointsRepository = PointsRepository(apiService);
+  final ordersRepository = OrdersRepository(apiService);
 
   runApp(
     MultiProvider(
@@ -98,6 +101,9 @@ void main() async {
 
         // 🔄 تحويل الأرباح لنقاط
         ChangeNotifierProvider(create: (_) => ConvertPointsViewModel(pointsRepository)),
+
+        // 📦 الطلبات (Orders)
+        ChangeNotifierProvider(create: (_) => OrdersViewModel(ordersRepository)),
       ],
       child: const MyApp(),
     ),

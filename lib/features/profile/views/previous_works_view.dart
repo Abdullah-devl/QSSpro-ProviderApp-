@@ -20,10 +20,14 @@ class PreviousWorksView extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          context.tr('previous_works') != 'previous_works' 
-            ? context.tr('previous_works') 
-            : 'الأعمال السابقة',
-          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
+          context.tr('previous_works') != 'previous_works'
+              ? context.tr('previous_works')
+              : 'الأعمال السابقة',
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.more_vert, color: Color(0xFF637381)),
@@ -37,24 +41,34 @@ class PreviousWorksView extends StatelessWidget {
         ],
       ),
       body: vm.isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF5CA4B8)))
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF5CA4B8)),
+            )
           : vm.errorMessage != null
-              ? Center(child: Text(vm.errorMessage!, style: const TextStyle(color: Colors.red)))
-              : vm.works.isEmpty
-                  ? const Center(child: Text('لا توجد أعمال سابقة'))
-                  : RefreshIndicator(
-                      color: const Color(0xFF5CA4B8),
-                      backgroundColor: Colors.white,
-                      onRefresh: vm.fetchWorks,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                        itemCount: vm.works.length,
-                        itemBuilder: (context, index) {
-                          final work = vm.works[index];
-                          return _buildWorkCard(context, work);
-                        },
-                      ),
-                    ),
+          ? Center(
+              child: Text(
+                vm.errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            )
+          : vm.works.isEmpty
+          ? const Center(child: Text('لا توجد أعمال سابقة'))
+          : RefreshIndicator(
+              color: const Color(0xFF5CA4B8),
+              backgroundColor: Colors.white,
+              onRefresh: vm.fetchWorks,
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                itemCount: vm.works.length,
+                itemBuilder: (context, index) {
+                  final work = vm.works[index];
+                  return _buildWorkCard(context, work);
+                },
+              ),
+            ),
     );
   }
 
@@ -69,7 +83,7 @@ class PreviousWorksView extends StatelessWidget {
             color: Colors.black.withOpacity(0.03),
             offset: const Offset(0, 8),
             blurRadius: 20,
-          )
+          ),
         ],
       ),
       child: Column(
@@ -87,12 +101,19 @@ class PreviousWorksView extends StatelessWidget {
                     children: [
                       Text(
                         profile.name,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '${profile.jobTitle} • الرياض',
-                        style: const TextStyle(fontSize: 12, color: Color(0xFF637381)),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF637381),
+                        ),
                       ),
                     ],
                   ),
@@ -109,7 +130,9 @@ class PreviousWorksView extends StatelessWidget {
                             fit: BoxFit.cover,
                           )
                         : const DecorationImage(
-                            image: AssetImage('assets/images/default_avatar.png'),
+                            image: AssetImage(
+                              'assets/images/default_avatar.png',
+                            ),
                             fit: BoxFit.cover,
                           ),
                   ),
@@ -129,13 +152,20 @@ class PreviousWorksView extends StatelessWidget {
                 width: double.infinity,
                 height: 220,
                 color: Colors.grey.shade200,
-                child: const Icon(Icons.broken_image, color: Colors.grey, size: 50),
+                child: const Icon(
+                  Icons.broken_image,
+                  color: Colors.grey,
+                  size: 50,
+                ),
               ),
             ),
 
           // Actions Space
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 14.0,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -161,13 +191,21 @@ class PreviousWorksView extends StatelessWidget {
               children: [
                 Text(
                   work.title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                   textAlign: TextAlign.right,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   work.description,
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF637381), height: 1.6),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF637381),
+                    height: 1.6,
+                  ),
                   textAlign: TextAlign.right,
                 ),
               ],
@@ -200,7 +238,11 @@ class PreviousWorksView extends StatelessWidget {
       ),
       child: Text(
         tag,
-        style: const TextStyle(color: Color(0xFF5CA4B8), fontSize: 12, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          color: Color(0xFF5CA4B8),
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

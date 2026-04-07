@@ -99,10 +99,12 @@ class CommissionsRepository {
     try {
       final response = await _apiService.get(ApiEndpoints.providerCommissionSummary);
       final data = ApiErrorHandler.handleResponse(response);
-      
+      print("==00000000 data 00000=======");
+      print("==00000000$data 00000=======");
       // استخراج البيانات من مفتاح 'data' إذا وجد
       final Map<String, dynamic> responseData = data['data'] ?? data;
-
+      print("==00000000 responseData 00000=======");
+      print("==00000000$responseData 00000=======");
       // 💾 تحديث الكاش
       await box.put(summaryCacheKey, responseData);
       

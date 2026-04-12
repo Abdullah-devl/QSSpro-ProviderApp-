@@ -64,7 +64,8 @@ class ApiEndpoints {
   // static const String childServices = "services/child";
   static const String childServices = "services/children";
 
-  static const String getOrders = "requests"; // مسار جلب الطلبات
+  static const String getOrders = "/requests/provider"; // مسار جلب الطلبات
+  // static const String getOrders = "requests"; // مسار جلب الطلبات
 
   // رابط العمولات
   static const String commissions = "commissions";
@@ -96,4 +97,9 @@ class ApiEndpoints {
   static const String providerRequestBonds = "provider-request-bonds";
   static const String myPointsPackages = "my-points-packages";
   static const String convertPoints = "points/convert";
+
+  // 📝 روابط الطلبات (تحديث الحالة وإضافة المبلغ)
+  static String getOrderDetail(String id) => "requests/$id";
+  static String updateStatus(String id) => "requests/$id/status";
+  static String addAmount(String id) => "requests/$id/addAmountToMoneyPaid";
 }

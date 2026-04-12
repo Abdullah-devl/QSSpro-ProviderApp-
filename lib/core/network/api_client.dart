@@ -73,8 +73,10 @@
 
 import 'package:dio/dio.dart';
 import 'package:service_provider_app/core/storage/token_storage.dart';
+import 'package:service_provider_app/core/network/navigation_service.dart'; // 🌍 استيراد مفتاح التنقل
 import 'dart:developer' as developer;
 import 'api_endpoints.dart';
+
 
 /// 📝 الوصف: المحرك الشامل للاتصال بالإنترنت (HTTP Requests).
 /// يدعم جميع العمليات (GET, POST, PUT, PATCH, DELETE) مع طباعة مفصلة للـ Console.
@@ -169,12 +171,20 @@ class ApiService {
           }
 
           // تفصيل الأخطاء الشائعة لتسهيل حلها
-          if (statusCode == 401) {
-            developer.log(
-              '⚠️ [401] Unauthorized - التوكن منتهي أو غير صالح',
-              name: 'API_ERROR',
-            );
-          } else if (statusCode == 422) {
+            if (statusCode == 401) {
+              developer.log(
+                '⚠️ [401] Unauthorized - التوكن منتهي أو غير صالح. يتم التوجيه لتسجيل الدخول...',
+                name: 'API_ERROR',
+              );
+              // 🗑️ حذف التوكن المنتهي لتجنب المحاولات الفاشلة مستقبلاً
+              _tokenStorage.deleteToken();
+
+              // 🚪 إعادة التوجيه الفوري لشاشة تسجيل الدخول ومسح كل السجلات السابقة
+              navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                '/login', 
+                (route) => false,
+              );
+            } else if (statusCode == 422) {
             developer.log(
               '⚠️ [422] Validation Error - البيانات المرسلة غير صحيحة: $errorData',
               name: 'API_ERROR',

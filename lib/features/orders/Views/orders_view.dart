@@ -413,8 +413,9 @@ class _OrderCardWidget extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 14),
-                    if (order.status != OrderStatus.canceled &&
-                        order.status != OrderStatus.completed)
+                    const SizedBox(width: 14),
+                    if (order.status != 'canceled' &&
+                        order.status != 'completed')
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -446,34 +447,56 @@ class _OrderCardWidget extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.newOrder:
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+      case 'new':
+      case 'new_order':
+        return const Color(0xFF1CB0F6); // Blue
+      case 'accepted':
+      case 'in_progress':
+      case 'accepted_initial':
+      case 'accepted_partial_paid':
+        return const Color(0xFFFFA502); // Orange
+      case 'completed':
+      case 'finished':
+        return const Color(0xFF2ECC71); // Green
+      case 'canceled':
+      case 'rejected':
+        return const Color(0xFFFF4757); // Red
+      case 'suspended':
+        return const Color(0xFF90A4AE); // Grey
+      default:
         return const Color(0xFF1CB0F6);
-      case OrderStatus.inProgress:
-        return const Color(0xFFFFA502);
-      case OrderStatus.completed:
-        return const Color(0xFF2ECC71);
-      case OrderStatus.canceled:
-        return const Color(0xFFFF4757);
     }
   }
 
-  Widget _buildStatusBadge(BuildContext context, OrderStatus status) {
+  Widget _buildStatusBadge(BuildContext context, String status) {
     String textKey;
-    switch (status) {
-      case OrderStatus.newOrder:
+    switch (status.toLowerCase()) {
+      case 'pending':
+      case 'new':
+      case 'new_order':
         textKey = 'new_order';
         break;
-      case OrderStatus.inProgress:
+      case 'accepted':
+      case 'accepted_initial':
+        textKey = 'accepted_initial';
+        break;
+      case 'in_progress':
+      case 'accepted_partial_paid':
         textKey = 'in_progress';
         break;
-      case OrderStatus.completed:
+      case 'completed':
+      case 'finished':
         textKey = 'completed';
         break;
-      case OrderStatus.canceled:
+      case 'canceled':
+      case 'rejected':
         textKey = 'canceled';
         break;
+      default:
+        textKey = 'status_$status';
     }
 
     return Container(

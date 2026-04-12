@@ -17,9 +17,14 @@ import 'package:service_provider_app/features/withdraw/repositories/withdraw_rep
 import 'package:service_provider_app/features/withdraw/viewmodels/withdraw_viewmodel.dart';
 import 'package:service_provider_app/features/points/repositories/points_repository.dart';
 import 'package:service_provider_app/features/points/viewmodels/convert_points_viewmodel.dart';
+import 'features/auth/repositories/auth_repository.dart';
+import 'features/auth/viewmodels/auth_viewmodel.dart';
 // 1. استدعاء ملفات الشبكة والتخزين (التي نسيناها) 🌐
 import 'core/storage/token_storage.dart';
+import 'core/network/navigation_service.dart'; // 🌍 استدعاء مفتاح التنقل
 import 'features/home/repositories/home_repository.dart';
+import 'features/auth/views/login_view.dart'; // 🚪 شاشة تسجيل الدخول
+
 
 // 2. استدعاء الـ ViewModels 🧠
 import 'features/settings/viewmodels/settings_provider.dart';
@@ -53,6 +58,7 @@ void main() async {
   final withdrawRepository = WithdrawRepository(apiService);
   final pointsRepository = PointsRepository(apiService);
   final ordersRepository = OrdersRepository(apiService);
+  final authRepository = AuthRepository(apiService, tokenStorage);
 
   runApp(
     MultiProvider(
@@ -63,9 +69,13 @@ void main() async {
         Provider<PointsRepository>.value(value: pointsRepository),
         Provider<ProfileRepository>.value(value: profileRepository),
         Provider<PaymentsHistoryRepository>.value(value: paymentsHistoryRepository),
+        Provider<AuthRepository>.value(value: authRepository),
 
         // ⚙️ 👇 التعديل هنا: أضفنا SettingsProvider لكي لا يتعطل التطبيق!
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        
+        // 🔐 ViewModel الخاص بالمصادقة (تسجيل الخروج)
+        ChangeNotifierProvider(create: (_) => AuthViewModel(authRepository)),
 
         // 📱 ViewModel الخاص بشريط التنقل السفلي
         ChangeNotifierProvider(create: (_) => MainViewModel()),
@@ -120,6 +130,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Provider App',
+      navigatorKey: navigatorKey, // ✅ ربط مفتاح التنقل بالعالم
+
 
       // 🎨 ربط الثيم والألوان
       theme: AppTheme.lightTheme,
@@ -137,6 +149,11 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+
+      // 🗺️ الطرق (Routes)
+      routes: {
+        '/login': (context) => const LoginView(),
+      },
 
       home: const SplashView(),
     );

@@ -38,4 +38,14 @@ class AuthRepository {
       throw ApiErrorHandler.handle(e);
     }
   }
-}
+
+  Future<void> logout() async {
+    try {
+      await _apiService.post(ApiEndpoints.logout);
+      await _tokenStorage.deleteToken();
+    } catch (e) {
+      await _tokenStorage.deleteToken();
+      throw ApiErrorHandler.handle(e);
+    }
+  }
+}

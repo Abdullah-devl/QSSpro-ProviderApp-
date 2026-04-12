@@ -20,6 +20,10 @@ import 'package:service_provider_app/features/profile/viewmodels/contact_info_vi
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/profile_viewmodel.dart';
+import '../../auth/viewmodels/auth_viewmodel.dart';
+import 'complaints_view.dart';
+import '../../settings/views/settings_view.dart';
+import '../../auth/views/login_view.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -135,9 +139,41 @@ class ProfileView extends StatelessWidget {
           fontSize: 16,
         ),
       ),
-      leading: IconButton(
+      leading: PopupMenuButton<String>(
         icon: const Icon(Icons.more_vert, color: Colors.blue),
-        onPressed: () {},
+        onSelected: (value) => _handleMenuSelection(context, value),
+        itemBuilder: (BuildContext context) => [
+          const PopupMenuItem(
+            value: 'complaints',
+            child: Row(
+              children: [
+                Icon(Icons.report_problem_outlined, size: 20),
+                SizedBox(width: 8),
+                Text('الشكاوي'),
+              ],
+            ),
+          ),
+          const PopupMenuItem(
+            value: 'settings',
+            child: Row(
+              children: [
+                Icon(Icons.settings_outlined, size: 20),
+                SizedBox(width: 8),
+                Text('الإعدادات'),
+              ],
+            ),
+          ),
+          const PopupMenuItem(
+            value: 'logout',
+            child: Row(
+              children: [
+                Icon(Icons.logout, color: Colors.red, size: 20),
+                SizedBox(width: 8),
+                Text('تسجيل الخروج', style: TextStyle(color: Colors.red)),
+              ],
+            ),
+          ),
+        ],
       ),
       actions: [
         IconButton(
@@ -596,6 +632,96 @@ class ProfileView extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               child: const Text('حذف', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ========================================================
+  // 🧩 معالجة خيارات القائمة
+  // ========================================================
+
+  void _handleMenuSelection(BuildContext context, String value) {
+    switch (value) {
+      case 'complaints':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ComplaintsView()),
+        );
+        break;
+      case 'settings':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const SettingsView()),
+        );
+        break;
+      case 'logout':
+        _showLogoutConfirmationDialog(context);
+        break;
+    }
+  }
+
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text('تسجيل الخروج', textAlign: TextAlign.right),
+          content: const Text(
+            'هل أنت متأكد أنك تريد تسجيل الخروج؟',
+            textAlign: TextAlign.right,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('إلغاء', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(ctx); // إغلاق الديالوج
+
+                // عرض مؤشر التحميل
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) => const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF5CA4B8)),
+                  ),
+                );
+
+                final authVm = context.read<AuthViewModel>();
+                final success = await authVm.logout();
+
+                if (context.mounted) {
+                  Navigator.pop(context); // إغلاق مؤشر التحميل
+
+                  if (success) {
+                    // العودة لشاشة تسجيل الدخول ومسح كل الشاشات السابقة
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginView()),
+                      (route) => false,
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('فشل تسجيل الخروج، حاول مرة أخرى'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: const Text(
+                'خروج',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );

@@ -158,7 +158,7 @@ class VerificationOptionsDialog extends StatelessWidget {
                     Icon(Icons.refresh_rounded, color: colors.primary, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      context.tr('renew_verification_request'),
+                      context.tr('renew_current_verification'),
                       style: TextStyle(
                         color: colors.primary,
                         fontWeight: FontWeight.bold,

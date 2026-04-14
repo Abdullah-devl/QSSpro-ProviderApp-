@@ -54,12 +54,23 @@ class HistoryListItem extends StatelessWidget {
     if (statusKey == 'completed' || statusKey == 'success' || statusKey == 'active') {
       badgeBgColor = const Color(0xFFE8F5E9);
       badgeTextColor = const Color(0xFF388E3C);
-    } else if (statusKey == 'pending' || statusKey == 'processing' || statusKey == 'waiting') {
+    } else if (statusKey == 'accepted_partial_paid' || statusKey == 'accepted_full_paid' || statusKey == 'processing') {
       badgeBgColor = const Color(0xFFFFF3E0);
-      badgeTextColor = const Color(0xFFF57C00);
+      badgeTextColor = const Color(0xFFE65100);
+    } else if (statusKey == 'pending' || statusKey == 'accepted_initial' || statusKey == 'waiting') {
+      badgeBgColor = const Color(0xFFE0F7FA);
+      badgeTextColor = const Color(0xFF0097A7);
+    } else if (statusKey == 'rejected' || statusKey == 'cancelled') {
+      badgeBgColor = const Color(0xFFFFEBEE);
+      badgeTextColor = const Color(0xFFC62828);
     } else {
       badgeBgColor = const Color(0xFFF5F5F5);
       badgeTextColor = const Color(0xFF757575);
+    }
+
+    String translatedStatus = context.tr('status_$statusKey');
+    if (translatedStatus == 'status_$statusKey') {
+      translatedStatus = context.tr(statusKey).isNotEmpty ? context.tr(statusKey) : item.status;
     }
 
     return Container(
@@ -150,7 +161,7 @@ class HistoryListItem extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  context.tr(statusKey).isNotEmpty ? context.tr(statusKey) : item.status,
+                  translatedStatus,
                   style: TextStyle(
                     color: badgeTextColor,
                     fontSize: 10,

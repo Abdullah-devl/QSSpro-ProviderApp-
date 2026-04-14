@@ -102,4 +102,6 @@ class ApiEndpoints {
   static String getOrderDetail(String id) => "requests/$id";
   static String updateStatus(String id) => "requests/$id/status";
   static String addAmount(String id) => "requests/$id/addAmountToMoneyPaid";
+  static String finishRequest(String id) => "requests/$id/finish";
+  static String payCommission(String id) => "requests/$id/pay-commission";
 }

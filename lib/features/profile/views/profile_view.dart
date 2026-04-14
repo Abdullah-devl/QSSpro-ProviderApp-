@@ -106,9 +106,9 @@ class ProfileView extends StatelessWidget {
                       ),
 
                       // داخل TabBarView
-                      const Center(
-                        child: Text('التقييمات قريباً'),
-                      ), // كطفل رابع
+                      Center(
+                        child: Text(context.tr('reviews_soon')),
+                      ),
                     ],
                   ),
                 ),
@@ -143,33 +143,33 @@ class ProfileView extends StatelessWidget {
         icon: const Icon(Icons.more_vert, color: Colors.blue),
         onSelected: (value) => _handleMenuSelection(context, value),
         itemBuilder: (BuildContext context) => [
-          const PopupMenuItem(
+          PopupMenuItem(
             value: 'complaints',
             child: Row(
               children: [
-                Icon(Icons.report_problem_outlined, size: 20),
-                SizedBox(width: 8),
-                Text('الشكاوي'),
+                const Icon(Icons.report_problem_outlined, size: 20),
+                const SizedBox(width: 8),
+                Text(context.tr('complaints')),
               ],
             ),
           ),
-          const PopupMenuItem(
+          PopupMenuItem(
             value: 'settings',
             child: Row(
               children: [
-                Icon(Icons.settings_outlined, size: 20),
-                SizedBox(width: 8),
-                Text('الإعدادات'),
+                const Icon(Icons.settings_outlined, size: 20),
+                const SizedBox(width: 8),
+                Text(context.tr('settings')),
               ],
             ),
           ),
-          const PopupMenuItem(
+          PopupMenuItem(
             value: 'logout',
             child: Row(
               children: [
-                Icon(Icons.logout, color: Colors.red, size: 20),
-                SizedBox(width: 8),
-                Text('تسجيل الخروج', style: TextStyle(color: Colors.red)),
+                const Icon(Icons.logout, color: Colors.red, size: 20),
+                const SizedBox(width: 8),
+                Text(context.tr('logout'), style: const TextStyle(color: Colors.red)),
               ],
             ),
           ),
@@ -262,7 +262,7 @@ class ProfileView extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            profile.bio.isNotEmpty ? profile.bio : 'وصف فني محترف...',
+            profile.bio.isNotEmpty ? profile.bio : context.tr('default_bio'),
             textAlign: TextAlign.justify,
             style: TextStyle(fontSize: 13, color: colors.textSub, height: 1.6),
           ),
@@ -408,7 +408,7 @@ class ProfileView extends StatelessWidget {
         ),
         Tab(
           icon: const Icon(Icons.contact_phone_rounded),
-          text: 'أرقام وحسابات',
+          text: context.tr('contact_info'),
         ),
       ],
     );
@@ -518,9 +518,9 @@ class ProfileView extends StatelessWidget {
               const SizedBox(height: 24),
               ListTile(
                 leading: const Icon(Icons.edit, color: Color(0xFF5CA4B8)),
-                title: const Text(
-                  'تعديل',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                title: Text(
+                  context.tr('edit'),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 onTap: () async {
                   Navigator.pop(ctx);
@@ -541,22 +541,22 @@ class ProfileView extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.share, color: Colors.blue),
-                title: const Text(
-                  'مشاركة',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                title: Text(
+                  context.tr('share'),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تم نسخ رابط العمل (قريباً)')),
+                    SnackBar(content: Text(context.tr('link_copied_soon'))),
                   );
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text(
-                  'حذف',
-                  style: TextStyle(
+                title: Text(
+                  context.tr('delete'),
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.red,
                   ),
@@ -585,16 +585,16 @@ class ProfileView extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Text('تأكيد الحذف', textAlign: TextAlign.right),
+          title: Text(context.tr('delete_confirm_title'), textAlign: TextAlign.right),
           content: Text(
-            'هل أنت متأكد أنك تريد حذف "${work.title}"؟ لا يمكن التراجع عن هذا الإجراء.',
+            context.tr('delete_confirm_msg_specific', args: {'title': work.title}),
             textAlign: TextAlign.right,
           ),
           actionsAlignment: MainAxisAlignment.spaceBetween,
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('إلغاء', style: TextStyle(color: Colors.grey)),
+              child: Text(context.tr('cancel'), style: const TextStyle(color: Colors.grey)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -615,8 +615,8 @@ class ProfileView extends StatelessWidget {
                   Navigator.pop(context); // إغلاق الديالوج حق التحميل
                   vm.fetchProfile(); // تحديث القائمة الواجهة
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('تم الحذف بنجاح'),
+                    SnackBar(
+                      content: Text(context.tr('delete_success')),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -709,8 +709,8 @@ class ProfileView extends StatelessWidget {
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('فشل تسجيل الخروج، حاول مرة أخرى'),
+                      SnackBar(
+                        content: Text(context.tr('logout_failed')),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -718,9 +718,9 @@ class ProfileView extends StatelessWidget {
                 }
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text(
-                'خروج',
-                style: TextStyle(color: Colors.white),
+              child: Text(
+                context.tr('exit'),
+                style: const TextStyle(color: Colors.white),
               ),
             ),
           ],

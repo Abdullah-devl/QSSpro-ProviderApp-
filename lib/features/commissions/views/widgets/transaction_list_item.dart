@@ -28,19 +28,38 @@ class TransactionListItem extends StatelessWidget {
       case 'completed':
         iconBgColor = const Color(0xFFE8F5E9);
         iconColor = const Color(0xFF388E3C);
-        iconData = Icons.receipt_long_rounded;
+        iconData = Icons.done_all_rounded;
         badgeBgColor = const Color(0xFFE8F5E9);
         badgeTextColor = const Color(0xFF388E3C);
-        translatedStatus = context.tr('completed');
+        translatedStatus = context.tr('status_completed');
         break;
       case 'pending':
+      case 'accepted_initial':
+        iconBgColor = const Color(0xFFE0F7FA);
+        iconColor = const Color(0xFF00BCD4);
+        iconData = Icons.new_releases_rounded;
+        badgeBgColor = const Color(0xFFE0F7FA);
+        badgeTextColor = const Color(0xFF0097A7);
+        translatedStatus = context.tr('status_$normalizedStatus');
+        break;
+      case 'accepted_partial_paid':
+      case 'accepted_full_paid':
       case 'processing':
         iconBgColor = const Color(0xFFFFF3E0);
         iconColor = const Color(0xFFF57C00);
-        iconData = Icons.hourglass_top_rounded;
+        iconData = Icons.engineering_rounded;
         badgeBgColor = const Color(0xFFFFF3E0);
-        badgeTextColor = const Color(0xFFF57C00);
-        translatedStatus = context.tr(normalizedStatus);
+        badgeTextColor = const Color(0xFFE65100);
+        translatedStatus = context.tr('status_$normalizedStatus');
+        break;
+      case 'rejected':
+      case 'cancelled':
+        iconBgColor = const Color(0xFFFFEBEE);
+        iconColor = const Color(0xFFD32F2F);
+        iconData = Icons.cancel_rounded;
+        badgeBgColor = const Color(0xFFFFEBEE);
+        badgeTextColor = const Color(0xFFC62828);
+        translatedStatus = context.tr('status_$normalizedStatus');
         break;
       case 'archived':
         iconBgColor = const Color(0xFFF5F5F5);
@@ -48,18 +67,17 @@ class TransactionListItem extends StatelessWidget {
         iconData = Icons.history_rounded;
         badgeBgColor = const Color(0xFFF5F5F5);
         badgeTextColor = const Color(0xFF757575);
-        translatedStatus = context.tr('archived');
+        translatedStatus = context.tr('status_archived');
         break;
       default:
         iconBgColor = const Color(0xFFF5F5F5);
         iconColor = const Color(0xFF9E9E9E);
-        iconData = Icons.history_rounded;
+        iconData = Icons.info_outline_rounded;
         badgeBgColor = const Color(0xFFF5F5F5);
         badgeTextColor = const Color(0xFF757575);
-        // Fallback or attempt to translate if another custom status was added to JSON
-        translatedStatus = context.tr(normalizedStatus);
-        if (translatedStatus == normalizedStatus) {
-           translatedStatus = transaction.status; // Return original capitalized if missing
+        translatedStatus = context.tr('status_$normalizedStatus');
+        if (translatedStatus == 'status_$normalizedStatus') {
+           translatedStatus = transaction.status;
         }
         break;
     }

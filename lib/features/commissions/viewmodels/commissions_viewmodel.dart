@@ -9,8 +9,8 @@ class CommissionsViewModel extends ChangeNotifier {
   final CommissionsRepository _repository;
 
   CommissionsViewModel(this._repository) {
-    // جلب بيانات العمولات فوراً
-    fetchCommissionsData();
+    // تم إلغاء الجلب التلقائي لتجنب الخطأ 404 (api/commissions غير موجود حالياً)
+    // fetchCommissionsData();
   }
 
   bool _isLoading = false;
@@ -29,24 +29,25 @@ class CommissionsViewModel extends ChangeNotifier {
   final List<String> tabKeys = ['all', 'paid', 'pending'];
 
   Future<void> fetchCommissionsData() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    // تم إيقاف محتوى هذه الدالة لتجنب الخطأ 404 بالسيرفر
+    // _isLoading = true;
+    // _errorMessage = null;
+    // notifyListeners();
 
-    try {
-      _commissionsData = await _repository.getCommissionsData();
+    // try {
+    //   _commissionsData = await _repository.getCommissionsData();
 
-      _isLoading = false;
-      notifyListeners();
-    } on Failure catch (failure) {
-      _isLoading = false;
-      _errorMessage = failure.message;
-      notifyListeners();
-    } catch (e) {
-      _isLoading = false;
-      _errorMessage = 'error_unexpected_fetch_data';
-      notifyListeners();
-    }
+    //   _isLoading = false;
+    //   notifyListeners();
+    // } on Failure catch (failure) {
+    //   _isLoading = false;
+    //   _errorMessage = failure.message;
+    //   notifyListeners();
+    // } catch (e) {
+    //   _isLoading = false;
+    //   _errorMessage = 'error_unexpected_fetch_data';
+    //   notifyListeners();
+    // }
   }
 
   // فلترة التعاملات المالية حسب التبويب المختار

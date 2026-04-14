@@ -58,6 +58,8 @@ class OrderModel {
   final List<OrderBond> bonds; // 📂 السندات الخاصة بالطلب
   final DateTime? createdAt; // 📅 تاريخ الإنشاء للفرز والدقة
   final Map<String, dynamic>? rawJson; // 🔍 الحزم الأصلية للتشخيص (Diagnostics)
+  final bool providerFinished; // ✅ هل انتهى المزود من العمل؟
+
 
   OrderModel({
     required this.id,
@@ -81,6 +83,7 @@ class OrderModel {
     this.bonds = const [],
     this.createdAt,
     this.rawJson,
+    this.providerFinished = false,
   });
 
   // 🚀 حساب المبلغ المتبقي (محلياً)
@@ -164,6 +167,7 @@ class OrderModel {
       bonds: bonds,
       createdAt: fullCreatedAt,
       rawJson: json,
+      providerFinished: json['provider_finished'] == 1 || json['provider_finished'] == true,
     );
   }
 }

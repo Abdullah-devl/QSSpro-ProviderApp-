@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:service_provider_app/core/theme/qs_color_extension.dart';
+import 'package:service_provider_app/core/localization/app_localizations.dart';
 import 'package:service_provider_app/features/verification/submit_verification/viewmodels/verification_viewmodel.dart';
 
 class NewVerificationRequestView extends StatelessWidget {
@@ -20,9 +21,9 @@ class NewVerificationRequestView extends StatelessWidget {
         backgroundColor: bgColor,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'طلب توثيق جديد',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        title: Text(
+          context.tr('new_verification_request_title'),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: colors.text, size: 20),
@@ -35,13 +36,13 @@ class NewVerificationRequestView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 📝 الهيدر
-            const Text(
-              'أخبرنا لماذا تريد توثيق حسابك؟',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              context.tr('why_verify_question'),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
-              'يرجى كتابة محتوى طلب التوثيق أو إرفاق روابط لمواقعك المهنية أو أي مستندات نصية تدعم طلبك.',
+              context.tr('verification_request_hint_desc'),
               style: TextStyle(fontSize: 14, color: colors.textSub, height: 1.6),
             ),
             const SizedBox(height: 32),
@@ -63,7 +64,7 @@ class NewVerificationRequestView extends StatelessWidget {
                 controller: vm.contentController,
                 maxLines: 8,
                 decoration: InputDecoration(
-                  hintText: 'اكتب هنا...',
+                  hintText: context.tr('write_here'),
                   hintStyle: TextStyle(color: colors.textSub, fontSize: 14),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -88,9 +89,9 @@ class NewVerificationRequestView extends StatelessWidget {
                 ),
                 child: vm.isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'إرسال الطلب للمراجعة',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                    : Text(
+                        context.tr('submit_verification_request'),
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                       ),
               ),
             ),

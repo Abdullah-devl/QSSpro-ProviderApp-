@@ -159,4 +159,24 @@ class OrdersViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // 🚀 إنهاء العمل من قبل المزود
+  Future<bool> finishOrder(String id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.finishRequest(id);
+      await refreshOrderDetail(id); // تحديث البيانات للتأكد من حالة provider_finished
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

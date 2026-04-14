@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
+import '../../profile/viewmodels/profile_viewmodel.dart';
+import '../../profile/models/profile_model.dart';
 import '../viewmodels/pay_commissions_viewmodel.dart';
 import 'widgets/reward_points_card.dart';
 import 'widgets/payment_method_option_widget.dart';
@@ -13,8 +15,13 @@ import 'pay_with_receipt_view.dart';
 
 class PayCommissionsView extends StatefulWidget {
   final double amount;
+  final String? orderId;
 
-  const PayCommissionsView({super.key, required this.amount});
+  const PayCommissionsView({
+    super.key,
+    required this.amount,
+    this.orderId,
+  });
 
   @override
   State<PayCommissionsView> createState() => _PayCommissionsViewState();
@@ -24,9 +31,11 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
   @override
   void initState() {
     super.initState();
-    // جلب البيانات فور تحميل الصفحة
+    // جلب البيانات فور تحميل الصفحة باستخدام الـ userId الخاص بالمستخدم
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PayCommissionsViewModel>().fetchCommissionsData();
+      final profileViewModel = context.read<ProfileViewModel>();
+      final userId = profileViewModel.profile?.id ?? 0;
+      context.read<PayCommissionsViewModel>().fetchCommissionsData(userId);
     });
   }
 
@@ -78,7 +87,7 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
                       // 2. بطاقة نقاط المكافآت (الديناميكية)
                       RewardPointsCard(
                         pointsBalance:
-                            viewModel.commissionData?.summary.availablePoints ??
+                            viewModel.commissionData?.summary.bonusPoints ??
                             0,
                       ),
                       const SizedBox(height: 32),
@@ -97,7 +106,7 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
 
                       PaymentMethodOptionWidget(
                         title: context.tr('pay_by_receipt'),
-                        subtitle: context.tr('upload_bank_transfer'),
+                        subtitle: context.tr('receipt_upload_subtitle'),
                         iconData: Icons.attach_file_rounded,
                         iconColor: Colors.blueGrey,
                         isSelected:
@@ -109,7 +118,7 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
                       ),
                       PaymentMethodOptionWidget(
                         title: context.tr('pay_by_points'),
-                        subtitle: context.tr('use_current_points_balance'),
+                        subtitle: context.tr('pay_points_subtitle'),
                         iconData: Icons.card_giftcard_rounded,
                         iconColor: const Color(0xFFE68A00),
                         isSelected:
@@ -141,12 +150,10 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
                             MaterialPageRoute(
                               builder: (_) => PayWithPointsView(
                                 amount: widget.amount,
-                                availablePoints: summary?.availablePoints ?? 0,
-                                equivalentPoints:
-                                    (widget.amount *
-                                            (summary?.pointsConversionFactor ??
-                                                100))
-                                        .toInt(),
+                                userId: context.read<ProfileViewModel>().profile?.id ?? 0,
+                                availablePoints: summary?.bonusPoints ?? 0,
+                                equivalentPoints: widget.amount.toInt(),
+                                orderId: widget.orderId,
                               ),
                             ),
                           );
@@ -155,7 +162,10 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const PayWithReceiptView(),
+                              builder: (_) => PayWithReceiptView(
+                                orderId: widget.orderId,
+                                amount: widget.amount,
+                              ),
                             ),
                           );
                         }

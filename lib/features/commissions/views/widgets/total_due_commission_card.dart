@@ -4,10 +4,7 @@ import '../../../../core/localization/app_localizations.dart';
 class TotalDueCommissionCard extends StatelessWidget {
   final double amount;
 
-  const TotalDueCommissionCard({
-    super.key,
-    required this.amount,
-  });
+  const TotalDueCommissionCard({super.key, required this.amount});
 
   @override
   Widget build(BuildContext context) {
@@ -16,10 +13,7 @@ class TotalDueCommissionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.blue.shade100,
-          width: 1.5,
-        ),
+        border: Border.all(color: Colors.blue.shade100, width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.01),
@@ -35,7 +29,7 @@ class TotalDueCommissionCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: const Color(0xFFE3F4FC),
                   borderRadius: BorderRadius.circular(10),
@@ -43,10 +37,10 @@ class TotalDueCommissionCard extends StatelessWidget {
                 child: const Icon(
                   Icons.account_balance_wallet_rounded,
                   color: Color(0xFF1CB0F6),
-                  size: 24,
+                  size: 22,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Text(
                 context.tr('total_due_commission'),
                 style: TextStyle(
@@ -57,7 +51,7 @@ class TotalDueCommissionCard extends StatelessWidget {
               ),
             ],
           ),
-          
+
           // القيمة (في النهاية)
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -65,7 +59,7 @@ class TotalDueCommissionCard extends StatelessWidget {
               Text(
                 amount.toStringAsFixed(2),
                 style: const TextStyle(
-                  fontSize: 26,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                   height: 1,

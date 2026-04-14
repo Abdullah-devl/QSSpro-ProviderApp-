@@ -525,7 +525,7 @@ class _ServiceDetailsBody extends StatelessWidget {
               ),
             )
           : viewModel.serviceDetails == null
-          ? const Center(child: Text('الخدمة غير متوفرة'))
+          ? Center(child: Text(context.tr('service_not_available')))
           : _buildContent(context, viewModel.serviceDetails!, viewModel),
     );
   }

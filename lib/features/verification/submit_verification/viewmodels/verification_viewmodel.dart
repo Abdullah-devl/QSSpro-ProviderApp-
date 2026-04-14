@@ -86,7 +86,7 @@ class VerificationViewModel extends ChangeNotifier {
   // 🛡️ إرسال طلب توثيق جديد (Content فقط)
   Future<void> submitContentRequest(BuildContext context) async {
     if (contentController.text.trim().isEmpty) {
-      DialogHelper.showErrorDialog(context, 'الرجاء كتابة محتوى طلب التوثيق');
+      DialogHelper.showErrorDialog(context, context.tr('error_missing_verification_content'));
       return;
     }
 
@@ -101,7 +101,7 @@ class VerificationViewModel extends ChangeNotifier {
 
       await DialogHelper.showSuccessDialog(
         context,
-        'تم إرسال طلب التوثيق بنجاح، سيتم مراجعته قريباً',
+        context.tr('verification_content_submitted_success'),
       );
 
       if (context.mounted) {

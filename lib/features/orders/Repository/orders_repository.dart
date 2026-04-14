@@ -145,4 +145,16 @@ class OrdersRepository {
       throw ApiErrorHandler.handle(e);
     }
   }
+
+  // 🚀 الإشارة إلى إنهاء العمل (PATCH /api/requests/{id}/finish)
+  Future<void> finishRequest(String requestId) async {
+    try {
+      final response = await _apiService.patch(
+        ApiEndpoints.finishRequest(requestId),
+      );
+      ApiErrorHandler.handleResponse(response);
+    } catch (e) {
+      throw ApiErrorHandler.handle(e);
+    }
+  }
 }

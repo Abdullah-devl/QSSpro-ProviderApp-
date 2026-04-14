@@ -4,6 +4,7 @@ class CommissionSummaryModel {
   final double dueAmount;
   final bool isVerified;
   final int availablePoints; // رصيد النقاط المشحون
+  final int bonusPoints; // رصيد نقاط المكافأة (Wallet)
   final int paidPoints; // الرصيد القابل للسحب (الأرباح)
   final int pointsConversionFactor; // كم نقطة لكل 1 ريال
 
@@ -11,6 +12,7 @@ class CommissionSummaryModel {
     required this.dueAmount,
     required this.isVerified,
     required this.availablePoints,
+    required this.bonusPoints,
     required this.paidPoints,
     required this.pointsConversionFactor,
   });
@@ -20,6 +22,7 @@ class CommissionSummaryModel {
       dueAmount: (json['due_amount'] ?? 0.0).toDouble(),
       isVerified: json['is_verified'] ?? false,
       availablePoints: (json['available_points'] ?? 0).toInt(),
+      bonusPoints: (json['bonus_points'] ?? json['available_points'] ?? 0).toInt(),
       paidPoints: (json['paid_points'] ?? 0).toInt(),
       pointsConversionFactor: (json['points_conversion_factor'] ?? 100).toInt(),
     );

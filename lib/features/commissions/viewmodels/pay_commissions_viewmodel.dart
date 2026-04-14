@@ -34,6 +34,7 @@ class PayCommissionsViewModel extends ChangeNotifier {
 
   final TextEditingController requestIdController = TextEditingController();
   final TextEditingController bondNumberController = TextEditingController();
+  final TextEditingController amountController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
   void changePaymentMethod(PaymentMethodType method) {
@@ -56,31 +57,90 @@ class PayCommissionsViewModel extends ChangeNotifier {
   }
 
   // جلب بيانات العمولات والنقاط
-  Future<void> fetchCommissionsData() async {
+  Future<void> fetchCommissionsData(int userId) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _commissionData = await _repository.getCommissionsData();
+      // 1. نحن لا نطلب api/commissions لتجنب 404
+      // _commissionData = await _repository.getCommissionsData();
+
+      // 2. جلب رصيد النقاط المحدث (bonus_points) من المسار 5.11
+      final dynamic pointsData = await _repository.getPointsBalance(userId);
+      debugPrint('🔍 PayCommissionsViewModel: pointsData received: $pointsData');
+
+      // محاولة استخراج القيم بشكل مرن (سواء كانت في 'data' أو مباشرة)
+      final map = (pointsData is Map && pointsData.containsKey('data')) 
+          ? pointsData['data'] 
+          : pointsData;
+
+      int parsePoints(dynamic val) {
+        if (val == null) return 0;
+        if (val is num) return val.toInt();
+        return double.tryParse(val.toString())?.toInt() ?? 0;
+      }
+
+      final int bonus = parsePoints(map['bonus_points']);
+      final int paid = parsePoints(map['paid_points']);
+      
+      debugPrint('🔍 PayCommissionsViewModel: Parsed Points -> Bonus: $bonus, Paid: $paid');
+
+      // إنشاء نموذج بيانات افتراضي يحتوي على النقاط المحدثة
+      _commissionData = CommissionDataModel(
+        summary: CommissionSummaryModel(
+          dueAmount: 0.0, 
+          isVerified: true, 
+          availablePoints: bonus,
+          bonusPoints: bonus,
+          paidPoints: paid,
+          pointsConversionFactor: 1, 
+        ),
+        transactions: [],
+      );
+
       _isLoading = false;
       notifyListeners();
     } catch (e) {
+      debugPrint('❌ PayCommissionsViewModel Error: $e');
       _isLoading = false;
       _errorMessage = e.toString();
       notifyListeners();
     }
   }
 
-  // السداد باستخدام النقاط
-  Future<bool> payUsingPoints(double amount) async {
+  // السداد باستخدام النقاط لطلب محدد — POST /api/requests/{id}/pay-commission
+  Future<bool> payCommissionUsingPoints(String requestId, int userId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.payCommissionWithPoints(requestId);
+      
+      // تحديث البيانات بعد السداد الناجح
+      await fetchCommissionsData(userId);
+      
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // السداد باستخدام النقاط (قديم/عام)
+  Future<bool> payUsingPoints(double amount, int userId) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
       await _repository.payWithPoints(amount);
-      await fetchCommissionsData();
+      await fetchCommissionsData(userId);
       _isLoading = false;
       notifyListeners();
       return true;
@@ -93,7 +153,7 @@ class PayCommissionsViewModel extends ChangeNotifier {
   }
 
   // السداد بإرفاق السند — POST /api/request-commission-bonds
-  Future<bool> submitReceipt() async {
+  Future<bool> submitReceipt(double amount) async {
     // التحقق من الحقول المطلوبة
     if (_receiptImage == null) {
       _errorMessage = "error_missing_receipt_image"; // مفتاح الترجمة
@@ -119,6 +179,7 @@ class PayCommissionsViewModel extends ChangeNotifier {
       await _repository.payWithReceipt(
         requestId: requestIdController.text.trim(),
         bondNumber: bondNumberController.text.trim(),
+        amount: amount,
         imagePath: _receiptImage!.path,
         description: descriptionController.text.trim(),
       );
@@ -143,6 +204,7 @@ class PayCommissionsViewModel extends ChangeNotifier {
   void dispose() {
     requestIdController.dispose();
     bondNumberController.dispose();
+    amountController.dispose();
     descriptionController.dispose();
     super.dispose();
   }

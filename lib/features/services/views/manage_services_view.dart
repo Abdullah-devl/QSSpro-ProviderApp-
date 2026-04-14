@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:service_provider_app/features/services/views/add_service_view.dart';
 import 'package:service_provider_app/features/services/widgets/service_card_widget.dart';
 import '../../../core/theme/qs_color_extension.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../home/viewmodels/main_viewmodel.dart';
 import '../viewmodels/manage_services_viewmodel.dart';
 import 'special_services_view.dart' as service_views;
@@ -17,7 +18,11 @@ class ManageServicesView extends StatelessWidget {
     final viewModel = Provider.of<ManageServicesViewModel>(context);
     final mainViewModel = Provider.of<MainViewModel>(context, listen: false);
 
-    final filters = ['الكل', 'نشط', 'غير نشط'];
+    final filters = [
+      context.tr('filter_all'),
+      context.tr('filter_active'),
+      context.tr('filter_inactive'),
+    ];
 
     return SafeArea(
       child: Column(
@@ -29,7 +34,7 @@ class ManageServicesView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'إدارة خدماتي',
+                  context.tr('manage_my_services'),
                   style: TextStyle(
                     color: context.qsColors.text,
                     fontSize: 20,
@@ -65,7 +70,7 @@ class ManageServicesView extends StatelessWidget {
                       child: TextField(
                         textAlign: TextAlign.right,
                         decoration: InputDecoration(
-                          hintText: 'بحث عن خدمة...',
+                          hintText: context.tr('search_service_hint'),
                           hintStyle: TextStyle(
                             color: context.qsColors.textSub.withOpacity(0.5),
                           ),
@@ -107,11 +112,11 @@ class ManageServicesView extends StatelessWidget {
                                 children: [
                                   const Icon(Icons.add, color: Colors.white, size: 18),
                                   const SizedBox(width: 2),
-                                  const Flexible(
+                                  Flexible(
                                     child: FittedBox(
                                       fit: BoxFit.scaleDown,
                                       child: Text(
-                                        'إضافة خدمة',
+                                        context.tr('add_service'),
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -152,7 +157,7 @@ class ManageServicesView extends StatelessWidget {
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
-                                      'الخدمات المخصصة والحضور',
+                                      context.tr('special_services_and_attendance'),
                                       style: TextStyle(
                                         color: context.qsColors.primary,
                                         fontWeight: FontWeight.bold,
@@ -235,9 +240,9 @@ class ManageServicesView extends StatelessWidget {
                         ),
                       )
                     else if (viewModel.filteredServices.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 50),
-                        child: Text('لا توجد خدمات حالياً.'),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 50),
+                        child: Text(context.tr('no_services_available')),
                       )
                     else
                       ...viewModel.filteredServices.map(

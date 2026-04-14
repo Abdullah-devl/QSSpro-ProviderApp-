@@ -328,10 +328,10 @@ class HomeDashboardView extends StatelessWidget {
                       const SizedBox(height: 50),
                       Icon(Icons.error_outline, color: Colors.red.shade400, size: 50),
                       const SizedBox(height: 16),
-                      Text(homeViewModel.errorMessage!, style: const TextStyle(color: Colors.red, fontFamily: 'Cairo')),
+                      Text(homeViewModel.errorMessage!, style: const TextStyle(color: Colors.red)),
                       TextButton(
                         onPressed: () => homeViewModel.fetchHomeData(),
-                        child: Text('إعادة المحاولة', style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold)),
+                        child: Text(context.tr('retry'), style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold)),
                       )
                     ],
                   ),
@@ -370,7 +370,7 @@ class HomeDashboardView extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 if (homeViewModel.homeData!.newRequests.isEmpty)
-                  Center(child: Text('لا توجد طلبات جديدة حالياً.', style: TextStyle(color: context.qsColors.textSub)))
+                  Center(child: Text(context.tr('no_new_requests'), style: TextStyle(color: context.qsColors.textSub)))
                 else
                   ...homeViewModel.homeData!.newRequests.map((request) => NewRequestCard(
                         title: request.title,

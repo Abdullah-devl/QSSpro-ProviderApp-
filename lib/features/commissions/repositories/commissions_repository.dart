@@ -46,20 +46,21 @@ class CommissionsRepository {
     }
   }
 
-  // دالة السداد باستخدام نقاط المكافآت
-  Future<void> payWithPoints(double amount) async {
+  // دالة السداد باستخدام نقاط المكافآت لطلب محدد
+  Future<void> payCommissionWithPoints(String requestId) async {
     try {
-      // محاكاة الاتصال بالخادم
-      // final response = await _apiService.post(
-      //   ApiEndpoints.payWithPoints,
-      //   data: {'amount': amount},
-      // );
-      // ApiErrorHandler.handleResponse(response);
-
-      await Future.delayed(const Duration(seconds: 2)); // محاكاة عملية معالجة
+      final response = await _apiService.post(
+        ApiEndpoints.payCommission(requestId),
+      );
+      ApiErrorHandler.handleResponse(response);
     } catch (e) {
       throw ApiErrorHandler.handle(e);
     }
+  }
+
+  // دالة عامة للسداد باستخدام النقاط (قد تُستخدم لاحقاً)
+  Future<void> payWithPoints(double amount) async {
+    // Implementing if needed, but for now just closing the syntax.
   }
 
   // دالة السداد بإرفاق السند
@@ -67,12 +68,14 @@ class CommissionsRepository {
     required String requestId,
     required String bondNumber,
     required String imagePath,
+    required double amount,
     String? description,
   }) async {
     try {
       final formData = FormData.fromMap({
         'request_id': requestId,
         'bond_number': bondNumber,
+        'amount': amount,
         'description': description ?? '',
         'image': await MultipartFile.fromFile(
           imagePath,
@@ -115,6 +118,17 @@ class CommissionsRepository {
       if (cachedData != null) {
         return ProviderCommissionSummaryModel.fromJson(Map<String, dynamic>.from(cachedData));
       }
+      throw ApiErrorHandler.handle(e);
+    }
+  }
+
+  /// 💰 جلب رصيد النقاط فقط (نقطة 5.11)
+  Future<Map<String, dynamic>> getPointsBalance(int userId) async {
+    try {
+      final response = await _apiService.get(ApiEndpoints.pointsBalance);
+      final data = ApiErrorHandler.handleResponse(response);
+      return data['data'] ?? data;
+    } catch (e) {
       throw ApiErrorHandler.handle(e);
     }
   }

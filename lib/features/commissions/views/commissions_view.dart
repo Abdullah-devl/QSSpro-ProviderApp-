@@ -21,7 +21,8 @@ class CommissionsView extends StatelessWidget {
   Widget build(BuildContext context) {
     // نفترض أن ViewModel تم توفيره عبر Provider (مثلاً في main.dart)
     final viewModel = Provider.of<CommissionsViewModel>(context);
-    // viewModel.fetchCommissionsData();
+    final statsViewModel = context.watch<CommissionsStatsViewModel>();
+    
     // لون الخلفية الرمادي الفاتح جداً
     final Color bgColor = const Color(0xFFF8F9FA);
 
@@ -39,24 +40,12 @@ class CommissionsView extends StatelessWidget {
             fontSize: 22,
           ),
         ),
-        // actions: [
-        //   // سهم الرجوع مناسب للغة العربية (لليمين)
-        //   IconButton(
-        //     icon: Icon(Icons.arrow_forward_ios, color: context.qsColors.text),
-        //     onPressed: () {
-        //       if (Navigator.canPop(context)) {
-        //         Navigator.pop(context);
-        //       }
-        //     },
-        //   ),
-        // ],
-        // إزالة زر القائمة الجانبية إذا كان موجوداً لتطابق الصورة تماماً
         leading: const SizedBox.shrink(),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
           await Future.wait([
-            viewModel.fetchCommissionsData(),
+            // viewModel.fetchCommissionsData(), // تم إيقافه لتجنب 404
             context.read<CommissionsStatsViewModel>().fetchStatsData(),
             context.read<PaymentsHistoryViewModel>().fetchAllHistory(),
           ]);
@@ -69,8 +58,7 @@ class CommissionsView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 1. شريط توثيق الحساب (في حال لم يكن الحساب موثقاً)
-              if (viewModel.commissionsData?.summary.isVerified == false ||
-                  viewModel.commissionsData == null) ...[
+              if (statsViewModel.isVerified == false) ...[
                 const VerificationBannerWidget(),
                 const SizedBox(height: 16),
               ],
@@ -89,9 +77,9 @@ class CommissionsView extends StatelessWidget {
 
               // 2. بطاقة العمولة المستحقة
               // (في حالة الانتظار أو الخطأ، نظهر صفر أو لا شيء، ولكن بما أنه تصميم يجب إظهاره دائماً)
-              DueCommissionCard(
-                amount: viewModel.commissionsData?.summary.dueAmount ?? 0.0,
-              ),
+              // DueCommissionCard(
+              //   amount: viewModel.commissionsData?.summary.dueAmount ?? 0.0,
+              // ),
               const SizedBox(height: 32),
 
               // 📊 سجل المدفوعات والعمليات المطور (الكل، باقاتي، العمليات، السحوبات، السندات)

@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../Models/order_model.dart';
 import '../ViewModels/orders_viewmodel.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../commissions/views/pay_commissions_view.dart';
 
 class OrderDetailView extends StatefulWidget {
   final OrderModel order;
@@ -24,24 +26,31 @@ class _OrderDetailViewState extends State<OrderDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    // إحداثيات افتراضية
-    final double lat = widget.order.latitude ?? 24.7136;
-    final double lng = widget.order.longitude ?? 46.6753;
-    final bool hasCoordinates = widget.order.latitude != null && widget.order.longitude != null;
-
     final viewModel = Provider.of<OrdersViewModel>(context);
     // البحث عن أحدث نسخة من الطلب في القائمة الكلية لضمان تحديث البيانات
     final currentOrder = viewModel.allOrders.firstWhere(
       (o) => o.id == widget.order.id,
       orElse: () => widget.order,
     );
-    
+
+    // إحداثيات الطلب
+    final double lat = currentOrder.latitude ?? 24.7136;
+    final double lng = currentOrder.longitude ?? 46.6753;
+    final bool hasCoordinates =
+        currentOrder.latitude != null && currentOrder.longitude != null;
+
     // 🕵️ طباعة بيانات التشخيص عند بناء الصفحة
-    debugPrint('🔍 [VIEW] Displaying OrderDetailView for ID: ${currentOrder.id}');
+    debugPrint(
+      '🔍 [VIEW] Displaying OrderDetailView for ID: ${currentOrder.id}',
+    );
     if (currentOrder.rawJson != null) {
       debugPrint('📦 [VIEW] Raw JSON for this Order: ${currentOrder.rawJson}');
     }
 
+    // حساب العمولة في بداية الـ build لتكون متاحة لكل الأجزاء
+    final double commissionAmount =
+        double.tryParse(currentOrder.rawJson?['order_commission']?.toString() ?? '') ??
+        (currentOrder.price * 0.10);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -70,13 +79,16 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             children: [
               SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildUnifiedRequestCard(context, currentOrder),
                     const SizedBox(height: 32),
-                    
+
                     // 📂 قسم السندات (Receipts)
                     if (currentOrder.bonds.isNotEmpty) ...[
                       _buildSectionHeader(context, 'order_bonds'),
@@ -88,20 +100,75 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     // 💰 قسم إدارة الدفع والحالة (تتبع الحالة والمبالغ)
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 500),
-                      child: currentStatusIndex(currentOrder.status) > 0
+                      child: currentStatusIndex(currentOrder.status) >= 1
                           ? Column(
-                              key: ValueKey('payment_section_${currentOrder.status}'),
+                              key: ValueKey(
+                                'payment_section_${currentOrder.status}',
+                              ),
                               children: [
-                                _buildPaymentManagerSection(context, viewModel, currentOrder),
+                                _buildPaymentManagerSection(
+                                  context,
+                                  viewModel,
+                                  currentOrder,
+                                ),
                                 const SizedBox(height: 32),
                               ],
                             )
                           : const SizedBox.shrink(),
                     ),
 
+                    // 🏆 قسم العمولة (يظهر فقط عند اكتمال الطلب)
+                    if (currentOrder.status == 'completed' || currentOrder.status == 'finished') ...[
+                      _buildCommissionCard(context, currentOrder, commissionAmount),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFFA502),
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(double.infinity, 60),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PayCommissionsView(
+                                amount: commissionAmount,
+                                orderId: currentOrder.id,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          context.tr('pay_commission'),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+
+                    // ✅ زر اكتمال العمل لمزود الخدمة
+                    _buildProviderFinishAction(
+                      context,
+                      viewModel,
+                      currentOrder,
+                    ),
+
                     _buildLocationSectionHeader(context, currentOrder),
                     const SizedBox(height: 12),
-                    _buildLocationMapCard(context, lat, lng, hasCoordinates, currentOrder),
+                    _buildLocationMapCard(
+                      context,
+                      lat,
+                      lng,
+                      hasCoordinates,
+                      currentOrder,
+                    ),
                     const SizedBox(height: 48),
 
                     _buildTotalPriceSection(context, currentOrder),
@@ -117,7 +184,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             ],
           ),
         ),
-        bottomNavigationBar: _buildBottomActions(context, viewModel, currentOrder),
+        //تبع زر الاكمال 
+        // bottomNavigationBar: _buildBottomActions(context, viewModel, currentOrder, commissionAmount),
       ),
     );
   }
@@ -149,23 +217,37 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                ),
+              ],
             ),
             child: Column(
               children: [
                 Expanded(
                   child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                    child: bond.imagePath.isNotEmpty 
-                      ? Image.network(bond.imagePath, fit: BoxFit.cover, width: double.infinity)
-                      : const Icon(Icons.receipt_long, color: Colors.grey),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
+                    child: bond.imagePath.isNotEmpty
+                        ? Image.network(
+                            bond.imagePath,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                          )
+                        : const Icon(Icons.receipt_long, color: Colors.grey),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: Text(
                     bond.bondNumber,
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -178,7 +260,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 
-  Widget _buildPaymentManagerSection(BuildContext context, OrdersViewModel viewModel, OrderModel order) {
+  Widget _buildPaymentManagerSection(
+    BuildContext context,
+    OrdersViewModel viewModel,
+    OrderModel order,
+  ) {
     final bool isCompleted = order.status == 'completed';
 
     return Container(
@@ -186,7 +272,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(32),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20),
+        ],
       ),
       child: Column(
         children: [
@@ -194,28 +282,28 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           Row(
             children: [
               _buildSummaryCard(
-                context, 
-                context.tr('paid_amount'), 
-                '${order.paidAmount}', 
-                const Color(0xFFE8F6FF), 
-                const Color(0xFF1CB0F6)
+                context,
+                context.tr('paid_currently'),
+                '${order.paidAmount}',
+                const Color(0xFFE8F6FF),
+                const Color(0xFF1CB0F6),
               ),
               const SizedBox(width: 12),
               _buildSummaryCard(
-                context, 
-                'المدفوع حالياً', // Actual Paid %
-                '${((order.paidAmount / order.price) * 100).toStringAsFixed(0)}%', 
-                const Color(0xFFE8F5E9), 
+                context,
+                 '${((order.paidAmount / order.price) * 100).toStringAsFixed(0)}%', // The label is actually the amount label above it? Wait, line 294 code says "'المدفوع حالياً', // Actual Paid %"
+                '${((order.paidAmount / order.price) * 100).toStringAsFixed(0)}%',
+                const Color(0xFFE8F5E9),
                 const Color(0xFF2ECC71),
-                hasBorder: true
+                hasBorder: true,
               ),
               const SizedBox(width: 12),
               _buildSummaryCard(
-                context, 
-                context.tr('remaining_amount'), 
-                '${order.remainingAmount}', 
-                const Color(0xFFFFF1F1), 
-                const Color(0xFFFF5252)
+                context,
+                context.tr('remaining_amount'),
+                '${order.remainingAmount}',
+                const Color(0xFFFFF1F1),
+                const Color(0xFFFF5252),
               ),
             ],
           ),
@@ -230,11 +318,19 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.info_outline, size: 16, color: Color(0xFF64748B)),
+                const Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: Color(0xFF64748B),
+                ),
                 const SizedBox(width: 8),
                 Text(
-                  'النسبة المطلوبة للبدء: ${order.requiredPartialPercentage}%',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
+                  context.tr('required_percentage_to_start', args: {'percentage': order.requiredPartialPercentage.toString()}),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF64748B),
+                  ),
                 ),
               ],
             ),
@@ -246,10 +342,34 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildStatusChip('pending', 'في الانتظار', order.status, const Color(0xFFFF9800), const Color(0xFFFFF3E0)),
-                _buildStatusChip('accepted_initial', 'تم القبول', order.status, const Color(0xFF1E88E5), const Color(0xFFE3F2FD)),
-                _buildStatusChip('accepted_partial_paid', 'جاري العمل', order.status, const Color(0xFF673AB7), const Color(0xFFEDE7F6)),
-                _buildStatusChip('completed', 'مكتمل', order.status, const Color(0xFF43A047), const Color(0xFFE8F5E9)),
+                _buildStatusChip(
+                  'pending',
+                  context.tr('pending_status'),
+                  order.status,
+                  const Color(0xFFFF9800),
+                  const Color(0xFFFFF3E0),
+                ),
+                _buildStatusChip(
+                  'accepted_initial',
+                  context.tr('accepted_status'),
+                  order.status,
+                  const Color(0xFF1E88E5),
+                  const Color(0xFFE3F2FD),
+                ),
+                _buildStatusChip(
+                  'accepted_partial_paid',
+                  context.tr('working_status'),
+                  order.status,
+                  const Color(0xFF673AB7),
+                  const Color(0xFFEDE7F6),
+                ),
+                _buildStatusChip(
+                  'completed',
+                  context.tr('completed_status'),
+                  order.status,
+                  const Color(0xFF43A047),
+                  const Color(0xFFE8F5E9),
+                ),
               ],
             ),
           ),
@@ -266,7 +386,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF1CB0F6), width: 2),
+                      border: Border.all(
+                        color: const Color(0xFF1CB0F6),
+                        width: 2,
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xFF1CB0F6).withOpacity(0.1),
@@ -292,7 +415,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                           padding: const EdgeInsets.only(top: 14),
                           child: Text(
                             context.tr('currency_sar'),
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
                           ),
                         ),
                       ),
@@ -308,7 +434,14 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 
-  Widget _buildSummaryCard(BuildContext context, String label, String value, Color bg, Color textColor, {bool hasBorder = false}) {
+  Widget _buildSummaryCard(
+    BuildContext context,
+    String label,
+    String value,
+    Color bg,
+    Color textColor, {
+    bool hasBorder = false,
+  }) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
@@ -321,17 +454,29 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           children: [
             Text(
               label,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF90A4AE)),
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF90A4AE),
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               value,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: textColor),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                color: textColor,
+              ),
             ),
             if (!label.contains('%'))
               Text(
                 context.tr('currency_sar'),
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: textColor),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                ),
               ),
           ],
         ),
@@ -349,6 +494,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
         return 1;
       case 'in_progress':
       case 'accepted_partial_paid':
+      case 'accepted_full_paid':
         return 2;
       case 'completed':
       case 'finished':
@@ -358,7 +504,13 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     }
   }
 
-  Widget _buildStatusChip(String code, String label, String currentStatus, Color color, Color bgColor) {
+  Widget _buildStatusChip(
+    String code,
+    String label,
+    String currentStatus,
+    Color color,
+    Color bgColor,
+  ) {
     bool isActive = false;
     bool isPast = false;
 
@@ -372,22 +524,30 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       margin: const EdgeInsets.only(left: 8),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: isActive 
-          ? bgColor 
-          : (isPast ? bgColor.withOpacity(0.4) : const Color(0xFFF9FAFB)),
+        color: isActive
+            ? bgColor
+            : (isPast ? bgColor.withOpacity(0.4) : const Color(0xFFF9FAFB)),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isActive ? color : (isPast ? color.withOpacity(0.5) : const Color(0xFFF1F5F9)),
+          color: isActive
+              ? color
+              : (isPast ? color.withOpacity(0.5) : const Color(0xFFF1F5F9)),
           width: isActive ? 2.5 : 1,
         ),
-        boxShadow: isActive 
-          ? [BoxShadow(color: color.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4))] 
-          : null,
+        boxShadow: isActive
+            ? [
+                BoxShadow(
+                  color: color.withOpacity(0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (isActive) 
+          if (isActive)
             Padding(
               padding: const EdgeInsets.only(left: 6),
               child: Icon(Icons.stars, color: color, size: 16),
@@ -395,9 +555,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           Text(
             label,
             style: TextStyle(
-              color: isActive 
-                ? color.withOpacity(0.9) 
-                : (isPast ? color.withOpacity(0.7) : const Color(0xFF94A3B8)),
+              color: isActive
+                  ? color.withOpacity(0.9)
+                  : (isPast ? color.withOpacity(0.7) : const Color(0xFF94A3B8)),
               fontWeight: isActive ? FontWeight.w900 : FontWeight.bold,
               fontSize: isActive ? 14 : 12,
             ),
@@ -407,39 +567,60 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 
-  Widget _buildSendButton(BuildContext context, OrdersViewModel viewModel, OrderModel order) {
+  Widget _buildSendButton(
+    BuildContext context,
+    OrdersViewModel viewModel,
+    OrderModel order,
+  ) {
     // 🚦 التحقق من الحالة: لا يمكن إضافة مبلغ إذا كان الطلب لا يزال "في الانتظار"
     final bool canPay = currentStatusIndex(order.status) > 0;
 
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
-        backgroundColor: canPay ? const Color(0xFF1CB0F6) : Colors.grey.shade400,
+        backgroundColor: canPay
+            ? const Color(0xFF1CB0F6)
+            : Colors.grey.shade400,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: viewModel.isLoading ? 0 : 0,
       ),
-      onPressed: (viewModel.isLoading || !canPay) ? null : () async {
-        final amount = double.tryParse(_amountController.text);
-        if (amount == null || amount <= 0) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الرجاء إدخال مبلغ صحيح')));
-          return;
-        }
-        debugPrint('🎯 [VIEW] User clicked Add Amount for Order ID: ${order.id}');
-        final success = await viewModel.addPaidAmount(order.id, amount);
-        if (success) {
-          _amountController.clear();
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تحديث المبلغ بنجاح')));
-        }
-      },
-      icon: viewModel.isLoading 
-          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+      onPressed: (viewModel.isLoading || !canPay)
+          ? null
+          : () async {
+              final amount = double.tryParse(_amountController.text);
+              if (amount == null || amount <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(context.tr('enter_valid_amount'))),
+                );
+                return;
+              }
+              debugPrint(
+                '🎯 [VIEW] User clicked Add Amount for Order ID: ${order.id}',
+              );
+              final success = await viewModel.addPaidAmount(order.id, amount);
+              if (success) {
+                _amountController.clear();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(context.tr('amount_updated_successfully'))),
+                );
+              }
+            },
+      icon: viewModel.isLoading
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
           : Icon(canPay ? Icons.send_rounded : Icons.lock_outline, size: 20),
       label: Text(
-        viewModel.isLoading 
-            ? context.tr('loading') 
-            : (canPay ? context.tr('send_amount') : context.tr('accept_first')), 
-        style: const TextStyle(fontWeight: FontWeight.bold)
+        viewModel.isLoading
+            ? context.tr('loading')
+            : (canPay ? context.tr('send_amount') : context.tr('accept_first')),
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -482,7 +663,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                             : null,
                       ),
                       child: order.customerImage.isEmpty
-                          ? const Icon(Icons.person, size: 40, color: Color(0xFF90A4AE))
+                          ? const Icon(
+                              Icons.person,
+                              size: 40,
+                              color: Color(0xFF90A4AE),
+                            )
                           : null,
                     ),
                     Container(
@@ -511,7 +696,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        order.customerPhone.isNotEmpty ? order.customerPhone : '---',
+                        order.customerPhone.isNotEmpty
+                            ? order.customerPhone
+                            : '---',
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -522,7 +709,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                _buildActionIcon(Icons.chat_bubble_outline, const Color(0xFFE8F6FF), const Color(0xFF1CB0F6)),
+                _buildActionIcon(
+                  Icons.chat_bubble_outline,
+                  const Color(0xFFE8F6FF),
+                  const Color(0xFF1CB0F6),
+                ),
               ],
             ),
           ),
@@ -568,7 +759,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         color: const Color(0xFFE8F6FF),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.ac_unit, color: Color(0xFF1CB0F6), size: 24),
+                      child: const Icon(
+                        Icons.ac_unit,
+                        color: Color(0xFF1CB0F6),
+                        size: 24,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -592,30 +787,32 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                ...order.subServices.map((sub) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            sub.name,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF6E7C87),
-                            ),
+                ...order.subServices.map(
+                  (sub) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          sub.name,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF6E7C87),
                           ),
-                          Text(
-                            '${sub.price.toInt()} ${context.tr('currency_sar')}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF1D2126),
-                            ),
+                        ),
+                        Text(
+                          '${sub.price.toInt()} ${context.tr('currency_sar')}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF1D2126),
                           ),
-                        ],
-                      ),
-                    )),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -671,38 +868,172 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 
-  Widget _buildLocationMapCard(BuildContext context, double lat, double lng, bool hasCoordinates, OrderModel order) {
-    return Container(
-      height: 180,
-      decoration: BoxDecoration(
-        color: const Color(0xFFE0E0E0),
-        borderRadius: BorderRadius.circular(32),
-        image: DecorationImage(
-          image: NetworkImage('https://api.mapbox.com/styles/v1/mapbox/light-v10/static/pin-s+ff4d4d($lng,$lat)/$lng,$lat,13/600x400?access_token=pk.placeholder'),
-          fit: BoxFit.cover,
-          opacity: 0.8,
+  Widget _buildLocationMapCard(
+    BuildContext context,
+    double lat,
+    double lng,
+    bool hasCoordinates,
+    OrderModel order,
+  ) {
+    return GestureDetector(
+      onTap: () async {
+        final url = Uri.parse(
+          'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+        );
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        } else {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.tr('error_open_google_maps'))),
+            );
+          }
+        }
+      },
+      child: Container(
+        height: 180,
+        decoration: BoxDecoration(
+          color: const Color(0xFFE0E0E0),
+          borderRadius: BorderRadius.circular(32),
+          image: DecorationImage(
+            image: NetworkImage(
+              'https://api.mapbox.com/styles/v1/mapbox/light-v10/static/pin-s+ff4d4d($lng,$lat)/$lng,$lat,13/600x400?access_token=pk.placeholder',
+            ),
+            fit: BoxFit.cover,
+            opacity: 0.8,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.location_on, color: Color(0xFFFF4D4D), size: 40),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+                ),
+                child: Text(
+                  order.location,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF1D2126),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                context.tr('click_to_open_google_maps'),
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      child: Center(
+    );
+  }
+
+  Widget _buildProviderFinishAction(
+    BuildContext context,
+    OrdersViewModel viewModel,
+    OrderModel order,
+  ) {
+    // الشروط: حالة الدفع جزئي أو كلي، ولم يسبق تأكيد الانتهاء
+    final bool canFinish =
+        (order.status == 'accepted_partial_paid' ||
+            order.status == 'accepted_full_paid') &&
+        !order.providerFinished;
+
+    if (!canFinish) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 32),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1CB0F6), Color(0xFF1976D2)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF1CB0F6).withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.location_on, color: Color(0xFFFF4D4D), size: 40),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
-              ),
-              child: Text(
-                order.location,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF1D2126),
+            Row(
+              children: [
+                const Icon(Icons.celebration, color: Colors.white, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    context.tr('finish_work_question'),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: viewModel.isLoading
+                    ? null
+                    : () async {
+                        final success = await viewModel.finishOrder(order.id);
+                        if (success && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                context.tr('work_completed_successfully'),
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF1CB0F6),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: viewModel.isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                      : Text(
+                        context.tr('confirm_finish_work'),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
           ],
@@ -751,10 +1082,16 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 
-  Widget _buildBottomActions(BuildContext context, OrdersViewModel viewModel, OrderModel order) {
+  Widget _buildBottomActions(
+    BuildContext context,
+    OrdersViewModel viewModel,
+    OrderModel order,
+    double commissionAmount,
+  ) {
     final bool isPending = order.status == 'pending';
     final bool isCompleted = order.status == 'completed';
-    final bool isPaidInFull = order.paidAmount >= order.price && order.price > 0;
+    final bool isPaidInFull =
+        order.paidAmount >= order.price && order.price > 0;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
@@ -762,129 +1099,209 @@ class _OrderDetailViewState extends State<OrderDetailView> {
         color: Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
         ],
       ),
-      child: isPending 
-      ? Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: ElevatedButton.icon(
+      child: isPending
+          ? Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1CB0F6),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      elevation: viewModel.isLoading ? 0 : 0,
+                    ),
+                    onPressed: viewModel.isLoading
+                        ? null
+                        : () async {
+                            final success = await viewModel.updateStatus(
+                              order.id,
+                              'accepted_initial',
+                            );
+                            if (success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    context.tr('order_accepted_success'),
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                    icon: viewModel.isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.check_circle_outline, size: 24),
+                    label: Text(
+                      viewModel.isLoading
+                          ? context.tr('loading')
+                          : context.tr('accept_order'),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF1F5F9),
+                      foregroundColor: const Color(0xFF5A6B7A),
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      elevation: 0,
+                    ),
+                    onPressed: viewModel.isLoading
+                        ? null
+                        : () async {
+                            final success = await viewModel.updateStatus(
+                              order.id,
+                              'canceled',
+                            );
+                            if (success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    context.tr('order_canceled_success'),
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                    icon: viewModel.isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF5A6B7A),
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.cancel_outlined, size: 24),
+                    label: Text(
+                      viewModel.isLoading
+                          ? context.tr('loading')
+                          : context.tr('reject'),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : (isCompleted || isPaidInFull)
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildCommissionCard(context, order, commissionAmount),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFA502),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 60),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PayCommissionsView(
+                          amount: commissionAmount,
+                          orderId: order.id,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    context.tr('pay_commission'),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : (order.status == 'accepted_partial_paid' ||
+                order.status == 'accepted_full_paid' ||
+                order.status == 'in_progress')
+          ? ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1CB0F6),
+                backgroundColor: const Color(0xFF2ECC71),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                elevation: viewModel.isLoading ? 0 : 0,
+                minimumSize: const Size(double.infinity, 64),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                elevation: viewModel.isLoading ? 0 : 8,
+                shadowColor: const Color(0xFF2ECC71).withOpacity(0.4),
               ),
-              onPressed: viewModel.isLoading ? null : () async {
-                final success = await viewModel.updateStatus(order.id, 'accepted_initial');
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('order_accepted_success'))));
-                }
-              },
-              icon: viewModel.isLoading 
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : const Icon(Icons.check_circle_outline, size: 24),
+              onPressed: viewModel.isLoading
+                  ? null
+                  : () {
+                      // 🚀 تم تعطيل طلب الباك اند بناءً على طلب المستخدم
+                      // await viewModel.updateStatus(order.id, 'completed');
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'سيتم تفعيل هذا الزر قريباً مع اللوجك الجديد',
+                          ),
+                          backgroundColor: Color(0xFF2ECC71),
+                        ),
+                      );
+                    },
+              icon: viewModel.isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Icon(Icons.check_circle, size: 24),
               label: Text(
-                viewModel.isLoading ? context.tr('loading') : context.tr('accept_order'),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                viewModel.isLoading
+                    ? context.tr('loading')
+                    : context.tr('complete_order'),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF1F5F9),
-                foregroundColor: const Color(0xFF5A6B7A),
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                elevation: 0,
-              ),
-              onPressed: viewModel.isLoading ? null : () async {
-                final success = await viewModel.updateStatus(order.id, 'canceled');
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('order_canceled_success'))));
-                }
-              },
-              icon: viewModel.isLoading 
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFF5A6B7A), strokeWidth: 2))
-                : const Icon(Icons.cancel_outlined, size: 24),
-              label: Text(
-                viewModel.isLoading ? context.tr('loading') : context.tr('reject'),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-              ),
-            ),
-          ),
-        ],
-      )
-      : (isCompleted || isPaidInFull)
-      ? Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildCommissionCard(context, order),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFA502),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 60),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                elevation: 0,
-              ),
-              onPressed: () {
-                // منطق دفع العمولة
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('سيتم فتح صفحة سداد العمولة قريباً')),
-                );
-              },
-              child: Text(
-                context.tr('pay_commission'),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-              ),
-            ),
-          ],
-        )
-      : (order.status == 'accepted_partial_paid' || order.status == 'accepted_full_paid' || order.status == 'in_progress')
-      ? ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2ECC71),
-            foregroundColor: Colors.white,
-            minimumSize: const Size(double.infinity, 64),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            elevation: viewModel.isLoading ? 0 : 8,
-            shadowColor: const Color(0xFF2ECC71).withOpacity(0.4),
-          ),
-          onPressed: viewModel.isLoading ? null : () {
-            // 🚀 تم تعطيل طلب الباك اند بناءً على طلب المستخدم
-            // await viewModel.updateStatus(order.id, 'completed');
-            
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('سيتم تفعيل هذا الزر قريباً مع اللوجك الجديد'),
-                backgroundColor: Color(0xFF2ECC71),
-              ),
-            );
-          },
-          icon: viewModel.isLoading 
-            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-            : const Icon(Icons.check_circle, size: 24),
-          label: Text(
-            viewModel.isLoading ? context.tr('loading') : context.tr('complete_order'),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        )
-      : const SizedBox.shrink(),
+            )
+          : const SizedBox.shrink(),
     );
   }
 
-  Widget _buildCommissionCard(BuildContext context, OrderModel order) {
-    // محاولة جلب قيمة العمولة من البيانات الخام، أو حسابها افتراضياً بنسبة 10%
-    final double commissionAmount = double.tryParse(order.rawJson?['order_commission']?.toString() ?? '') 
-                                   ?? (order.price * 0.10);
-
+  Widget _buildCommissionCard(BuildContext context, OrderModel order, double commissionAmount) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -914,13 +1331,17 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   color: const Color(0xFFFFA502),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white, size: 20),
+                child: const Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'عمولة المنصة المستحقة',
-                  style: TextStyle(
+                  context.tr('total_due_commission'),
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF8B5E00),

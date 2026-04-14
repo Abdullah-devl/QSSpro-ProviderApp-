@@ -9,14 +9,18 @@ import '../viewmodels/pay_commissions_viewmodel.dart';
 
 class PayWithPointsView extends StatelessWidget {
   final double amount;
+  final int userId;
   final int availablePoints;
   final int equivalentPoints;
+  final String? orderId;
 
   const PayWithPointsView({
     super.key,
     required this.amount,
+    required this.userId,
     required this.availablePoints,
     required this.equivalentPoints,
+    this.orderId,
   });
 
   @override
@@ -215,23 +219,54 @@ class PayWithPointsView extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: viewModel.isLoading 
                   ? null 
-                  : () async {
-                      final success = await viewModel.payUsingPoints(amount);
-                      if (context.mounted) {
-                        if (success) {
-                          await DialogHelper.showSuccessDialog(
-                            context,
-                            context.tr('payment_success'),
-                          );
-                          if (context.mounted) Navigator.pop(context);
-                        } else {
+                    : () async {
+                        // 1. التحقق من الرصيد
+                        if (availablePoints < equivalentPoints) {
                           DialogHelper.showErrorDialog(
                             context,
-                            viewModel.errorMessage ?? context.tr('payment_failed'),
+                            context.tr('insufficient_points'),
                           );
+                          return;
                         }
-                      }
-                    },
+
+                        // 2. التحقق من وجود رقم الطلب (لان الربط يتطلب ID)
+                        if (orderId == null) {
+                          DialogHelper.showErrorDialog(
+                            context,
+                            context.tr('error_order_id_required'),
+                          );
+                          return;
+                        }
+
+                        // 3. طلب تأكيد
+                        final confirmed = await DialogHelper.showConfirmationDialog(
+                          context,
+                          title: context.tr('confirm_points_payment_title'),
+                          message: context.tr('confirm_points_payment_msg')
+                              .replaceAll('{amount}', amount.toStringAsFixed(2))
+                              .replaceAll('{points}', equivalentPoints.toString()),
+                        );
+
+                        if (!confirmed) return;
+
+                        // 4. تنفيذ الدفع
+                        final success = await viewModel.payCommissionUsingPoints(orderId!, userId);
+                        
+                        if (context.mounted) {
+                          if (success) {
+                            await DialogHelper.showSuccessDialog(
+                              context,
+                              context.tr('payment_success_msg'),
+                            );
+                            if (context.mounted) Navigator.pop(context);
+                          } else {
+                            DialogHelper.showErrorDialog(
+                              context,
+                              viewModel.errorMessage ?? context.tr('payment_failed_msg'),
+                            );
+                          }
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF5CA4B8),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

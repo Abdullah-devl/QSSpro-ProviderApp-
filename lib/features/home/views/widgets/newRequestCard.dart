@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/qs_color_extension.dart';
+import '../../../../core/localization/app_localizations.dart';
 // 3. كارت الطلب الجديد
 class NewRequestCard extends StatelessWidget {
   final String title;
@@ -71,7 +72,7 @@ class NewRequestCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     elevation: 0,
                   ),
-                  child: const Text('قبول الطلب', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Cairo')),
+                  child: Text(context.tr('accept_request'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],

@@ -35,11 +35,11 @@ class TransactionListItem extends StatelessWidget {
         break;
       case 'pending':
       case 'accepted_initial':
-        iconBgColor = const Color(0xFFE0F7FA);
-        iconColor = const Color(0xFF00BCD4);
+        iconBgColor = const Color(0xFFE1F5FE);
+        iconColor = const Color(0xFF03A9F4);
         iconData = Icons.new_releases_rounded;
-        badgeBgColor = const Color(0xFFE0F7FA);
-        badgeTextColor = const Color(0xFF0097A7);
+        badgeBgColor = const Color(0xFFE1F5FE);
+        badgeTextColor = const Color(0xFF0288D1);
         translatedStatus = context.tr('status_$normalizedStatus');
         break;
       case 'accepted_partial_paid':

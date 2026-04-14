@@ -104,4 +104,6 @@ class ApiEndpoints {
   static String addAmount(String id) => "requests/$id/addAmountToMoneyPaid";
   static String finishRequest(String id) => "requests/$id/finish";
   static String payCommission(String id) => "requests/$id/pay-commission";
+  static const String complaints = "request-complaints";
+  static const String systemComplaints = "system-complaints";
 }

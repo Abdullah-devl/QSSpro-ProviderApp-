@@ -21,7 +21,8 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/profile_viewmodel.dart';
 import '../../auth/viewmodels/auth_viewmodel.dart';
-import 'complaints_view.dart';
+
+import '../../complaints/views/complaints_hub_view.dart';
 import '../../settings/views/settings_view.dart';
 import '../../auth/views/login_view.dart';
 
@@ -106,9 +107,7 @@ class ProfileView extends StatelessWidget {
                       ),
 
                       // داخل TabBarView
-                      Center(
-                        child: Text(context.tr('reviews_soon')),
-                      ),
+                      Center(child: Text(context.tr('reviews_soon'))),
                     ],
                   ),
                 ),
@@ -169,18 +168,21 @@ class ProfileView extends StatelessWidget {
               children: [
                 const Icon(Icons.logout, color: Colors.red, size: 20),
                 const SizedBox(width: 8),
-                Text(context.tr('logout'), style: const TextStyle(color: Colors.red)),
+                Text(
+                  context.tr('logout'),
+                  style: const TextStyle(color: Colors.red),
+                ),
               ],
             ),
           ),
         ],
       ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.arrow_forward, color: colors.text),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ],
+      // actions: [
+      //   IconButton(
+      //     icon: Icon(Icons.arrow_forward, color: colors.text),
+      //     onPressed: () => Navigator.pop(context),
+      //   ),
+      // ],
     );
   }
 
@@ -585,16 +587,25 @@ class ProfileView extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: Text(context.tr('delete_confirm_title'), textAlign: TextAlign.right),
+          title: Text(
+            context.tr('delete_confirm_title'),
+            textAlign: TextAlign.right,
+          ),
           content: Text(
-            context.tr('delete_confirm_msg_specific', args: {'title': work.title}),
+            context.tr(
+              'delete_confirm_msg_specific',
+              args: {'title': work.title},
+            ),
             textAlign: TextAlign.right,
           ),
           actionsAlignment: MainAxisAlignment.spaceBetween,
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text(context.tr('cancel'), style: const TextStyle(color: Colors.grey)),
+              child: Text(
+                context.tr('cancel'),
+                style: const TextStyle(color: Colors.grey),
+              ),
             ),
             ElevatedButton(
               onPressed: () async {

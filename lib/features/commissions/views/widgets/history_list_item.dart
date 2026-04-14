@@ -58,8 +58,8 @@ class HistoryListItem extends StatelessWidget {
       badgeBgColor = const Color(0xFFFFF3E0);
       badgeTextColor = const Color(0xFFE65100);
     } else if (statusKey == 'pending' || statusKey == 'accepted_initial' || statusKey == 'waiting') {
-      badgeBgColor = const Color(0xFFE0F7FA);
-      badgeTextColor = const Color(0xFF0097A7);
+      badgeBgColor = const Color(0xFFE1F5FE);
+      badgeTextColor = const Color(0xFF0288D1);
     } else if (statusKey == 'rejected' || statusKey == 'cancelled') {
       badgeBgColor = const Color(0xFFFFEBEE);
       badgeTextColor = const Color(0xFFC62828);

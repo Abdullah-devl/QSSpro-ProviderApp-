@@ -453,22 +453,21 @@ class _OrderCardWidget extends StatelessWidget {
       case 'pending':
       case 'new':
       case 'new_order':
-        return const Color(0xFF1CB0F6); // Blue
+      case 'accepted_initial': // Waiting
+        return const Color(0xFF03A9F4); // Sky Blue / Azure
       case 'accepted':
       case 'in_progress':
-      case 'accepted_initial':
       case 'accepted_partial_paid':
-        return const Color(0xFFFFA502); // Orange
+      case 'accepted_full_paid':
+        return const Color(0xFFFF9800); // Orange
       case 'completed':
       case 'finished':
-        return const Color(0xFF2ECC71); // Green
+        return const Color(0xFF388E3C); // Dark Green
       case 'canceled':
       case 'rejected':
         return const Color(0xFFFF4757); // Red
-      case 'suspended':
-        return const Color(0xFF90A4AE); // Grey
       default:
-        return const Color(0xFF1CB0F6);
+        return const Color(0xFF03A9F4);
     }
   }
 
@@ -478,23 +477,23 @@ class _OrderCardWidget extends StatelessWidget {
       case 'pending':
       case 'new':
       case 'new_order':
-        textKey = 'new_order';
+        textKey = 'status_pending';
         break;
-      case 'accepted':
       case 'accepted_initial':
-        textKey = 'accepted_initial';
+        textKey = 'status_accepted_initial';
         break;
       case 'in_progress':
       case 'accepted_partial_paid':
-        textKey = 'in_progress';
+      case 'accepted_full_paid':
+        textKey = 'status_$status';
         break;
       case 'completed':
       case 'finished':
-        textKey = 'completed';
+        textKey = 'status_completed';
         break;
       case 'canceled':
       case 'rejected':
-        textKey = 'canceled';
+        textKey = 'status_$status';
         break;
       default:
         textKey = 'status_$status';

@@ -5,6 +5,7 @@ import '../Models/order_model.dart';
 import '../ViewModels/orders_viewmodel.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../commissions/views/pay_commissions_view.dart';
+import '../../complaints/views/submit_complaint_view.dart';
 
 class OrderDetailView extends StatefulWidget {
   final OrderModel order;
@@ -160,6 +161,14 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       currentOrder,
                     ),
 
+                    // 🚩 زر إرسال شكوى (يظهر فقط في مرحلة جاري العمل)
+                    if (currentOrder.status == 'accepted_partial_paid' ||
+                        currentOrder.status == 'accepted_full_paid' ||
+                        currentOrder.status == 'processing') ...[
+                      const SizedBox(height: 16),
+                      _buildComplaintButton(context, currentOrder.id),
+                    ],
+
                     _buildLocationSectionHeader(context, currentOrder),
                     const SizedBox(height: 12),
                     _buildLocationMapCard(
@@ -198,7 +207,32 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w900,
-        color: Color(0xFF6E7C87),
+      ),
+    );
+  }
+
+  Widget _buildComplaintButton(BuildContext context, String orderId) {
+    return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.redAccent,
+        side: const BorderSide(color: Colors.redAccent, width: 2),
+        minimumSize: const Size(double.infinity, 56),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SubmitComplaintView(orderId: orderId),
+          ),
+        );
+      },
+      icon: const Icon(Icons.report_problem_outlined),
+      label: Text(
+        context.tr('submit_complaint'),
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
       ),
     );
   }
@@ -344,30 +378,30 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               children: [
                 _buildStatusChip(
                   'pending',
-                  context.tr('pending_status'),
+                  context.tr('pending_status'), // New
                   order.status,
-                  const Color(0xFFFF9800),
-                  const Color(0xFFFFF3E0),
+                  const Color(0xFF03A9F4), // Sky Blue/Azure
+                  const Color(0xFFE1F5FE),
                 ),
                 _buildStatusChip(
                   'accepted_initial',
-                  context.tr('accepted_status'),
+                  context.tr('accepted_status'), // Waiting
                   order.status,
-                  const Color(0xFF1E88E5),
-                  const Color(0xFFE3F2FD),
+                  const Color(0xFF03A9F4), // Sky Blue/Azure
+                  const Color(0xFFE1F5FE),
                 ),
                 _buildStatusChip(
                   'accepted_partial_paid',
-                  context.tr('working_status'),
+                  context.tr('working_status'), // In Progress
                   order.status,
-                  const Color(0xFF673AB7),
-                  const Color(0xFFEDE7F6),
+                  const Color(0xFFFF9800), // Orange
+                  const Color(0xFFFFF3E0),
                 ),
                 _buildStatusChip(
                   'completed',
-                  context.tr('completed_status'),
+                  context.tr('completed_status'), // Completed
                   order.status,
-                  const Color(0xFF43A047),
+                  const Color(0xFF388E3C), // Dark Green
                   const Color(0xFFE8F5E9),
                 ),
               ],

@@ -31,6 +31,9 @@ import 'features/settings/viewmodels/settings_provider.dart';
 import 'features/home/viewmodels/main_viewmodel.dart';
 import 'features/orders/Repository/orders_repository.dart';
 import 'features/orders/ViewModels/orders_viewmodel.dart';
+import 'features/complaints/repositories/complaints_repository.dart';
+import 'features/complaints/viewmodels/submit_complaint_viewmodel.dart';
+import 'features/complaints/viewmodels/system_complaints_viewmodel.dart';
 
 // 3. استدعاء الثيم، الترجمة، وشاشة البداية 🎨
 import 'core/storage/hive_helper.dart';
@@ -59,6 +62,7 @@ void main() async {
   final pointsRepository = PointsRepository(apiService);
   final ordersRepository = OrdersRepository(apiService);
   final authRepository = AuthRepository(apiService, tokenStorage);
+  final complaintsRepository = ComplaintsRepository(apiService);
 
   runApp(
     MultiProvider(
@@ -114,6 +118,10 @@ void main() async {
 
         // 📦 الطلبات (Orders)
         ChangeNotifierProvider(create: (_) => OrdersViewModel(ordersRepository)),
+
+        // 📝 الشكاوي (Complaints)
+        ChangeNotifierProvider(create: (_) => SubmitComplaintViewModel(complaintsRepository)),
+        ChangeNotifierProvider(create: (_) => SystemComplaintsViewModel(complaintsRepository)),
       ],
       child: const MyApp(),
     ),

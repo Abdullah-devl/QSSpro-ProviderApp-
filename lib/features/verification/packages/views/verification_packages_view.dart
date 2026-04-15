@@ -62,7 +62,8 @@ class VerificationPackagesView extends StatelessWidget {
         ),
       ),
       body: RefreshIndicator(
-        color: const Color(0xFF1CB0F6),
+        color: Colors.grey,
+        backgroundColor: Colors.white,
         onRefresh: () async => await vm.fetchPackages(),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),

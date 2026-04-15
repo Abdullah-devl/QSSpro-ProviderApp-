@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../profile/repositories/profile_repository.dart';
 import '../models/manage_services_model.dart';
 import '../repositories/manage_services_repository.dart';
 
 class SpecialServicesViewModel extends ChangeNotifier {
   final ManageServicesRepository repository;
+  final ProfileRepository profileRepository;
 
   List<ServiceModel> customServices = [];
   List<ServiceModel> meetingServices = [];
@@ -14,22 +16,43 @@ class SpecialServicesViewModel extends ChangeNotifier {
   String? customError;
   String? meetingError;
 
-  SpecialServicesViewModel(this.repository) {
+  int? _userId;
+
+  SpecialServicesViewModel(this.repository, this.profileRepository) {
     loadAllServices();
   }
 
+  Future<void> _ensureUserId() async {
+    if (_userId != null) return;
+    try {
+      final profile = await profileRepository.getMyProfile();
+      _userId = profile.id;
+    } catch (e) {
+      debugPrint('❌ SpecialServicesViewModel: Error getting userId: $e');
+    }
+  }
+
   Future<void> loadAllServices() async {
+    await _ensureUserId();
     loadCustomServices();
     loadMeetingServices();
   }
 
   Future<void> loadCustomServices() async {
+    if (_userId == null) await _ensureUserId();
+    if (_userId == null) {
+      customError = 'Unable to identify user';
+      isCustomLoading = false;
+      notifyListeners();
+      return;
+    }
+
     isCustomLoading = true;
     customError = null;
     notifyListeners();
 
     try {
-      customServices = await repository.getCustomServices();
+      customServices = await repository.getCustomServices(_userId);
     } catch (e) {
       customError = e.toString();
     } finally {
@@ -39,12 +62,20 @@ class SpecialServicesViewModel extends ChangeNotifier {
   }
 
   Future<void> loadMeetingServices() async {
+    if (_userId == null) await _ensureUserId();
+    if (_userId == null) {
+      meetingError = 'Unable to identify user';
+      isMeetingLoading = false;
+      notifyListeners();
+      return;
+    }
+
     isMeetingLoading = true;
     meetingError = null;
     notifyListeners();
 
     try {
-      meetingServices = await repository.getMeetingServices();
+      meetingServices = await repository.getMeetingServices(_userId);
     } catch (e) {
       meetingError = e.toString();
     } finally {
@@ -55,7 +86,11 @@ class SpecialServicesViewModel extends ChangeNotifier {
 
   Future<void> toggleServiceStatus(ServiceModel service) async {
     try {
-      // تحديث متفائل (Optimistic Update) في المخصصة
+      // البحث عما إذا كانت الخدمة مخصصة أم حضور
+      bool isCustom = customServices.any((s) => s.id == service.id);
+      bool isMeeting = meetingServices.any((s) => s.id == service.id);
+
+      // تحديث متفائل (Optimistic Update)
       int customIndex = customServices.indexWhere((s) => s.id == service.id);
       if (customIndex != -1) {
         bool newStatus = !service.isActive;
@@ -63,7 +98,6 @@ class SpecialServicesViewModel extends ChangeNotifier {
         notifyListeners();
       }
 
-      // تحديث متفائل في الحضور
       int meetingIndex = meetingServices.indexWhere((s) => s.id == service.id);
       if (meetingIndex != -1) {
         bool newStatus = !service.isActive;
@@ -71,9 +105,9 @@ class SpecialServicesViewModel extends ChangeNotifier {
         notifyListeners();
       }
 
-      // إرسال الطلب
-      await repository.updateService(
-        serviceId: service.id,
+      // إرسال الطلب باستخدام دالة التحديث الخاصة بالخدمات التلقائية (PUT)
+      await repository.updateSpecialService(
+        isCustom: isCustom,
         isActive: !service.isActive,
       );
     } catch (e) {

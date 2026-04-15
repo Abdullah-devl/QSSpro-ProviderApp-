@@ -64,7 +64,7 @@ class ApiEndpoints {
   // static const String childServices = "services/child";
   static const String childServices = "services/children";
 
-  static const String getOrders = "/requests/provider"; // مسار جلب الطلبات
+  static const String getOrders = "requests/provider"; // مسار جلب الطلبات
   // static const String getOrders = "requests"; // مسار جلب الطلبات
 
   // رابط العمولات
@@ -106,4 +106,11 @@ class ApiEndpoints {
   static String payCommission(String id) => "requests/$id/pay-commission";
   static const String complaints = "request-complaints";
   static const String systemComplaints = "system-complaints";
+
+  // 🛠️ روابط الخدمات التلقائية (اللقاء والمخصصة)
+  static String getCustomService(dynamic userId) => "services-custom/$userId";
+  static String getMeetingService(dynamic userId) => "services-meeting/$userId";
+  
+  static const String updateCustomService = "services-custom";
+  static const String updateMeetingService = "services-meeting";
 }

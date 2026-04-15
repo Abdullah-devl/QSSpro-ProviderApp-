@@ -53,14 +53,27 @@ class _PointsPackagesViewState extends State<PointsPackagesView> {
         leading: const SizedBox.shrink(),
       ),
       body: RefreshIndicator(
-        color: const Color(0xFF1CB0F6),
+        color: Colors.grey,
+        backgroundColor: Colors.white,
         onRefresh: () async => await vm.fetchPointsPackages(),
         child: vm.isLoading
             ? const Center(child: CircularProgressIndicator(color: Color(0xFF1CB0F6)))
             : vm.errorMessage != null
-                ? _buildErrorWidget(context, vm.errorMessage!)
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                      _buildErrorWidget(context, vm.errorMessage!),
+                    ],
+                  )
                 : vm.packages.isEmpty
-                    ? _buildEmptyWidget(context, colors)
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                          _buildEmptyWidget(context, colors),
+                        ],
+                      )
                     : _buildPackagesList(context, vm.packages, colors),
       ),
     );

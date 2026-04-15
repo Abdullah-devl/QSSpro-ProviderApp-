@@ -177,7 +177,11 @@
   "nav_home": "Home",
   "nav_orders": "Orders",
   "nav_services": "Services",
+  "nav_profile": "Profile",
   "nav_settings": "Settings",
+  "demo_active_service_title": "Plumbing - Leak Repair",
+  "demo_client_name": "Fahad Al-Otaibi",
+  "demo_started_since": "Started 45 minutes ago",
   "new_order": "New",
   "new_requests": "New Requests",
   "new_verification_request": "New Verification Request",
@@ -419,5 +423,15 @@
   "processing": "Processing",
   "waiting": "Waiting",
   "no_transactions_currently": "No transactions currently",
-  "error_order_id_required": "Sorry, payment must be linked to a specific order."
+  "error_order_id_required": "Sorry, payment must be linked to a specific order.",
+  "dark_mode": "Dark Mode",
+  "light_mode": "Light Mode",
+  "appearance": "Appearance",
+  "preferences": "Preferences",
+  "legal_about": "Legal & About",
+  "arabic": "Arabic",
+  "english": "English",
+  "select_language": "Select Language",
+  "app_version": "App Version",
+  "support_hub": "Support & Complaints Hub"
 }

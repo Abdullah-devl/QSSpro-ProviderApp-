@@ -52,9 +52,20 @@ class PreviousWorksView extends StatelessWidget {
               ),
             )
           : vm.works.isEmpty
-          ? const Center(child: Text('لا توجد أعمال سابقة'))
+          ? RefreshIndicator(
+              color: Colors.grey,
+              backgroundColor: Colors.white,
+              onRefresh: vm.fetchWorks,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                  const Center(child: Text('لا توجد أعمال سابقة')),
+                ],
+              ),
+            )
           : RefreshIndicator(
-              color: const Color(0xFF5CA4B8),
+              color: Colors.grey,
               backgroundColor: Colors.white,
               onRefresh: vm.fetchWorks,
               child: ListView.builder(

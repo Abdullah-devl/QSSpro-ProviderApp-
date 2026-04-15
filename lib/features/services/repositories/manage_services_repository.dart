@@ -165,16 +165,14 @@ class ManageServicesRepository {
   }
 
   // 🚀 دالة جلب الخدمات المخصصة
-  Future<List<ServiceModel>> getCustomServices() async {
+  Future<List<ServiceModel>> getCustomServices(dynamic userId) async {
     try {
-      final response = await _apiService.get('/services-custom');
+      final response = await _apiService.get(ApiEndpoints.getCustomService(userId));
       final data = ApiErrorHandler.handleResponse(response);
       
       if (data is Map) {
-        // إذا كان الباك إند يعيد كائن خدمة واحد (تم استخراج الـ data تلقائياً في الـ ErrorHandler)
         return [ServiceModel.fromJson(Map<String, dynamic>.from(data))];
       } else if (data is List) {
-        // إذا كان مصفوفة، نعاملها كقائمة خدمات
         return data.map((e) => ServiceModel.fromJson(e)).toList();
       }
       return [];
@@ -184,13 +182,12 @@ class ManageServicesRepository {
   }
 
   // 🚀 دالة جلب خدمات الحضور
-  Future<List<ServiceModel>> getMeetingServices() async {
+  Future<List<ServiceModel>> getMeetingServices(dynamic userId) async {
     try {
-      final response = await _apiService.get('/services-meeting');
+      final response = await _apiService.get(ApiEndpoints.getMeetingService(userId));
       final data = ApiErrorHandler.handleResponse(response);
       
       if (data is Map) {
-        // إذا كان الباك إند يعيد كائن خدمة واحد
         return [ServiceModel.fromJson(Map<String, dynamic>.from(data))];
       } else if (data is List) {
         return data.map((e) => ServiceModel.fromJson(e)).toList();
@@ -407,6 +404,27 @@ class ManageServicesRepository {
     try {
       final response = await _apiService.delete(
         '${ApiEndpoints.myServices}/schedules/$scheduleId',
+      );
+      ApiErrorHandler.handleResponse(response);
+    } catch (e) {
+      throw ApiErrorHandler.handle(e);
+    }
+  }
+
+  // 🚀 دالة تحديث الخدمات التلقائية (Meeting/Custom) باستخدام PUT
+  Future<void> updateSpecialService({
+    required bool isCustom,
+    required bool isActive,
+    double? price,
+  }) async {
+    try {
+      final endpoint = isCustom ? ApiEndpoints.updateCustomService : ApiEndpoints.updateMeetingService;
+      final response = await _apiService.put(
+        endpoint,
+        data: {
+          "is_active": isActive ? 1 : 0,
+          if (price != null) "price": price,
+        },
       );
       ApiErrorHandler.handleResponse(response);
     } catch (e) {

@@ -36,13 +36,19 @@ class ActiveServiceCard extends StatelessWidget {
                           child: Text(context.tr('in_progress'), style: TextStyle(color: Colors.amber.shade700, fontSize: 11, fontWeight: FontWeight.bold)),
                         ),
                         const SizedBox(height: 8),
-                        Text('سباكة - إصلاح تسريب', style: TextStyle(color: context.qsColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text(
+                          context.tr('demo_active_service_title'),
+                          style: TextStyle(color: context.qsColors.text, fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
                             Icon(Icons.person_outline, size: 14, color: context.qsColors.textSub),
                             const SizedBox(width: 4),
-                            Text('${context.tr('client')} فهد العتيبي', style: TextStyle(color: context.qsColors.textSub, fontSize: 13)),
+                            Text(
+                              '${context.tr('client')} ${context.tr('demo_client_name')}',
+                              style: TextStyle(color: context.qsColors.textSub, fontSize: 13),
+                            ),
                           ],
                         ),
                       ],
@@ -61,12 +67,18 @@ class ActiveServiceCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('تم البدء منذ 45 دقيقة', style: TextStyle(color: context.qsColors.textSub, fontSize: 12)),
+                  Text(
+                    context.tr('demo_started_since'),
+                    style: TextStyle(color: context.qsColors.textSub, fontSize: 12),
+                  ),
                   Row(
                     children: [
-                      Text(context.tr('view_details'), style: TextStyle(color: context.qsColors.primary, fontSize: 13, fontWeight: FontWeight.bold)),
+                      Text(
+                        context.tr('view_details'),
+                        style: TextStyle(color: context.qsColors.primary, fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
                       const SizedBox(width: 4),
-                      Icon(Icons.arrow_back, color: context.qsColors.primary, size: 16),
+                      Icon(Icons.arrow_forward_ios, color: context.qsColors.primary, size: 14),
                     ],
                   ),
                 ],

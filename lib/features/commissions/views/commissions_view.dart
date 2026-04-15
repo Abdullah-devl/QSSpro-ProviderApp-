@@ -50,18 +50,17 @@ class CommissionsView extends StatelessWidget {
             context.read<PaymentsHistoryViewModel>().fetchAllHistory(),
           ]);
         },
-        color: const Color(0xFF1CB0F6),
+        backgroundColor: Colors.white,
+        color: Colors.grey,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1. شريط توثيق الحساب (في حال لم يكن الحساب موثقاً)
-              if (statsViewModel.isVerified == false) ...[
-                const VerificationBannerWidget(),
-                const SizedBox(height: 16),
-              ],
+              // 1. شريط توثيق الحساب (يظهر دائماً للوصول لخيارات التوثيق)
+              const VerificationBannerWidget(),
+              const SizedBox(height: 16),
 
               // 📊 مربع إحصائيات العمولات والنقاط (نقطة 5.8، 5.11، 5.2)
               const CommissionsStatsBanner(),

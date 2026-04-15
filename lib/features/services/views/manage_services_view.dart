@@ -47,8 +47,9 @@ class ManageServicesView extends StatelessWidget {
 
           Expanded(
             child: RefreshIndicator(
+              color: Colors.grey,
+              backgroundColor: Colors.white,
               onRefresh: () async => await viewModel.fetchServices(),
-              color: context.qsColors.primary,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),

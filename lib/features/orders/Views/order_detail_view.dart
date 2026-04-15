@@ -50,7 +50,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
 
     // حساب العمولة في بداية الـ build لتكون متاحة لكل الأجزاء
     final double commissionAmount =
-        double.tryParse(currentOrder.rawJson?['order_commission']?.toString() ?? '') ??
+        double.tryParse(
+          currentOrder.rawJson?['order_commission']?.toString() ?? '',
+        ) ??
         (currentOrder.price * 0.10);
 
     return Directionality(
@@ -75,6 +77,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           ),
         ),
         body: RefreshIndicator(
+          color: Colors.grey,
+          backgroundColor: Colors.white,
           onRefresh: () => viewModel.refreshOrderDetail(currentOrder.id),
           child: Stack(
             children: [
@@ -119,8 +123,13 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     ),
 
                     // 🏆 قسم العمولة (يظهر فقط عند اكتمال الطلب)
-                    if (currentOrder.status == 'completed' || currentOrder.status == 'finished') ...[
-                      _buildCommissionCard(context, currentOrder, commissionAmount),
+                    if (currentOrder.status == 'completed' ||
+                        currentOrder.status == 'finished') ...[
+                      _buildCommissionCard(
+                        context,
+                        currentOrder,
+                        commissionAmount,
+                      ),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -169,15 +178,15 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       _buildComplaintButton(context, currentOrder.id),
                     ],
 
-                    _buildLocationSectionHeader(context, currentOrder),
-                    const SizedBox(height: 12),
-                    _buildLocationMapCard(
-                      context,
-                      lat,
-                      lng,
-                      hasCoordinates,
-                      currentOrder,
-                    ),
+                    // _buildLocationSectionHeader(context, currentOrder),
+                    // const SizedBox(height: 12),
+                    // _buildLocationMapCard(
+                    //   context,
+                    //   lat,
+                    //   lng,
+                    //   hasCoordinates,
+                    //   currentOrder,
+                    // ),
                     const SizedBox(height: 48),
 
                     _buildTotalPriceSection(context, currentOrder),
@@ -193,8 +202,12 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             ],
           ),
         ),
-        //تبع زر الاكمال 
-        // bottomNavigationBar: _buildBottomActions(context, viewModel, currentOrder, commissionAmount),
+        // bottomNavigationBar: _buildBottomActions(
+        //   context,
+        //   viewModel,
+        //   currentOrder,
+        //   commissionAmount,
+        // ),
       ),
     );
   }
@@ -204,10 +217,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
   Widget _buildSectionHeader(BuildContext context, String titleKey) {
     return Text(
       context.tr(titleKey),
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w900,
-      ),
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
     );
   }
 
@@ -217,9 +227,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
         foregroundColor: Colors.redAccent,
         side: const BorderSide(color: Colors.redAccent, width: 2),
         minimumSize: const Size(double.infinity, 56),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       onPressed: () {
         Navigator.push(
@@ -325,7 +333,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               const SizedBox(width: 12),
               _buildSummaryCard(
                 context,
-                 '${((order.paidAmount / order.price) * 100).toStringAsFixed(0)}%', // The label is actually the amount label above it? Wait, line 294 code says "'المدفوع حالياً', // Actual Paid %"
+                '${((order.paidAmount / order.price) * 100).toStringAsFixed(0)}%', // The label is actually the amount label above it? Wait, line 294 code says "'المدفوع حالياً', // Actual Paid %"
                 '${((order.paidAmount / order.price) * 100).toStringAsFixed(0)}%',
                 const Color(0xFFE8F5E9),
                 const Color(0xFF2ECC71),
@@ -359,7 +367,12 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  context.tr('required_percentage_to_start', args: {'percentage': order.requiredPartialPercentage.toString()}),
+                  context.tr(
+                    'required_percentage_to_start',
+                    args: {
+                      'percentage': order.requiredPartialPercentage.toString(),
+                    },
+                  ),
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -636,7 +649,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               if (success) {
                 _amountController.clear();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(context.tr('amount_updated_successfully'))),
+                  SnackBar(
+                    content: Text(context.tr('amount_updated_successfully')),
+                  ),
                 );
               }
             },
@@ -720,13 +735,25 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        order.customerName,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF1D2126),
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            order.customerName,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF1D2126),
+                            ),
+                          ),
+                          if (order.isVerified) ...[
+                            const SizedBox(width: 8),
+                            const Icon(
+                              Icons.verified,
+                              color: Color(0xFF1CB0F6),
+                              size: 20,
+                            ),
+                          ],
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -777,7 +804,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
 
           const Divider(height: 1, color: Color(0xFFF1F5F9)),
 
-          // 🛠️ 3. تفاصيل الخدمة
+          // 🛠️ 3. تفاصيل الخدمة (المفصلة برؤية المستخدم)
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -785,69 +812,152 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               children: [
                 _buildInlineSectionTitle(context, 'service_details_title'),
                 const SizedBox(height: 16),
+
+                // الخدمة الأساسية
+                _buildServiceRow(
+                  context,
+                  order.serviceName,
+                  order.price -
+                      order.subServices.fold(
+                        0.0,
+                        (sum, sub) => sum + sub.price,
+                      ), // السعر الأساسي = الإجمالي - الفرعي
+                  isMain: true,
+                ),
+
+                if (order.subServices.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Divider(color: Color(0xFFF1F5F9), thickness: 0.5),
+                  ),
+                  ...order.subServices.map(
+                    (sub) => _buildServiceRow(context, sub.name, sub.price),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+
+          // 📍 4. الموقع المرسل مع الطلب
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildInlineSectionTitle(context, 'location_label'),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE8F6FF),
+                        color: const Color(0xFFFFF1F1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
-                        Icons.ac_unit,
-                        color: Color(0xFF1CB0F6),
-                        size: 24,
+                        Icons.location_on,
+                        color: Color(0xFFFF4D4D),
+                        size: 20,
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: Text(
-                        order.serviceName,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF1D2126),
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            order.location,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1D2126),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            context.tr('click_to_open_google_maps'),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF90A4AE),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      '${order.price.toInt()} ${context.tr('currency_sar')}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF1CB0F6),
+                    GestureDetector(
+                      onTap: () async {
+                        final url = Uri.parse(
+                          'https://www.google.com/maps/search/?api=1&query=${order.latitude},${order.longitude}',
+                        );
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(
+                            url,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        }
+                      },
+                      child: _buildActionIcon(
+                        Icons.near_me_outlined,
+                        const Color(0xFFE8F6FF),
+                        const Color(0xFF1CB0F6),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                ...order.subServices.map(
-                  (sub) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          sub.name,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF6E7C87),
-                          ),
-                        ),
-                        Text(
-                          '${sub.price.toInt()} ${context.tr('currency_sar')}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF1D2126),
-                          ),
-                        ),
-                      ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServiceRow(
+    BuildContext context,
+    String name,
+    double price, {
+    bool isMain = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Icon(
+                  isMain ? Icons.star_rounded : Icons.add_circle_outline,
+                  size: 18,
+                  color: isMain
+                      ? const Color(0xFFFFA502)
+                      : const Color(0xFF1CB0F6),
+                ),
+                const SizedBox(width: 10),
+                Flexible(
+                  child: Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: isMain ? FontWeight.w800 : FontWeight.w600,
+                      color: isMain
+                          ? const Color(0xFF1D2126)
+                          : const Color(0xFF5A6B7A),
                     ),
                   ),
                 ),
               ],
+            ),
+          ),
+          Text(
+            '${price.toInt()} ${context.tr('currency_sar')}',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w900,
+              color: isMain ? const Color(0xFF1CB0F6) : const Color(0xFF1D2126),
             ),
           ),
         ],
@@ -1061,7 +1171,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                      : Text(
+                    : Text(
                         context.tr('confirm_finish_work'),
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
@@ -1122,7 +1232,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     OrderModel order,
     double commissionAmount,
   ) {
-    final bool isPending = order.status == 'pending';
+    final bool isPending = order.status == 'pending' || order.status == 'new';
     final bool isCompleted = order.status == 'completed';
     final bool isPaidInFull =
         order.paidAmount >= order.price && order.price > 0;
@@ -1335,7 +1445,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 
-  Widget _buildCommissionCard(BuildContext context, OrderModel order, double commissionAmount) {
+  Widget _buildCommissionCard(
+    BuildContext context,
+    OrderModel order,
+    double commissionAmount,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),

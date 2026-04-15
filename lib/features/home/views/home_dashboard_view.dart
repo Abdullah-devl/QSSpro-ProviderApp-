@@ -223,8 +223,9 @@ class HomeDashboardView extends StatelessWidget {
 
     return SafeArea(
       child: RefreshIndicator(
+        color: Colors.grey,
+        backgroundColor: Colors.white,
         onRefresh: () async => await homeViewModel.fetchHomeData(),
-        color: context.qsColors.primary,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(20.0),

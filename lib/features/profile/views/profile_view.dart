@@ -55,7 +55,7 @@ class ProfileView extends StatelessWidget {
           ? const SizedBox()
           // 🚀 التعديل 2: تغليف الشاشة بالسحب للتحديث (Pull to Refresh)
           : RefreshIndicator(
-              color: const Color(0xFF5CA4B8),
+              color: Colors.grey,
               backgroundColor: Colors.white,
               onRefresh: () async {
                 await vm.fetchProfile();

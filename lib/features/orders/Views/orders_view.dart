@@ -74,6 +74,8 @@ class _OrdersBody extends StatelessWidget {
                 : viewModel.errorMessage != null
                 ? _buildErrorWidget(context, viewModel)
                 : RefreshIndicator(
+                    color: Colors.grey, // السهم رمادي
+                    backgroundColor: Colors.white, // الخلفية بيضاء
                     onRefresh: () => viewModel.fetchOrders(),
                     child: viewModel.filteredOrders.isEmpty
                         ? _buildEmptyState(context)

@@ -14,9 +14,9 @@ class ProviderCommissionSummaryModel {
   factory ProviderCommissionSummaryModel.fromJson(Map<String, dynamic> json) {
     final summary = json['summary'] ?? json;
     return ProviderCommissionSummaryModel(
-      totalDueCommission: double.tryParse(summary['total_due_commission']?.toString() ?? '0.0') ?? 0.0,
-      totalPaidAlready: double.tryParse(summary['total_paid_already']?.toString() ?? '0.0') ?? 0.0,
-      currentBalance: double.tryParse(summary['current_balance']?.toString() ?? '0.0') ?? 0.0,
+      totalDueCommission: double.tryParse((summary['total_commission_due'] ?? '0.0').toString()) ?? 0.0,
+      totalPaidAlready: double.tryParse((summary['total_commission_paid'] ?? '0.0').toString()) ?? 0.0,
+      currentBalance: double.tryParse((summary['remaining_balance'] ?? '0.0').toString()) ?? 0.0,
     );
   }
 }

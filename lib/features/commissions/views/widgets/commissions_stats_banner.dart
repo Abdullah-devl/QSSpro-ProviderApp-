@@ -34,7 +34,7 @@ class CommissionsStatsBanner extends StatelessWidget {
             _buildStatCard(
               context,
               title: context.tr('total_due_commission_label'),
-              value: '${viewModel.statsSummary?.currentBalance ?? 0}',
+              value: '${viewModel.statsSummary?.currentBalance.toInt() ?? 0}',
               unit: context.tr('currency_sar'),
               icon: Icons.account_balance_wallet_rounded,
               color: const Color(0xFF1CB0F6),

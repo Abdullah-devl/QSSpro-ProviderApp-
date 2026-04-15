@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../profile/repositories/profile_repository.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/special_services_viewmodel.dart';
 import '../widgets/special_service_card_widget.dart';
@@ -19,7 +20,8 @@ class SpecialServicesView extends StatelessWidget {
         final tokenStorage = TokenStorage();
         final apiService = ApiService(tokenStorage);
         final repository = ManageServicesRepository(apiService);
-        return SpecialServicesViewModel(repository);
+        final profileRepository = ProfileRepository(apiService);
+        return SpecialServicesViewModel(repository, profileRepository);
       },
       child: const _SpecialServicesBody(),
     );
@@ -126,6 +128,8 @@ class _SpecialServicesBody extends StatelessWidget {
 
     if (services.isEmpty) {
       return RefreshIndicator(
+        color: Colors.grey,
+        backgroundColor: Colors.white,
         onRefresh: onRefresh,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -143,8 +147,9 @@ class _SpecialServicesBody extends StatelessWidget {
     }
 
     return RefreshIndicator(
+      color: Colors.grey,
+      backgroundColor: Colors.white,
       onRefresh: onRefresh,
-      color: context.qsColors.primary,
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         itemCount: services.length,

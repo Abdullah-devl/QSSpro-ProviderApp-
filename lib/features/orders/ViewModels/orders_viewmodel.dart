@@ -58,8 +58,10 @@ class OrdersViewModel extends ChangeNotifier {
     if (_selectedTabIndex == 0) return _allOrders; // الكل
 
     if (_selectedTabIndex == 1) {
-      // جديد (Pending)
-      return _allOrders.where((o) => o.status == 'pending').toList();
+      // جديد (Pending / New)
+      return _allOrders
+          .where((o) => o.status == 'pending' || o.status == 'new')
+          .toList();
     }
 
     if (_selectedTabIndex == 2) {

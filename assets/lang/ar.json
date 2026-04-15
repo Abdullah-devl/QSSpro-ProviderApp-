@@ -177,7 +177,11 @@
   "nav_home": "الرئيسية",
   "nav_orders": "الطلبات",
   "nav_services": "الخدمات",
+  "nav_profile": "الملف الشخصي",
   "nav_settings": "الإعدادات",
+  "demo_active_service_title": "سباكة - إصلاح تسريب",
+  "demo_client_name": "فهد العتيبي",
+  "demo_started_since": "تم البدء منذ 45 دقيقة",
   "new_order": "جديد",
   "new_requests": "الطلبات الجديدة",
   "new_verification_request": "طلب توثيق جديد",
@@ -419,5 +423,15 @@
   "processing": "قيد المعالجة",
   "waiting": "في الانتظار",
   "no_transactions_currently": "لا توجد حركات مالية حالياً",
-  "error_order_id_required": "عذراً، يجب أن يكون السداد مرتبطاً بطلب محدد."
+  "error_order_id_required": "عذراً، يجب أن يكون السداد مرتبطاً بطلب محدد.",
+  "dark_mode": "الوضع الداكن",
+  "light_mode": "الوضع الفاتح",
+  "appearance": "المظهر",
+  "preferences": "التفضيلات",
+  "legal_about": "قانوني ومعلومات",
+  "arabic": "العربية",
+  "english": "English",
+  "select_language": "اختر اللغة",
+  "app_version": "إصدار التطبيق",
+  "support_hub": "مركز الدعم والشكاوى"
 }

@@ -67,9 +67,10 @@ class CommissionsStatsViewModel extends ChangeNotifier {
       // 3. بيانات البروفايل
       try {
         final profile = await _profileRepository.getMyProfile();
-        _isVerified = profile.verificationProvider;
         _calculateVerificationDays(profile.providerVerifiedUntil);
-        debugPrint('✅ CommissionsStatsViewModel: Profile loaded (Verified: $_isVerified)');
+        // ✅ التعديل: إذا كان متبقي أيام، نعتبره موثقاً تلقائياً حتى لو الحقل الآخر 0
+        _isVerified = profile.verificationProvider || _verificationDaysLeft > 0;
+        debugPrint('✅ CommissionsStatsViewModel: Profile loaded (Days Left: $_verificationDaysLeft, IsVerified: $_isVerified)');
       } catch (e) {
         debugPrint('❌ CommissionsStatsViewModel: Error loading profile: $e');
       }

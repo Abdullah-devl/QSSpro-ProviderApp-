@@ -34,13 +34,25 @@ class ServicesView extends StatelessWidget {
     final services = vm.services;
 
     if (services.isEmpty) {
-      return const Center(
-        child: Text('لا توجد خدمات حالياً', style: TextStyle(color: Colors.grey)),
+      return RefreshIndicator(
+        color: Colors.grey,
+        backgroundColor: Colors.white,
+        onRefresh: vm.fetchServices,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+            const Center(
+              child: Text('لا توجد خدمات حالياً', style: TextStyle(color: Colors.grey)),
+            ),
+          ],
+        ),
       );
     }
 
     return RefreshIndicator(
-      color: const Color(0xFF5CA4B8),
+      color: Colors.grey,
+      backgroundColor: Colors.white,
       onRefresh: vm.fetchServices,
       child: ListView.separated(
         padding: const EdgeInsets.all(16),

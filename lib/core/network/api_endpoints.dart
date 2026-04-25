@@ -18,7 +18,8 @@ class ApiEndpoints {
 
   /// 2. للهاتف الحقيقي (تأكد من وضع الـ IP الخاص بجهازك وأنك متصل بنفس الشبكة):
   // static String get domain => "http://192.168.43.245:8000";
-  static String get domain => "http://127.0.0.1:8000";
+  // static String get domain => "http://127.0.0.1:8000";
+  static String get domain => "http://192.168.137.59:8000";
 
   /// 3. للسيرفر المرفوع على الإنترنت (Live):
   // static String get domain => "https://your-api-domain.com";
@@ -110,7 +111,7 @@ class ApiEndpoints {
   // 🛠️ روابط الخدمات التلقائية (اللقاء والمخصصة)
   static String getCustomService(dynamic userId) => "services-custom/$userId";
   static String getMeetingService(dynamic userId) => "services-meeting/$userId";
-  
+
   static const String updateCustomService = "services-custom";
   static const String updateMeetingService = "services-meeting";
 }

@@ -99,25 +99,40 @@ class OrderModel {
     // استخراج بيانات المستخدم
     final userData = json['user'] ?? json['seeker'] ?? json['customer'] ?? {};
 
-    // استخراج اسم الخدمة والخدمات الفرعية والنسبة المطلوبة
-    final List mainServices = json['main_service'] ?? [];
+    // استخراج بيانات الخدمات (الرئيسية والفرعية) من مفتاح services أو الحقول القديمة
+    final List allServices = json['services'] ?? json['main_service'] ?? [];
     String serviceName = 'خدمة عامة';
     List<OrderSubService> subServices = [];
     double partialPercentage = 0.0;
 
-    if (mainServices.isNotEmpty) {
-      final firstService = mainServices[0];
-      serviceName = firstService['name'] ?? 'خدمة عامة';
-      partialPercentage =
-          double.tryParse(
-            firstService['required_partial_percentage']?.toString() ?? '0',
-          ) ??
-          0.0;
+    if (allServices.isNotEmpty) {
+      // 1. البحث عن الخدمة الرئيسية (التي نوعها main أو ليس لها أب)
+      final mainService = allServices.firstWhere(
+        (s) => s['type'] == 'main' || s['parent_service_id'] == null,
+        orElse: () => allServices[0],
+      );
 
-      final List rawSubServices = firstService['sub_services'] ?? [];
-      subServices = rawSubServices
-          .map((e) => OrderSubService.fromJson(e))
+      serviceName = mainService['name'] ?? 'خدمة عامة';
+      
+      // جلب نسبة الدفع الجزئي
+      partialPercentage = double.tryParse(
+        mainService['required_partial_percentage']?.toString() ?? '0',
+      ) ?? 0.0;
+
+      // 2. استخراج الخدمات الفرعية
+      // نبحث عن الخدمات التي نوعها child أو لها أب، أو موجودة كقائمة فرSubService داخل الرئيسية
+      final List childFromFlatList = allServices
+          .where((s) => s['type'] == 'child' || s['parent_service_id'] != null)
           .toList();
+
+      if (childFromFlatList.isNotEmpty) {
+        subServices = childFromFlatList
+            .map((e) => OrderSubService.fromJson(e))
+            .toList();
+      } else if (mainService['sub_services'] != null) {
+        final List rawSub = mainService['sub_services'];
+        subServices = rawSub.map((e) => OrderSubService.fromJson(e)).toList();
+      }
     }
 
     // استخراج السندات

@@ -9,6 +9,7 @@ import '../../../core/storage/token_storage.dart';
 import '../repositories/manage_services_repository.dart';
 import '../viewmodels/add_service_viewmodel.dart';
 
+import 'service_details_view.dart';
 // import 'dart:io';
 class AddServiceView extends StatelessWidget {
   const AddServiceView({super.key});
@@ -206,15 +207,21 @@ class _AddServiceBody extends StatelessWidget {
                 onPressed: viewModel.isLoading
                     ? null
                     : () async {
-                        bool success = await viewModel.submitService(context);
-                        if (success && context.mounted) {
+                        int? serviceId = await viewModel.submitService(context);
+                        if (serviceId != null && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('تم نشر الخدمة بنجاح!'),
                               backgroundColor: Colors.green,
                             ),
                           );
-                          Navigator.pop(context); // العودة للصفحة السابقة
+                          // الانتقال لصفحة تفاصيل الخدمة الجديدة مع استبدال الصفحة الحالية
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ServiceDetailsView(serviceId: serviceId),
+                            ),
+                          );
                         }
                       },
                 child: viewModel.isLoading

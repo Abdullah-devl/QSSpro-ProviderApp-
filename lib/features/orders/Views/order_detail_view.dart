@@ -34,11 +34,6 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       orElse: () => widget.order,
     );
 
-    // إحداثيات الطلب
-    final double lat = currentOrder.latitude ?? 24.7136;
-    final double lng = currentOrder.longitude ?? 46.6753;
-    final bool hasCoordinates =
-        currentOrder.latitude != null && currentOrder.longitude != null;
 
     // 🕵️ طباعة بيانات التشخيص عند بناء الصفحة
     debugPrint(
@@ -178,15 +173,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       _buildComplaintButton(context, currentOrder.id),
                     ],
 
-                    // _buildLocationSectionHeader(context, currentOrder),
-                    // const SizedBox(height: 12),
-                    // _buildLocationMapCard(
-                    //   context,
-                    //   lat,
-                    //   lng,
-                    //   hasCoordinates,
-                    //   currentOrder,
-                    // ),
+
                     const SizedBox(height: 48),
 
                     _buildTotalPriceSection(context, currentOrder),
@@ -989,104 +976,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 
-  Widget _buildLocationSectionHeader(BuildContext context, OrderModel order) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildSectionHeader(context, 'location_label'),
-        Row(
-          children: [
-            const Icon(Icons.near_me, color: Color(0xFF1CB0F6), size: 16),
-            const SizedBox(width: 6),
-            Text(
-              context.tr('distance_away', args: {'distance': order.distance}),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFF1CB0F6),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 
-  Widget _buildLocationMapCard(
-    BuildContext context,
-    double lat,
-    double lng,
-    bool hasCoordinates,
-    OrderModel order,
-  ) {
-    return GestureDetector(
-      onTap: () async {
-        final url = Uri.parse(
-          'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
-        );
-        if (await canLaunchUrl(url)) {
-          await launchUrl(url, mode: LaunchMode.externalApplication);
-        } else {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(context.tr('error_open_google_maps'))),
-            );
-          }
-        }
-      },
-      child: Container(
-        height: 180,
-        decoration: BoxDecoration(
-          color: const Color(0xFFE0E0E0),
-          borderRadius: BorderRadius.circular(32),
-          image: DecorationImage(
-            image: NetworkImage(
-              'https://api.mapbox.com/styles/v1/mapbox/light-v10/static/pin-s+ff4d4d($lng,$lat)/$lng,$lat,13/600x400?access_token=pk.placeholder',
-            ),
-            fit: BoxFit.cover,
-            opacity: 0.8,
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.location_on, color: Color(0xFFFF4D4D), size: 40),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
-                ),
-                child: Text(
-                  order.location,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF1D2126),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.tr('click_to_open_google_maps'),
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Colors.black54,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+
+
 
   Widget _buildProviderFinishAction(
     BuildContext context,

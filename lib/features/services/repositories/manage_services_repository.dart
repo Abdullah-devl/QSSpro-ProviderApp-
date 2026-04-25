@@ -12,7 +12,7 @@ import '../models/manage_services_model.dart';
 // أضف هذا الاستيراد في أعلى الملف لرفع الملفات
 import 'package:dio/dio.dart';
 import 'dart:io';
-import 'dart:convert';
+// import 'dart:convert';
 import '../models/service_schedule_model.dart';
 
 class ManageServicesRepository {
@@ -61,7 +61,7 @@ class ManageServicesRepository {
   }
 
   // 🚀 دالة إضافة خدمة جديدة (POST /services)
-  Future<void> createService({
+  Future<ServiceDetailsModel> createService({
     required String name,
     required String description,
     required double price,
@@ -128,7 +128,8 @@ class ManageServicesRepository {
         ApiEndpoints.myServices,
         data: formData,
       );
-      ApiErrorHandler.handleResponse(response);
+      final data = ApiErrorHandler.handleResponse(response);
+      return ServiceDetailsModel.fromJson(data);
     } catch (e) {
       throw ApiErrorHandler.handle(e);
     }

@@ -335,7 +335,7 @@ class AddServiceViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  Future<bool> submitService(BuildContext context) async {
+  Future<int?> submitService(BuildContext context) async {
     if (nameController.text.trim().isEmpty ||
         priceController.text.trim().isEmpty ||
         partialPercentController.text.trim().isEmpty ||
@@ -344,15 +344,16 @@ class AddServiceViewModel extends ChangeNotifier {
         context,
         'يرجى تعبئة الحقول الأساسية (الاسم، الفئة، السعر، نسبة الدفع المسبق)',
       );
-      return false;
+      return null;
     }
 
     _isLoading = true;
     notifyListeners();
 
     try {
+      int? createdId;
       if (serviceToEdit == null) {
-        await _repository.createService(
+        final newService = await _repository.createService(
           name: nameController.text.trim(),
           description: descriptionController.text.trim(),
           price: double.parse(priceController.text.trim()),
@@ -363,6 +364,7 @@ class AddServiceViewModel extends ChangeNotifier {
           schedules: _schedules,
           imageFile: _imageFile,
         );
+        createdId = newService.id;
       } else {
         await _repository.updateService(
           serviceId: serviceToEdit!.id,
@@ -376,21 +378,22 @@ class AddServiceViewModel extends ChangeNotifier {
           schedules: _schedules,
           imageFile: _imageFile,
         );
+        createdId = serviceToEdit!.id;
       }
 
       _isLoading = false;
       notifyListeners();
-      return true; // نجاح الرفع
+      return createdId; // نجاح الرفع
     } on Failure catch (failure) {
       _isLoading = false;
       notifyListeners();
       DialogHelper.showErrorDialog(context, failure.message);
-      return false;
+      return null;
     } catch (e) {
       _isLoading = false;
       notifyListeners();
       DialogHelper.showErrorDialog(context, 'حدث خطأ غير متوقع');
-      return false;
+      return null;
     }
   }
 

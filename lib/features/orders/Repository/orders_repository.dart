@@ -71,8 +71,9 @@ class OrdersRepository {
       debugPrint('🔍 [STORAGE] Raw Data from Server: $data');
 
       List responseList;
-      if (data is Map && data.containsKey('data')) {
-        responseList = data['data'] is List ? data['data'] : [];
+      if (data is Map) {
+        final rawData = data['requests'] ?? data['data'] ?? data['orders'] ?? [];
+        responseList = rawData is List ? rawData : [];
       } else if (data is List) {
         responseList = data;
       } else {

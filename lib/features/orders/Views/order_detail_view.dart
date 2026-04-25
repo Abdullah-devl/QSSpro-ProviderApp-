@@ -202,12 +202,12 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             ],
           ),
         ),
-        // bottomNavigationBar: _buildBottomActions(
-        //   context,
-        //   viewModel,
-        //   currentOrder,
-        //   commissionAmount,
-        // ),
+        bottomNavigationBar: _buildBottomActions(
+          context,
+          viewModel,
+          currentOrder,
+          commissionAmount,
+        ),
       ),
     );
   }
@@ -1408,9 +1408,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               ),
               onPressed: viewModel.isLoading
                   ? null
-                  : () {
-                      // 🚀 تم تعطيل طلب الباك اند بناءً على طلب المستخدم
-                      // await viewModel.updateStatus(order.id, 'completed');
+                    : () async {
+                       await viewModel.updateStatus(order.id, 'completed');
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

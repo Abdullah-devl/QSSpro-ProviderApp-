@@ -20,11 +20,7 @@ class CommissionsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // نفترض أن ViewModel تم توفيره عبر Provider (مثلاً في main.dart)
-    final viewModel = Provider.of<CommissionsViewModel>(context);
-    final statsViewModel = context.watch<CommissionsStatsViewModel>();
-    
-    // لون الخلفية الرمادي الفاتح جداً
-    final Color bgColor = const Color(0xFFF8F9FA);
+    final viewModel  = Provider.of<CommissionsViewModel>(context);
 
     return Scaffold(
       backgroundColor: bgColor,

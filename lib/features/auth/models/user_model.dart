@@ -20,7 +20,7 @@ class UserModel {
     required this.isVerified,
   });
 
-  // دالة تحويل الـ JSON إلى كائن (نفس الكود الذي أرسلته لي بالضبط)
+  // دالة تحويل الـ JSON إلى كائن
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['user']['id'],

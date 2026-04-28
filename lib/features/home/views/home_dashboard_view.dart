@@ -1,4 +1,4 @@
-﻿
+
 // import 'package:flutter/cupertino.dart';
 // import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
@@ -212,6 +212,7 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/main_viewmodel.dart';
 import '../../notifications/viewmodels/notification_viewmodel.dart';
+import 'package:service_provider_app/features/profile/viewmodels/profile_viewmodel.dart';
 
 class HomeDashboardView extends StatelessWidget {
   const HomeDashboardView({super.key});
@@ -221,12 +222,16 @@ class HomeDashboardView extends StatelessWidget {
     // استدعاء الـ ViewModels مباشرة (لأنها متوفرة الآن في main.dart)
     final mainViewModel = Provider.of<MainViewModel>(context);
     final homeViewModel = Provider.of<HomeViewModel>(context);
+    final profileViewModel = Provider.of<ProfileViewModel>(context);
 
     return SafeArea(
       child: RefreshIndicator(
         color: context.qsColors.primary,
         backgroundColor: context.qsColors.card,
-        onRefresh: () async => await homeViewModel.fetchHomeData(),
+        onRefresh: () async {
+          await homeViewModel.fetchHomeData();
+          await profileViewModel.fetchProfile();
+        },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(20.0),
@@ -241,23 +246,12 @@ class HomeDashboardView extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Stack(
-                        alignment: Alignment.bottomRight,
-                        children: [
-                          const CircleAvatar(
-                            radius: 25,
-                            backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'),
-                          ),
-                          Container(
-                            width: 14,
-                            height: 14,
-                            decoration: BoxDecoration(
-                              color: context.qsColors.success,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: context.qsColors.background, width: 2),
-                            ),
-                          ),
-                        ],
+                      CircleAvatar(
+                        radius: 25,
+                        backgroundColor: context.qsColors.primary.withOpacity(0.1),
+                        backgroundImage: profileViewModel.profile?.avatarUrl != null && profileViewModel.profile!.avatarUrl.isNotEmpty
+                            ? NetworkImage(profileViewModel.profile!.avatarUrl)
+                            : const NetworkImage('https://cdn-icons-png.flaticon.com/512/149/149071.png'), // صورة افتراضية
                       ),
                       const SizedBox(width: 12),
                       Column(
@@ -268,7 +262,7 @@ class HomeDashboardView extends StatelessWidget {
                             style: TextStyle(color: context.qsColors.textSub, fontSize: 12),
                           ),
                           Text(
-                            homeViewModel.userName, 
+                            profileViewModel.profile?.name ?? 'شريكنا العزيز', 
                             style: TextStyle(color: context.qsColors.text, fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         ],

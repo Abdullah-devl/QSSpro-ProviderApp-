@@ -13,14 +13,25 @@ class NotificationsView extends StatefulWidget {
   State<NotificationsView> createState() => _NotificationsViewState();
 }
 
-class _NotificationsViewState extends State<NotificationsView> {
+class _NotificationsViewState extends State<NotificationsView>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+
     // جلب الإشعارات عند فتح الصفحة
     Future.microtask(() {
       context.read<NotificationViewModel>().fetchNotifications();
     });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -32,7 +43,8 @@ class _NotificationsViewState extends State<NotificationsView> {
         elevation: 0,
         title: Text(
           context.tr('notifications_title'),
-          style: TextStyle(color: context.qsColors.text, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: context.qsColors.text, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         leading: IconButton(
@@ -48,11 +60,42 @@ class _NotificationsViewState extends State<NotificationsView> {
             tooltip: context.tr('mark_all_as_read'),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: Consumer<NotificationViewModel>(
+            builder: (context, viewModel, child) {
+              final unreadCount = viewModel.unreadCount;
+              final readCount = viewModel.notifications.length - unreadCount;
+
+              return Container(
+                color: context.qsColors.card,
+                child: TabBar(
+                  controller: _tabController,
+                  labelColor: context.qsColors.primary,
+                  unselectedLabelColor: context.qsColors.textSub,
+                  indicatorColor: context.qsColors.primary,
+                  indicatorWeight: 3,
+                  labelStyle: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14),
+                  unselectedLabelStyle: const TextStyle(
+                      fontWeight: FontWeight.w500, fontSize: 14),
+                  tabs: [
+                    Tab(text: 'الكل (${viewModel.notifications.length})'),
+                    Tab(text: 'غير مقروءة ($unreadCount)'),
+                    Tab(text: 'مقروءة ($readCount)'),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
       ),
       body: Consumer<NotificationViewModel>(
         builder: (context, viewModel, child) {
           if (viewModel.isLoading) {
-            return Center(child: CircularProgressIndicator(color: context.qsColors.primary));
+            return Center(
+                child: CircularProgressIndicator(
+                    color: context.qsColors.primary));
           }
 
           if (viewModel.errorMessage != null) {
@@ -78,35 +121,61 @@ class _NotificationsViewState extends State<NotificationsView> {
             );
           }
 
-          if (viewModel.notifications.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.notifications_off_outlined, size: 64, color: context.qsColors.textSub),
-                  const SizedBox(height: 16),
-                  Text(
-                    context.tr('no_notifications'),
-                    style: TextStyle(color: context.qsColors.textSub, fontSize: 16),
-                  ),
-                ],
-              ),
-            );
-          }
+          final allNotifications = viewModel.notifications;
+          final unreadNotifications =
+              allNotifications.where((n) => !n.isRead).toList();
+          final readNotifications =
+              allNotifications.where((n) => n.isRead).toList();
 
-          return RefreshIndicator(
-            color: context.qsColors.primary,
-            onRefresh: () => viewModel.fetchNotifications(),
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: viewModel.notifications.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final notification = viewModel.notifications[index];
-                return _NotificationItem(notification: notification);
-              },
-            ),
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              // تبويب: الكل
+              _buildNotificationList(allNotifications, 'لا توجد إشعارات'),
+              // تبويب: غير مقروءة
+              _buildNotificationList(
+                  unreadNotifications, 'لا توجد إشعارات غير مقروءة'),
+              // تبويب: مقروءة
+              _buildNotificationList(
+                  readNotifications, 'لا توجد إشعارات مقروءة'),
+            ],
           );
+        },
+      ),
+    );
+  }
+
+  Widget _buildNotificationList(
+      List<NotificationModel> notifications, String emptyMessage) {
+    if (notifications.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.notifications_off_outlined,
+                size: 64, color: context.qsColors.textSub),
+            const SizedBox(height: 16),
+            Text(
+              emptyMessage,
+              style:
+                  TextStyle(color: context.qsColors.textSub, fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      color: context.qsColors.primary,
+      onRefresh: () =>
+          context.read<NotificationViewModel>().fetchNotifications(),
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: notifications.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          final notification = notifications[index];
+          return _NotificationItem(notification: notification);
         },
       ),
     );
@@ -132,12 +201,12 @@ class _NotificationItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: notification.isRead 
+          color: notification.isRead
               ? context.qsColors.card
               : context.qsColors.primary.withOpacity(0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: notification.isRead 
+            color: notification.isRead
                 ? context.qsColors.textSub.withOpacity(0.1)
                 : context.qsColors.primary.withOpacity(0.2),
           ),
@@ -165,7 +234,9 @@ class _NotificationItem extends StatelessWidget {
                         child: Text(
                           notification.title,
                           style: TextStyle(
-                            fontWeight: notification.isRead ? FontWeight.w500 : FontWeight.bold,
+                            fontWeight: notification.isRead
+                                ? FontWeight.w500
+                                : FontWeight.bold,
                             fontSize: 16,
                             color: context.qsColors.text,
                           ),
@@ -195,7 +266,8 @@ class _NotificationItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    DateFormat('yyyy-MM-dd HH:mm').format(notification.createdAt),
+                    DateFormat('yyyy-MM-dd HH:mm')
+                        .format(notification.createdAt),
                     style: TextStyle(
                       color: context.qsColors.textSub.withOpacity(0.7),
                       fontSize: 12,

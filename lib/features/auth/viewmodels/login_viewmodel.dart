@@ -1,8 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:service_provider_app/core/network/error/failure.dart';
 import 'package:service_provider_app/features/home/views/main_view.dart';
+import 'package:provider/provider.dart';
 import '../repositories/auth_repository.dart';
+import '../viewmodels/auth_viewmodel.dart';
 
 class LoginViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
@@ -51,11 +53,13 @@ class LoginViewModel extends ChangeNotifier {
 
       // 2. 🛡️ تطبيق شرط التحقق (Middleware / Guard)
       if (user.isVerified) {
+        // ✅ تحديث توكن الإشعارات فور تسجيل الدخول لضمان وصولها
+        _syncFCMToken(context);
+
         // إذا كان حسابه موثقاً / موافقاً على الشروط -> يدخل التطبيق
         _showAlert(context, 'تم تسجيل الدخول بنجاح!', isError: false);
 
         // الانتقال للشاشة الرئيسية
-        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeView()));
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainView()));
       } else {
         // إذا لم يكن موثقاً -> نمنعه من الدخول للرئيسية وننقله لشاشة التوثيق أو الشروط
@@ -76,6 +80,15 @@ class LoginViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       _showAlert(context, 'حدث خطأ غير متوقع.', isError: true);
+    }
+  }
+
+  // دالة مساعدة لمزامنة التوكن
+  void _syncFCMToken(BuildContext context) {
+    try {
+      context.read<AuthViewModel>().syncFCMToken();
+    } catch (e) {
+      // نجهل الخطأ هنا لكي لا يعطل عملية تسجيل الدخول
     }
   }
 

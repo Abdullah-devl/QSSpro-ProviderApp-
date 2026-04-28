@@ -1,4 +1,4 @@
-﻿// مسار الملف: lib/features/home/views/main_view.dart
+// مسار الملف: lib/features/home/views/main_view.dart
 
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -11,6 +11,7 @@ import 'package:service_provider_app/features/services/views/manage_services_vie
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/main_viewmodel.dart';
+import '../../notifications/viewmodels/notification_viewmodel.dart';
 
 class MainView extends StatelessWidget {
   const MainView({super.key});
@@ -24,8 +25,22 @@ class MainView extends StatelessWidget {
   }
 }
 
-class _MainViewBody extends StatelessWidget {
+class _MainViewBody extends StatefulWidget {
   const _MainViewBody();
+
+  @override
+  State<_MainViewBody> createState() => _MainViewBodyState();
+}
+
+class _MainViewBodyState extends State<_MainViewBody> {
+  @override
+  void initState() {
+    super.initState();
+    // جلب الإشعارات لعرض عددها على الأيقونة
+    Future.microtask(() {
+      context.read<NotificationViewModel>().fetchNotifications();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

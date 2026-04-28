@@ -26,7 +26,7 @@ class AuthRepository {
       // تحويل البيانات إلى كائن باستخدام المودل الذي صنعناه
       final user = UserModel.fromJson(data);
       
-      // حفظ التوكن في Hive لكي يستخدمه ApiService لاحقاً في كل الطلبات
+      // حفظ التوكن فقط كما طلبت
       if (user.token.isNotEmpty) {
         await _tokenStorage.saveToken(user.token);
       }
@@ -48,4 +48,4 @@ class AuthRepository {
       throw ApiErrorHandler.handle(e);
     }
   }
-}
+}

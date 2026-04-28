@@ -43,6 +43,7 @@ class HomeViewModel extends ChangeNotifier {
 
   // جلب اسم المستخدم من الـ Repository الذي يقرأه من Hive
   String get userName => _repository.getUserName();
+  String get userImage => _repository.getUserImage();
 
   Future<void> fetchHomeData() async {
     _isLoading = true;

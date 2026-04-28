@@ -13,8 +13,18 @@ class NotificationRepository {
   Future<List<NotificationModel>> getNotifications() async {
     try {
       final response = await _apiService.get(ApiEndpoints.notifications);
-      if (response.data != null && response.data is List) {
-        return (response.data as List)
+      final responseData = response.data;
+
+      // Laravel يرجع البيانات داخل مفتاح 'data'
+      List? list;
+      if (responseData is Map && responseData['data'] is List) {
+        list = responseData['data'];
+      } else if (responseData is List) {
+        list = responseData;
+      }
+
+      if (list != null) {
+        return list
             .map((json) => NotificationModel.fromJson(json))
             .toList();
       }

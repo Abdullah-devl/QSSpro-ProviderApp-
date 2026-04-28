@@ -37,7 +37,10 @@ class FCMNotificationService {
       developer.log('User declined or has not accepted permission', name: 'FCM_SERVICE');
     }
 
-    // 2. إعداد الإشعارات المحلية (للعرض والتطبيق مفتوح)
+    // 2. إعداد قنوات الإشعارات (للأندرويد)
+    await _createNotificationChannel();
+
+    // 3. إعداد الإشعارات المحلية (للعرض والتطبيق مفتوح)
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     
@@ -52,33 +55,58 @@ class FCMNotificationService {
       settings: initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         if (response.payload != null) {
-          Map<String, dynamic> data = jsonDecode(response.payload!);
-          _handleNotificationClick(data);
+          try {
+            Map<String, dynamic> data = jsonDecode(response.payload!);
+            _handleNotificationClick(data);
+          } catch (e) {
+            developer.log("Error decoding notification payload: $e", name: 'FCM_SERVICE');
+          }
         }
       },
     );
 
-    // 3. معالجة الإشعارات والبرنامج في الواجهة (Foreground)
+    // 4. معالجة الإشعارات والبرنامج في الواجهة (Foreground)
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       developer.log("Message received in foreground: ${message.notification?.title}", name: 'FCM_SERVICE');
       _showLocalNotification(message);
     });
 
-    // 4. معالجة النقر على الإشعار والتطبيق في الخلفية (Background)
+    // 5. معالجة النقر على الإشعار والتطبيق في الخلفية (Background)
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       developer.log("Notification clicked (Background): ${message.data}", name: 'FCM_SERVICE');
       _handleNotificationClick(message.data);
     });
 
-    // 5. التحقق مما إذا تم فتح التطبيق من إشعار (بينما كان مغلقاً تماماً Terminated)
+    // 6. التحقق مما إذا تم فتح التطبيق من إشعار (بينما كان مغلقاً تماماً Terminated)
     RemoteMessage? initialMessage = await _fcm.getInitialMessage();
     if (initialMessage != null) {
       developer.log("App opened from terminated state by notification", name: 'FCM_SERVICE');
       _handleNotificationClick(initialMessage.data);
     }
 
-    // 6. تعيين معالج الخلفية
+    // 7. تعيين معالج الخلفية
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    // 8. الاستماع لتحديث التوكن (Token Refresh)
+    _fcm.onTokenRefresh.listen((newToken) {
+      developer.log("FCM Token Refreshed: $newToken", name: 'FCM_SERVICE');
+    });
+  }
+
+  /// إنشاء قناة إشعارات عالية الأهمية للأندرويد
+  Future<void> _createNotificationChannel() async {
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'high_importance_channel', // id
+      'High Importance Notifications', // name
+      description: 'This channel is used for important notifications.', // description
+      importance: Importance.max,
+      playSound: true,
+      enableVibration: true,
+    );
+
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
   }
 
   /// الحصول على التوكن
@@ -120,9 +148,6 @@ class FCMNotificationService {
         notificationDetails: platformChannelSpecifics,
         payload: jsonEncode(message.data),
       );
-      
-      // اختيارياً: إظهار Dialog داخل التطبيق
-      _showInAppDialog(notification.title ?? "", notification.body ?? "", message.data);
     }
   }
 

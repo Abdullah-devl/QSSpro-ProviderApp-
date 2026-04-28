@@ -50,4 +50,10 @@ class HomeRepository {
     var box = Hive.box(HiveKeys.settingsBox);
     return box.get('user_name', defaultValue: 'شريكنا العزيز');
   }
+
+  // دالة لجلب صورة المستخدم من Hive
+  String getUserImage() {
+    var box = Hive.box(HiveKeys.settingsBox);
+    return box.get('user_image', defaultValue: '');
+  }
 }

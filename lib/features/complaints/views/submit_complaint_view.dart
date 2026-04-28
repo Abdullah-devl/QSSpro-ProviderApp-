@@ -105,8 +105,8 @@ class _SubmitComplaintViewState extends State<SubmitComplaintView> {
         title: Text(context.tr('submit_complaint')),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: context.qsColors.card,
+        foregroundColor: context.qsColors.text,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -139,7 +139,7 @@ class _SubmitComplaintViewState extends State<SubmitComplaintView> {
               onPressed: viewModel.isLoading ? null : _showConfirmDialog,
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
-                foregroundColor: Colors.white,
+                foregroundColor: context.qsColors.card,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -147,12 +147,12 @@ class _SubmitComplaintViewState extends State<SubmitComplaintView> {
                 elevation: 0,
               ),
               child: viewModel.isLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: context.qsColors.card,
                       ),
                     )
                   : Text(
@@ -172,10 +172,10 @@ class _SubmitComplaintViewState extends State<SubmitComplaintView> {
   Widget _buildFieldLabel(String label) {
     return Text(
       label,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.bold,
-        color: Colors.black54,
+        color: context.qsColors.textSub,
       ),
     );
   }
@@ -196,9 +196,9 @@ class _SubmitComplaintViewState extends State<SubmitComplaintView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: context.qsColors.textSub),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -231,9 +231,9 @@ class _SubmitComplaintViewState extends State<SubmitComplaintView> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: context.qsColors.textSub),
       ),
       child: TextField(
         controller: controller,
@@ -242,9 +242,11 @@ class _SubmitComplaintViewState extends State<SubmitComplaintView> {
           hintText: hintText,
           contentPadding: const EdgeInsets.all(16),
           border: InputBorder.none,
-          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+          hintStyle: TextStyle(color: context.qsColors.textSub, fontSize: 14),
         ),
       ),
     );
   }
 }
+
+

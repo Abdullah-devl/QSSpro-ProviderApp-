@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:service_provider_app/core/network/error/failure.dart';
 import 'package:service_provider_app/features/home/views/main_view.dart';
 import '../repositories/auth_repository.dart';
@@ -83,7 +84,7 @@ class LoginViewModel extends ChangeNotifier {
   //   ScaffoldMessenger.of(context).showSnackBar(
   //     SnackBar(
   //       content: Text(message, style: const TextStyle(fontFamily: 'Cairo')),
-  //       backgroundColor: isError ? Colors.red.shade700 : Colors.green.shade700,
+  //       backgroundColor: isError ? context.qsColors.error : context.qsColors.success,
   //       behavior: SnackBarBehavior.floating,
   //     ),
   //   );
@@ -108,7 +109,7 @@ class LoginViewModel extends ChangeNotifier {
                 isError
                     ? Icons.error_outline_rounded
                     : Icons.check_circle_outline_rounded,
-                color: isError ? Colors.red.shade600 : Colors.green.shade600,
+                color: isError ? context.qsColors.error : context.qsColors.success,
                 size: 28,
               ),
               const SizedBox(width: 10),
@@ -117,7 +118,7 @@ class LoginViewModel extends ChangeNotifier {
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.bold,
-                  color: isError ? Colors.red.shade600 : Colors.green.shade600,
+                  color: isError ? context.qsColors.error : context.qsColors.success,
                   fontSize: 20,
                 ),
               ),
@@ -139,8 +140,8 @@ class LoginViewModel extends ChangeNotifier {
                   vertical: 10,
                 ),
                 backgroundColor: isError
-                    ? Colors.red.withOpacity(0.1)
-                    : Colors.green.withOpacity(0.1),
+                    ? context.qsColors.error.withOpacity(0.1)
+                    : context.qsColors.success.withOpacity(0.1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -151,7 +152,7 @@ class LoginViewModel extends ChangeNotifier {
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.bold,
-                  color: isError ? Colors.red.shade700 : Colors.green.shade700,
+                  color: isError ? context.qsColors.error : context.qsColors.success,
                 ),
               ),
             ),
@@ -168,3 +169,4 @@ class LoginViewModel extends ChangeNotifier {
     super.dispose();
   }
 }
+

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:service_provider_app/core/localization/app_localizations.dart';
 import '../../profile/repositories/profile_repository.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/special_services_viewmodel.dart';
@@ -33,35 +34,36 @@ class _SpecialServicesBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.qsColors;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: context.qsColors.background,
+        backgroundColor: colors.background,
         appBar: AppBar(
-          backgroundColor: context.qsColors.background,
+          backgroundColor: colors.background,
           elevation: 0,
           centerTitle: true,
           title: Text(
-            'الطلبات الخاصة والحضور',
+            context.tr('special_services_and_attendance'),
             style: TextStyle(
-              color: context.qsColors.text,
+              color: colors.text,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new, color: context.qsColors.text, size: 20),
+            icon: Icon(Icons.arrow_back_ios_new, color: colors.text, size: 20),
             onPressed: () => Navigator.pop(context),
           ),
           bottom: TabBar(
-            labelColor: context.qsColors.primary,
-            unselectedLabelColor: context.qsColors.textSub,
-            indicatorColor: context.qsColors.primary,
+            labelColor: colors.primary,
+            unselectedLabelColor: colors.textSub,
+            indicatorColor: colors.primary,
             indicatorWeight: 3,
             labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-            tabs: const [
-              Tab(text: 'الخدمات المخصصة'),
-              Tab(text: 'خدمات الحضور'),
+            tabs: [
+              Tab(text: context.tr('custom_services')),
+              Tab(text: context.tr('attendance_services')),
             ],
           ),
         ),
@@ -76,7 +78,7 @@ class _SpecialServicesBody extends StatelessWidget {
                   error: viewModel.customError,
                   services: viewModel.customServices,
                   onRefresh: viewModel.loadCustomServices,
-                  emptyMessage: 'لا توجد خدمات مخصصة حالياً.',
+                  emptyMessage: context.tr('no_custom_services_available'),
                   isCustomType: true,
                 ),
                 // التبويب الثاني: الحضور
@@ -86,7 +88,7 @@ class _SpecialServicesBody extends StatelessWidget {
                   error: viewModel.meetingError,
                   services: viewModel.meetingServices,
                   onRefresh: viewModel.loadMeetingServices,
-                  emptyMessage: 'لا توجد خدمات حضور حالياً.',
+                  emptyMessage: context.tr('no_attendance_services_available'),
                   isCustomType: false,
                 ),
               ],
@@ -106,8 +108,9 @@ class _SpecialServicesBody extends StatelessWidget {
     required String emptyMessage,
     required bool isCustomType,
   }) {
+    final colors = context.qsColors;
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: CircularProgressIndicator(color: colors.primary));
     }
 
     if (error != null) {
@@ -115,11 +118,15 @@ class _SpecialServicesBody extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(error, style: const TextStyle(color: Colors.red)),
+            Text(error, style: TextStyle(color: colors.error)),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: onRefresh,
-              child: const Text('إعادة المحاولة'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.primary,
+                foregroundColor: colors.card,
+              ),
+              child: Text(context.tr('retry')),
             ),
           ],
         ),
@@ -128,8 +135,8 @@ class _SpecialServicesBody extends StatelessWidget {
 
     if (services.isEmpty) {
       return RefreshIndicator(
-        color: Colors.grey,
-        backgroundColor: Colors.white,
+        color: colors.primary,
+        backgroundColor: colors.card,
         onRefresh: onRefresh,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -138,7 +145,7 @@ class _SpecialServicesBody extends StatelessWidget {
             Center(
               child: Text(
                 emptyMessage,
-                style: TextStyle(color: context.qsColors.textSub, fontSize: 16),
+                style: TextStyle(color: colors.textSub, fontSize: 16),
               ),
             ),
           ],
@@ -147,8 +154,8 @@ class _SpecialServicesBody extends StatelessWidget {
     }
 
     return RefreshIndicator(
-      color: Colors.grey,
-      backgroundColor: Colors.white,
+      color: colors.primary,
+      backgroundColor: colors.card,
       onRefresh: onRefresh,
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),

@@ -28,12 +28,12 @@ class _PointsPackagesViewState extends State<PointsPackagesView> {
   Widget build(BuildContext context) {
     final colors = context.qsColors;
     final vm = context.watch<PointsViewModel>();
-    final Color bgColor = const Color(0xFFF8F9FA);
+    final Color bgColor = colors.background;
 
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: bgColor,
+        backgroundColor: colors.card,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -53,11 +53,11 @@ class _PointsPackagesViewState extends State<PointsPackagesView> {
         leading: const SizedBox.shrink(),
       ),
       body: RefreshIndicator(
-        color: Colors.grey,
-        backgroundColor: Colors.white,
+        color: colors.primary,
+        backgroundColor: colors.card,
         onRefresh: () async => await vm.fetchPointsPackages(),
         child: vm.isLoading
-            ? const Center(child: CircularProgressIndicator(color: Color(0xFF1CB0F6)))
+            ? Center(child: CircularProgressIndicator(color: colors.primary))
             : vm.errorMessage != null
                 ? ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -83,10 +83,10 @@ class _PointsPackagesViewState extends State<PointsPackagesView> {
     return GridView.builder(
       padding: const EdgeInsets.all(20),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // باقتان في السطر
+        crossAxisCount: 2,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
-        childAspectRatio: 0.62, // زيادة الارتفاع ليتناسب مع المحتوى
+        childAspectRatio: 0.62,
       ),
       itemCount: packages.length,
       itemBuilder: (context, index) {
@@ -103,11 +103,11 @@ class _PointsPackagesViewState extends State<PointsPackagesView> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.card,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: colors.text.withValues(alpha: 0.04),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -116,18 +116,16 @@ class _PointsPackagesViewState extends State<PointsPackagesView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 💎 أيقونة الباقة في المنتصف
               Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1CB0F6).withOpacity(0.1),
+                  color: colors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.stars_rounded, color: Color(0xFF1CB0F6), size: 36),
+                child: Icon(Icons.stars_rounded, color: colors.primary, size: 36),
               ),
 
-              // 📝 اسم الباقة
               Text(
                 package.name,
                 textAlign: TextAlign.center,
@@ -141,25 +139,23 @@ class _PointsPackagesViewState extends State<PointsPackagesView> {
               ),
               const SizedBox(height: 8),
 
-              // 💰 النقاط والهدية
               Wrap(
                 alignment: WrapAlignment.center,
                 spacing: 4,
                 children: [
                   Text(
                     context.tr('points_amount', args: {'count': package.points.toString()}),
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF1CB0F6)),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: colors.primary),
                   ),
                   if (hasBonus)
                     Text(
                       '+ ${package.bonusPoints}',
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green),
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: colors.success),
                     ),
                 ],
               ),
               const SizedBox(height: 12),
 
-              // 🔘 السعر وزر الشراء
               Text(
                 '${package.price.toInt()} ${context.tr('sar')}',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: colors.text),
@@ -180,8 +176,8 @@ class _PointsPackagesViewState extends State<PointsPackagesView> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1CB0F6),
-                    foregroundColor: Colors.white,
+                    backgroundColor: colors.primary,
+                    foregroundColor: colors.card,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -196,7 +192,6 @@ class _PointsPackagesViewState extends State<PointsPackagesView> {
           ),
         ),
 
-        // 🎁 علامة العرض (أعلى اليسار)
         if (hasBonus)
           Positioned(
             top: 10,
@@ -204,20 +199,20 @@ class _PointsPackagesViewState extends State<PointsPackagesView> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.orange.shade400,
+                color: colors.warning,
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
-                  BoxShadow(color: Colors.orange.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2)),
+                  BoxShadow(color: colors.warning.withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 2)),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.card_giftcard, color: Colors.white, size: 12),
-                  SizedBox(width: 4),
+                  Icon(Icons.card_giftcard, color: colors.card, size: 12),
+                  const SizedBox(width: 4),
                   Text(
-                    'هدية', // يمكنك استبدالها بمفتاح ترجمة لو أردت
-                    style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                    context.tr('gift'),
+                    style: TextStyle(color: colors.card, fontSize: 9, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -234,7 +229,7 @@ class _PointsPackagesViewState extends State<PointsPackagesView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            Icon(Icons.error_outline, color: context.qsColors.error, size: 48),
             const SizedBox(height: 16),
             Text(context.tr('error_loading_points_packages'), textAlign: TextAlign.center),
           ],

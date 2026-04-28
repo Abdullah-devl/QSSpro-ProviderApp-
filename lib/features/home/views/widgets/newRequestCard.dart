@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../../core/theme/qs_color_extension.dart';
 import '../../../../core/localization/app_localizations.dart';
 // 3. كارت الطلب الجديد
@@ -19,9 +19,9 @@ class NewRequestCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: context.qsColors.text.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         children: [
@@ -58,7 +58,7 @@ class NewRequestCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                decoration: BoxDecoration(border: Border.all(color: context.qsColors.textSub.withOpacity(0.2)), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(border: Border.all(color: context.qsColors.textSub.withValues(alpha: 0.2)), borderRadius: BorderRadius.circular(12)),
                 child: IconButton(icon: Icon(Icons.close, color: context.qsColors.textSub), onPressed: () {}),
               ),
               const SizedBox(width: 12),
@@ -67,7 +67,7 @@ class NewRequestCard extends StatelessWidget {
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.qsColors.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: context.qsColors.card,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     elevation: 0,
@@ -85,12 +85,12 @@ class NewRequestCard extends StatelessWidget {
   Widget _buildTag(BuildContext context, IconData icon, String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(color: context.qsColors.success.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
       child: Row(
         children: [
-          Icon(icon, color: Colors.green.shade700, size: 14),
+          Icon(icon, color: context.qsColors.success, size: 14),
           const SizedBox(width: 4),
-          Text(text, style: TextStyle(color: Colors.green.shade700, fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(text, style: TextStyle(color: context.qsColors.success, fontSize: 12, fontWeight: FontWeight.bold)),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import '../../../../core/localization/app_localizations.dart';
 
 class TotalDueCommissionCard extends StatelessWidget {
@@ -8,15 +9,17 @@ class TotalDueCommissionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.qsColors;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.blue.shade100, width: 1.5),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.1), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.01),
+            color: colors.text.withValues(alpha: 0.01),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -31,12 +34,12 @@ class TotalDueCommissionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE3F4FC),
+                  color: colors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
+                child:  Icon(
                   Icons.account_balance_wallet_rounded,
-                  color: Color(0xFF1CB0F6),
+                  color: colors.primary,
                   size: 22,
                 ),
               ),
@@ -46,7 +49,7 @@ class TotalDueCommissionCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue.shade300,
+                  color: colors.text,
                 ),
               ),
             ],
@@ -58,10 +61,10 @@ class TotalDueCommissionCard extends StatelessWidget {
             children: [
               Text(
                 amount.toStringAsFixed(2),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: colors.text,
                   height: 1,
                 ),
               ),
@@ -70,7 +73,7 @@ class TotalDueCommissionCard extends StatelessWidget {
                 context.tr('currency_sar'),
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: colors.textSub,
                   fontWeight: FontWeight.bold,
                 ),
               ),

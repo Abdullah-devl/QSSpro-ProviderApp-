@@ -1,4 +1,4 @@
-
+﻿
 // import 'package:flutter/cupertino.dart';
 // import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
@@ -44,7 +44,7 @@
 //                           width: 14,
 //                           height: 14,
 //                           decoration: BoxDecoration(
-//                             color: Colors.green,
+//                             color: context.qsColors.success,
 //                             shape: BoxShape.circle,
 //                             border: Border.all(
 //                               color: Theme.of(context).scaffoldBackgroundColor,
@@ -95,7 +95,7 @@
 //                         shape: BoxShape.circle,
 //                         boxShadow: [
 //                           BoxShadow(
-//                             color: Colors.black.withOpacity(0.05),
+//                             color: context.qsColors.text.withOpacity(0.05),
 //                             blurRadius: 10,
 //                             offset: const Offset(0, 2),
 //                           ),
@@ -112,7 +112,7 @@
 //                             width: 8,
 //                             height: 8,
 //                             decoration: const BoxDecoration(
-//                               color: Colors.red,
+//                               color: context.qsColors.error,
 //                               shape: BoxShape.circle,
 //                             ),
 //                           ),
@@ -211,6 +211,7 @@ import 'package:service_provider_app/features/home/views/widgets/statCard.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/main_viewmodel.dart';
+import '../../notifications/viewmodels/notification_viewmodel.dart';
 
 class HomeDashboardView extends StatelessWidget {
   const HomeDashboardView({super.key});
@@ -223,8 +224,8 @@ class HomeDashboardView extends StatelessWidget {
 
     return SafeArea(
       child: RefreshIndicator(
-        color: Colors.grey,
-        backgroundColor: Colors.white,
+        color: context.qsColors.primary,
+        backgroundColor: context.qsColors.card,
         onRefresh: () async => await homeViewModel.fetchHomeData(),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -251,9 +252,9 @@ class HomeDashboardView extends StatelessWidget {
                             width: 14,
                             height: 14,
                             decoration: BoxDecoration(
-                              color: Colors.green,
+                              color: context.qsColors.success,
                               shape: BoxShape.circle,
-                              border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 2),
+                              border: Border.all(color: context.qsColors.background, width: 2),
                             ),
                           ),
                         ],
@@ -285,25 +286,44 @@ class HomeDashboardView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2)),
-                          ],
-                        ),
-                        child: Stack(
-                          alignment: Alignment.topRight,
-                          children: [
-                            Icon(Icons.notifications_none_rounded, color: context.qsColors.text),
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                            ),
-                          ],
+                      InkWell(
+                        onTap: () => Navigator.pushNamed(context, '/notifications'),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: context.qsColors.card,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(color: context.qsColors.text.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 2)),
+                            ],
+                          ),
+                          child: Consumer<NotificationViewModel>(
+                            builder: (context, notificationVM, child) {
+                              final unreadCount = notificationVM.unreadCount ;//?? 0;
+                              return Stack(
+                                alignment: Alignment.topRight,
+                                children: [
+                                  Icon(Icons.notifications_none_rounded, color: context.qsColors.text),
+                                  if (unreadCount > 0)
+                                    Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        color: context.qsColors.error,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: context.qsColors.card, width: 1.5),
+                                      ),
+                                      constraints: const BoxConstraints(minWidth: 10, minHeight: 10),
+                                      child: Text(
+                                        unreadCount > 9 ? '+9' : unreadCount.toString(),
+                                        style: TextStyle(color: context.qsColors.card, fontSize: 8, fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ],
@@ -327,9 +347,9 @@ class HomeDashboardView extends StatelessWidget {
                   child: Column(
                     children: [
                       const SizedBox(height: 50),
-                      Icon(Icons.error_outline, color: Colors.red.shade400, size: 50),
+                      Icon(Icons.error_outline, color: context.qsColors.error, size: 50),
                       const SizedBox(height: 16),
-                      Text(homeViewModel.errorMessage!, style: const TextStyle(color: Colors.red)),
+                      Text(homeViewModel.errorMessage!, style: TextStyle(color: context.qsColors.error)),
                       TextButton(
                         onPressed: () => homeViewModel.fetchHomeData(),
                         child: Text(context.tr('retry'), style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold)),
@@ -399,3 +419,4 @@ class HomeDashboardView extends StatelessWidget {
     );
   }
 }
+

@@ -23,19 +23,14 @@ class ServiceCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<ManageServicesViewModel>(context, listen: false);
-    final isActive = service.status == 'نشط' || service.isActive;
-    final statusColor = isActive ? Colors.green.shade600 : Colors.red.shade600;
-    final statusBgColor = isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1);
+    final colors = context.qsColors;
+    
+    // Check both status string and isActive bool
+    final isActive = service.isActive;
+    final statusColor = isActive ? colors.success : colors.error;
+    final statusBgColor = isActive ? colors.success.withValues(alpha: 0.1) : colors.error.withValues(alpha: 0.1);
 
     return GestureDetector(
-      // onTap: () {
-      //   // 🚀 الانتقال لشاشة التفاصيل وتمرير الـ ID
-      //   Navigator.push(
-      //     context,
-      //     MaterialPageRoute(builder: (_) => ServiceDetailsView(serviceId: service.id)),
-      //   );
-      // },
-
       onTap: () async {
         if (onTapOverride != null) {
           final shouldRefresh = await onTapOverride!();
@@ -45,13 +40,11 @@ class ServiceCardWidget extends StatelessWidget {
           return;
         }
 
-        // ننتظر النتيجة العائدة من شاشة التفاصيل
         final shouldRefresh = await Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => ServiceDetailsView(serviceId: service.id)),
         );
 
-        // إذا كانت النتيجة true (يعني تم الحذف أو التعديل)، قم بتحديث القائمة
         if (shouldRefresh == true) {
            Provider.of<ManageServicesViewModel>(context, listen: false).fetchServices();
         }
@@ -60,14 +53,14 @@ class ServiceCardWidget extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isActive ? Colors.white : Colors.red.withOpacity(0.05),
+          color: colors.card,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: context.qsColors.textSub.withOpacity(0.05),
+            color: colors.textSub.withValues(alpha: 0.05),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: colors.text.withValues(alpha: 0.04),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -78,7 +71,7 @@ class ServiceCardWidget extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.more_horiz, color: context.qsColors.textSub),
+                Icon(Icons.more_horiz, color: colors.textSub),
                 const Spacer(),
                 Expanded(
                   flex: 3,
@@ -99,9 +92,9 @@ class ServiceCardWidget extends StatelessWidget {
                                     viewModel.toggleServiceStatus(service);
                                   }
                                 },
-                                activeColor: Colors.green.shade600,
-                                inactiveThumbColor: Colors.red.shade600,
-                                inactiveTrackColor: Colors.red.withOpacity(0.2),
+                                activeColor: colors.success,
+                                inactiveThumbColor: colors.error,
+                                inactiveTrackColor: colors.error.withValues(alpha: 0.2),
                               ),
                           ),
                           const SizedBox(width: 4),
@@ -116,9 +109,17 @@ class ServiceCardWidget extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text(service.title, style: TextStyle(color: context.qsColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text(
+                        service.title, 
+                        style: TextStyle(color: colors.text, fontSize: 16, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.end,
+                      ),
                       const SizedBox(height: 4),
-                      Text(service.priceText, style: TextStyle(color: context.qsColors.textSub, fontSize: 13)),
+                      Text(
+                        service.priceText, 
+                        style: TextStyle(color: colors.textSub, fontSize: 13),
+                        textAlign: TextAlign.end,
+                      ),
                     ],
                   ),
                 ),
@@ -128,29 +129,37 @@ class ServiceCardWidget extends StatelessWidget {
                   child: Image.network(
                     service.imageUrl.isNotEmpty ? service.imageUrl : 'https://via.placeholder.com/80',
                     width: 80, height: 80, fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(width: 80, height: 80, color: Colors.grey.shade200),
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 80, 
+                      height: 80, 
+                      color: colors.textSub.withValues(alpha: 0.1),
+                      child: Icon(Icons.image_not_supported_outlined, color: colors.textSub),
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Divider(color: context.qsColors.textSub.withOpacity(0.1), height: 1),
+            Divider(color: colors.textSub.withValues(alpha: 0.1), height: 1),
             const SizedBox(height: 16),
             if (service.isExpanded && service.quickServices.isNotEmpty) ...[
               Align(
                 alignment: AlignmentDirectional.centerStart,
-                child: Text('خدمات فرعية سريعة', style: TextStyle(color: context.qsColors.textSub, fontSize: 12, fontWeight: FontWeight.bold)),
+                child: Text(
+                  context.tr('quick_sub_services'), 
+                  style: TextStyle(color: colors.textSub, fontSize: 12, fontWeight: FontWeight.bold)
+                ),
               ),
               const SizedBox(height: 8),
               ...service.quickServices.map((sub) => Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: Row(
                       children: [
-                        Text(sub.price, style: TextStyle(color: context.qsColors.textSub, fontSize: 13)),
+                        Text(sub.price, style: TextStyle(color: colors.textSub, fontSize: 13)),
                         const Spacer(),
-                        Text(sub.name, style: TextStyle(color: context.qsColors.text, fontSize: 14)),
+                        Text(sub.name, style: TextStyle(color: colors.text, fontSize: 14)),
                         const SizedBox(width: 8),
-                        Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
+                        Container(width: 8, height: 8, decoration: BoxDecoration(color: colors.success, shape: BoxShape.circle)),
                       ],
                     ),
                   )),
@@ -161,9 +170,12 @@ class ServiceCardWidget extends StatelessWidget {
                   _buildEditButton(context),
                   Row(
                     children: [
-                      Icon(Icons.arrow_back, color: context.qsColors.primary, size: 16),
+                      Icon(Icons.arrow_back, color: colors.primary, size: 16),
                       const SizedBox(width: 4),
-                      Text('إدارة الكل', style: TextStyle(color: context.qsColors.primary, fontSize: 13, fontWeight: FontWeight.bold)),
+                      Text(
+                        context.tr('manage_all'), 
+                        style: TextStyle(color: colors.primary, fontSize: 13, fontWeight: FontWeight.bold)
+                      ),
                     ],
                   ),
                 ],
@@ -175,9 +187,12 @@ class ServiceCardWidget extends StatelessWidget {
                   _buildEditButton(context),
                   Row(
                     children: [
-                      Text('الخدمات الفرعية (${service.subServicesCount})', style: TextStyle(color: context.qsColors.textSub, fontSize: 13)),
+                      Text(
+                        context.tr('sub_services_count', args: {'count': service.subServicesCount.toString()}), 
+                        style: TextStyle(color: colors.textSub, fontSize: 13)
+                      ),
                       const SizedBox(width: 8),
-                      Icon(Icons.list_alt_rounded, color: context.qsColors.textSub, size: 20),
+                      Icon(Icons.list_alt_rounded, color: colors.textSub, size: 20),
                     ],
                   ),
                 ],
@@ -190,14 +205,15 @@ class ServiceCardWidget extends StatelessWidget {
   }
 
   Widget _buildEditButton(BuildContext context) {
+    final colors = context.qsColors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(color: context.qsColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: colors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
       child: Row(
         children: [
-          Text(context.tr('edit'), style: TextStyle(color: context.qsColors.primary, fontSize: 13, fontWeight: FontWeight.bold)),
+          Text(context.tr('edit'), style: TextStyle(color: colors.primary, fontSize: 13, fontWeight: FontWeight.bold)),
           const SizedBox(width: 6),
-          Icon(Icons.edit, color: context.qsColors.primary, size: 14),
+          Icon(Icons.edit, color: colors.primary, size: 14),
         ],
       ),
     );

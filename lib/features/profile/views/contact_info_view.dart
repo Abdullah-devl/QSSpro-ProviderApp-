@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/profile_model.dart';
@@ -28,7 +29,7 @@ class ContactInfoView extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSectionTitle('أرقام التواصل'),
+            _buildSectionTitle(context, 'أرقام التواصل'),
             IconButton(
               icon: const Icon(
                 Icons.add_circle,
@@ -50,7 +51,7 @@ class ContactInfoView extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSectionTitle('الحسابات البنكية'),
+            _buildSectionTitle(context, 'الحسابات البنكية'),
             IconButton(
               icon: const Icon(Icons.add_circle, color: Color(0xFF5CA4B8)),
               onPressed: () => _showBankDialog(context, vm, null),
@@ -66,13 +67,13 @@ class ContactInfoView extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
-        color: Colors.black87,
+        color: context.qsColors.text,
       ),
     );
   }
@@ -89,7 +90,7 @@ class ContactInfoView extends StatelessWidget {
 
     if (phone.type == 'whatsapp') {
       iconData = Icons.chat_bubble_outline_rounded;
-      iconColor = Colors.green;
+      iconColor = context.qsColors.success;
       typeText = 'واتساب';
     } else if (phone.type == 'both') {
       iconData = Icons.phone_in_talk_rounded;
@@ -102,7 +103,7 @@ class ContactInfoView extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 2),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: context.qsColors.textSub),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -174,9 +175,9 @@ class ContactInfoView extends StatelessWidget {
                   onPressed: () => _showPhoneDialog(context, vm, phone),
                 ),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.delete,
-                    color: Colors.redAccent,
+                    color: context.qsColors.error,
                     size: 20,
                   ),
                   onPressed: () => _confirmDeletePhone(context, vm, phone.id),
@@ -199,7 +200,7 @@ class ContactInfoView extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: context.qsColors.textSub),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -246,8 +247,8 @@ class ContactInfoView extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: bank.isActive
-                            ? Colors.green.withOpacity(0.1)
-                            : Colors.red.withOpacity(0.1),
+                            ? context.qsColors.success.withOpacity(0.1)
+                            : context.qsColors.error.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -256,16 +257,16 @@ class ContactInfoView extends StatelessWidget {
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: bank.isActive
-                              ? Colors.green
-                              : Colors.redAccent,
+                              ? context.qsColors.success
+                              : context.qsColors.error,
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.edit,
-                        color: Colors.grey,
+                        color: context.qsColors.textSub,
                         size: 20,
                       ),
                       padding: EdgeInsets.zero,
@@ -274,9 +275,9 @@ class ContactInfoView extends StatelessWidget {
                     ),
                     const SizedBox(width: 16),
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.delete,
-                        color: Colors.redAccent,
+                        color: context.qsColors.error,
                         size: 20,
                       ),
                       padding: EdgeInsets.zero,
@@ -290,7 +291,7 @@ class ContactInfoView extends StatelessWidget {
             const Divider(height: 24),
             Text(
               'رقم الحساب / الآيبان: ${bank.accountNumber}',
-              style: const TextStyle(color: Colors.black87),
+              style: TextStyle(color: context.qsColors.text),
             ),
           ],
         ),
@@ -356,7 +357,7 @@ class ContactInfoView extends StatelessWidget {
             child: const Text('إلغاء'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: context.qsColors.error),
             onPressed: () async {
               Navigator.pop(ctx);
               showDialog(
@@ -368,10 +369,13 @@ class ContactInfoView extends StatelessWidget {
               await onDelete();
               Navigator.pop(context); // Close loading indicator
             },
-            child: const Text('حذف', style: TextStyle(color: Colors.white)),
+            child: Text('حذف', style: TextStyle(color: context.qsColors.card)),
           ),
         ],
       ),
     );
   }
 }
+
+
+

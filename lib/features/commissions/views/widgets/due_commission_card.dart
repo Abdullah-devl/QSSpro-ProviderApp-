@@ -1,6 +1,7 @@
-// مسار الملف: lib/features/commissions/views/widgets/due_commission_card.dart
+﻿// مسار الملف: lib/features/commissions/views/widgets/due_commission_card.dart
 
 import 'package:flutter/material.dart';
+import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../pay_commissions_view.dart';
 
@@ -18,11 +19,11 @@ class DueCommissionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: context.qsColors.text.withOpacity(0.03),
             blurRadius: 15,
             offset: const Offset(0, 5),
             spreadRadius: 1,
@@ -40,12 +41,12 @@ class DueCommissionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
+                  color: context.qsColors.warning,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.account_balance_wallet_rounded,
-                  color: Colors.orange.shade800,
+                  color: context.qsColors.warning,
                   size: 26,
                 ),
               ),
@@ -60,7 +61,7 @@ class DueCommissionCard extends StatelessWidget {
                     Text(
                       context.tr('due_commission'),
                       style: TextStyle(
-                        color: Colors.blue.shade800, // لون أزرق غامق للعنوان
+                        color: context.qsColors.info, // لون أزرق غامق للعنوان
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
@@ -68,8 +69,8 @@ class DueCommissionCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       context.tr('pay_to_avoid_suspension'),
-                      style: const TextStyle(
-                        color: Colors.red,
+                      style: TextStyle(
+                        color: context.qsColors.error,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -86,17 +87,17 @@ class DueCommissionCard extends StatelessWidget {
                 children: [
                   Text(
                     amount.toStringAsFixed(2),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       height: 1.2,
-                      color: Colors.black87,
+                      color: context.qsColors.text,
                     ),
                   ),
                   Text(
                     context.tr('currency_sar'),
                     style: TextStyle(
-                      color: Colors.grey.shade600,
+                      color: context.qsColors.textSub,
                       fontSize: 14,
                     ),
                   ),
@@ -122,7 +123,7 @@ class DueCommissionCard extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1CB0F6),
-                foregroundColor: Colors.white,
+                foregroundColor: context.qsColors.card,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -150,7 +151,7 @@ class DueCommissionCard extends StatelessWidget {
                     context.tr('pay_commission_subtitle'),
                     style: TextStyle(
                       fontSize: 10,
-                      color: Colors.white.withOpacity(0.8),
+                      color: context.qsColors.card.withOpacity(0.8),
                     ),
                   ),
                 ],
@@ -162,3 +163,5 @@ class DueCommissionCard extends StatelessWidget {
     );
   }
 }
+
+

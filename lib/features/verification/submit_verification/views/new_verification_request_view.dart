@@ -13,20 +13,19 @@ class NewVerificationRequestView extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.qsColors;
     final vm = context.watch<VerificationViewModel>();
-    final bgColor = const Color(0xFFF8F9FA);
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: bgColor,
+        backgroundColor: colors.background,
         elevation: 0,
         centerTitle: true,
         title: Text(
           context.tr('new_verification_request_title'),
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(color: colors.text, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: colors.text, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new, color: colors.text, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -38,7 +37,7 @@ class NewVerificationRequestView extends StatelessWidget {
             // 📝 الهيدر
             Text(
               context.tr('why_verify_question'),
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(color: colors.text, fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
@@ -50,11 +49,12 @@ class NewVerificationRequestView extends StatelessWidget {
             // ✍️ حقل النص الرئيسي
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.card,
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: colors.text.withValues(alpha: 0.04),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -63,13 +63,11 @@ class NewVerificationRequestView extends StatelessWidget {
               child: TextField(
                 controller: vm.contentController,
                 maxLines: 8,
+                style: TextStyle(color: colors.text),
                 decoration: InputDecoration(
                   hintText: context.tr('write_here'),
-                  hintStyle: TextStyle(color: colors.textSub, fontSize: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide.none,
-                  ),
+                  hintStyle: TextStyle(color: colors.textSub.withValues(alpha: 0.5), fontSize: 14),
+                  border: InputBorder.none,
                   contentPadding: const EdgeInsets.all(20),
                 ),
               ),
@@ -83,15 +81,16 @@ class NewVerificationRequestView extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: vm.isLoading ? null : () => vm.submitContentRequest(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF5CA4B8),
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.card,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
                 child: vm.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? CircularProgressIndicator(color: colors.card)
                     : Text(
                         context.tr('submit_verification_request'),
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
               ),
             ),

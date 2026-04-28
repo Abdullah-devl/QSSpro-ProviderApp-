@@ -21,8 +21,8 @@ class SectionHeader extends StatelessWidget {
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                child: Text('$badgeCount', style: const TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold)),
+                decoration: BoxDecoration(color: context.qsColors.error.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                child: Text('$badgeCount', style: TextStyle(color: context.qsColors.error, fontSize: 12, fontWeight: FontWeight.bold)),
               ),
             ]
           ],

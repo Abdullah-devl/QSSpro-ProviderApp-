@@ -1,5 +1,6 @@
-// مسار الملف: lib/features/home/views/main_view.dart
+﻿// مسار الملف: lib/features/home/views/main_view.dart
 
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:service_provider_app/features/commissions/views/commissions_view.dart';
@@ -30,7 +31,6 @@ class _MainViewBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = Provider.of<MainViewModel>(context);
 
-    // قائمة الشاشات (حالياً الرئيسية فقط، والباقي شاشات فارغة مؤقتاً)
     final List<Widget> screens = [
       const HomeDashboardView(),
       const OrdersView(),
@@ -41,59 +41,148 @@ class _MainViewBody extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: context.qsColors.background,
+      extendBody: true, // مهم جداً لكي تمتد الشاشة خلف شريط التنقل العائم
       body: screens[viewModel.currentIndex],
+      bottomNavigationBar: _CustomFloatingNavBar(
+        currentIndex: viewModel.currentIndex,
+        onTap: viewModel.changeTab,
+      ),
+    );
+  }
+}
 
-      // شريط التنقل السفلي
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
+class _CustomFloatingNavBar extends StatelessWidget {
+  final int currentIndex;
+  final Function(int) onTap;
+
+  const _CustomFloatingNavBar({
+    required this.currentIndex,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.qsColors;
+
+    return SafeArea(
+      top: false,
+      child: Container(
+        margin: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              height: 72,
+              decoration: BoxDecoration(
+                color: colors.background.withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: colors.primary.withValues(alpha: 0.15),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: colors.text.withValues(alpha: 0.08),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(context, 0, Icons.home_filled, context.tr('nav_home')),
+                  _buildNavItem(context, 1, Icons.assignment_outlined, context.tr('nav_orders')),
+                  _buildNavItem(context, 2, Icons.category_outlined, context.tr('nav_services')),
+                  _buildNavItem(context, 3, Icons.account_balance_wallet_outlined, context.tr('nav_commissions')),
+                  _buildNavItem(context, 4, Icons.person, context.tr('nav_profile')),
+                ],
+              ),
             ),
-          ],
+          ),
         ),
-        child: BottomNavigationBar(
-          currentIndex: viewModel.currentIndex,
-          onTap: viewModel.changeTab,
-          backgroundColor: Theme.of(context).cardColor,
-          type: BottomNavigationBarType.fixed, // مهم لكي لا تختفي النصوص
-          selectedItemColor: context.qsColors.primary,
-          unselectedItemColor: context.qsColors.textSub.withOpacity(0.5),
-          selectedLabelStyle: const TextStyle(
-            fontFamily: 'Cairo',
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontFamily: 'Cairo',
-            fontSize: 12,
-          ),
-          items: [
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.home_filled),
-              label: context.tr('nav_home'),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(BuildContext context, int index, IconData icon, String label) {
+    final bool isSelected = currentIndex == index;
+    final colors = context.qsColors;
+
+    return GestureDetector(
+      onTap: () => onTap(index),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.primary.withValues(alpha: 0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedScale(
+              scale: isSelected ? 1.15 : 1.0,
+              duration: const Duration(milliseconds: 200),
+              child: Icon(
+                icon,
+                color: isSelected ? colors.primary : colors.textSub,
+                size: 22,
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.assignment_outlined),
-              label: context.tr('nav_orders'),
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.category_outlined),
-              label: context.tr('nav_services'),
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.account_balance_wallet_outlined),
-              label: context.tr('nav_commissions'),
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.person),
-              label: context.tr('nav_profile'),
+            const SizedBox(height: 3),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                color: isSelected ? colors.primary : colors.textSub,
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+              child: Text(label),
             ),
           ],
         ),
       ),
     );
   }
+
+  // Widget _buildCenterItem(BuildContext context, int index) {
+  //   final colors = context.qsColors;
+  //   final bool isSelected = currentIndex == index;
+
+  //   return GestureDetector(
+  //     onTap: () => onTap(index),
+  //     child: AnimatedContainer(
+  //       duration: const Duration(milliseconds: 200),
+  //       width: 52,
+  //       height: 52,
+  //       decoration: BoxDecoration(
+  //         gradient: LinearGradient(
+  //           begin: Alignment.topLeft,
+  //           end: Alignment.bottomRight,
+  //           colors: [
+  //             colors.primary,
+  //             colors.secondary,
+  //           ],
+  //         ),
+  //         shape: BoxShape.circle,
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: colors.primary.withValues(alpha: isSelected ? 0.5 : 0.3),
+  //             blurRadius: isSelected ? 16 : 10,
+  //             offset: const Offset(0, 4),
+  //           ),
+  //         ],
+  //       ),
+  //       child: Icon(
+  //         Icons.category_outlined,
+  //         color: context.qsColors.card,
+  //         size: isSelected ? 30 : 26,
+  //       ),
+  //     ),
+  //   );
+  // }
 }
+

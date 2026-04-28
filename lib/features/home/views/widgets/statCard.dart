@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../../core/theme/qs_color_extension.dart';
 // 1. كارت الإحصائيات (أرباح الأسبوع / التقييم)
 class StatCard extends StatelessWidget {
@@ -19,11 +19,11 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = isPrimary ? context.qsColors.primary : Theme.of(context).cardColor;
-    final textColor = isPrimary ? Colors.white : context.qsColors.text;
-    final subTextColor = isPrimary ? Colors.white.withOpacity(0.8) : context.qsColors.textSub;
-    final iconBgColor = isPrimary ? Colors.white.withOpacity(0.2) : Colors.amber.withOpacity(0.1);
-    final iconColor = isPrimary ? Colors.white : Colors.amber;
+    final bgColor = isPrimary ? context.qsColors.primary : context.qsColors.card;
+    final textColor = isPrimary ? context.qsColors.card : context.qsColors.text;
+    final subTextColor = isPrimary ? context.qsColors.card.withValues(alpha: 0.8) : context.qsColors.textSub;
+    final iconBgColor = isPrimary ? context.qsColors.card.withValues(alpha: 0.2) : context.qsColors.warning.withValues(alpha: 0.1);
+    final iconColor = isPrimary ? context.qsColors.card : context.qsColors.warning;
 
     return Expanded(
       child: Container(
@@ -33,7 +33,7 @@ class StatCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: isPrimary ? context.qsColors.primary.withOpacity(0.3) : Colors.black.withOpacity(0.05),
+              color: isPrimary ? context.qsColors.primary.withValues(alpha: 0.3) : context.qsColors.text.withValues(alpha: 0.05),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),

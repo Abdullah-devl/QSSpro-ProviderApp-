@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/localization/app_localizations.dart';
@@ -110,12 +110,12 @@ class VerificationOptionsDialog extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.post_add_rounded, color: Colors.white, size: 20),
+                    Icon(Icons.post_add_rounded, color: context.qsColors.card, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       context.tr('new_verification_request'),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: context.qsColors.card,
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                         fontFamily: 'Cairo',
@@ -191,3 +191,5 @@ class VerificationOptionsDialog extends StatelessWidget {
     );
   }
 }
+
+

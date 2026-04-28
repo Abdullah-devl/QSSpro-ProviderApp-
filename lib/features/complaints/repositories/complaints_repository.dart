@@ -4,11 +4,24 @@ import '../../../../core/network/error/api_error_handler.dart';
 import '../models/complaint_model.dart';
 
 import '../models/system_complaint_model.dart';
+import '../models/request_complaint_model.dart';
 
 class ComplaintsRepository {
   final ApiService _apiService;
 
   ComplaintsRepository(this._apiService);
+
+  Future<List<RequestComplaintModel>> getRequestComplaints() async {
+    try {
+      final response = await _apiService.get(ApiEndpoints.complaints);
+      ApiErrorHandler.handleResponse(response);
+      
+      final List data = response.data['RequestComplaints']?['data'] ?? response.data['data'] ?? [];
+      return data.map((e) => RequestComplaintModel.fromJson(e)).toList();
+    } catch (e) {
+      throw ApiErrorHandler.handle(e);
+    }
+  }
 
   Future<void> submitOrderComplaint(ComplaintModel complaint) async {
     try {

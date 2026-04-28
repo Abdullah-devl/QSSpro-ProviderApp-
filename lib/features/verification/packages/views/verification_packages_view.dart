@@ -1,4 +1,4 @@
-// مسار الملف: lib/features/packages/views/verification_packages_view.dart
+// مسار الملف: lib/features/verification/packages/views/verification_packages_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,15 +16,10 @@ class VerificationPackagesView extends StatelessWidget {
     final colors = context.qsColors;
     final vm = context.watch<PackagesViewModel>();
     
-    // لون خلفية الصفحة الأساسي بناءً على التصميم
-    final Color bgColor = Theme.of(context).brightness == Brightness.dark 
-        ? colors.background 
-        : const Color(0xFFF8F9FA);
-
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: bgColor,
+        backgroundColor: colors.background,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -35,35 +30,14 @@ class VerificationPackagesView extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-        leading: const SizedBox.shrink(), // لإخفاء الزر الافتراضي
-        actions: [
-          IconButton(
-            icon: Icon(Icons.arrow_forward_ios, color: colors.text, size: 20),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-        // 🚀 إضافة كلمة QuickServe في الجهة المقابلة للسهم
-        flexibleSpace: SafeArea(
-          child: Align(
-            alignment: AlignmentDirectional.centerStart, // يدعم RTL و LTR
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                context.tr('quick_serve'),
-                style: const TextStyle(
-                  color: Color(0xFF0F4A8A),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  fontFamily: 'Cairo', // للحفاظ على نفس هوية الخط
-                ),
-              ),
-            ),
-          ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new, color: colors.text, size: 20),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: RefreshIndicator(
-        color: Colors.grey,
-        backgroundColor: Colors.white,
+        color: colors.primary,
+        backgroundColor: colors.card,
         onRefresh: () async => await vm.fetchPackages(),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -76,9 +50,9 @@ class VerificationPackagesView extends StatelessWidget {
 
               // 📦 حالة التحميل أو الأخطاء أو قائمة الباقات
               if (vm.isLoading && vm.packages.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 50),
-                  child: Center(child: CircularProgressIndicator(color: Color(0xFF1CB0F6))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 50),
+                  child: Center(child: CircularProgressIndicator(color: colors.primary)),
                 )
               else if (vm.errorMessage != null && vm.packages.isEmpty)
                 Padding(
@@ -86,7 +60,7 @@ class VerificationPackagesView extends StatelessWidget {
                   child: Center(
                     child: Text(
                       context.tr(vm.errorMessage!),
-                      style: const TextStyle(color: Colors.red),
+                      style: TextStyle(color: colors.error),
                     ),
                   ),
                 )
@@ -120,22 +94,18 @@ class VerificationPackagesView extends StatelessWidget {
     );
   }
 
-  // =========================================================
-  // 🧩 المكونات الداخلية (Widgets)
-  // =========================================================
-
   Widget _buildHeader(BuildContext context, dynamic colors) {
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.all(16),
-          decoration: const BoxDecoration(
-            color: Color(0xFFE4F3F8), // أزرق فاتح جداً للأيقونة
+          decoration: BoxDecoration(
+            color: colors.primary.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
+          child: Icon(
             Icons.verified_rounded,
-            color: Color(0xFF5CA4B8),
+            color: colors.primary,
             size: 32,
           ),
         ),
@@ -163,44 +133,47 @@ class VerificationPackagesView extends StatelessWidget {
   }
 
   Widget _buildPackageCard(BuildContext context, PackageModel package, dynamic colors) {
-    // 🎨 توحيد الألوان لتكون بيضاء (White Theme) لجميع الكروت
-    final bool isBlue = package.isPopular; // نحتفظ بها لتمييز "الأكثر طلباً" فقط في الشارة
+    final bool isBlue = package.isPopular;
     
-    final Color cardColor = Colors.white;
+    final Color cardColor = colors.card;
     final Color textColor = colors.text;
     final Color subTextColor = colors.textSub;
-    final Color buttonColor = isBlue ? const Color(0xFF5CA4B8) : const Color(0xFFF3F4F6);
-    final Color buttonTextColor = isBlue ? Colors.white : colors.text;
+    final Color primaryColor = colors.primary;
     
-    // تحديد الأيقونات العلوية ديناميكياً (نجمة برونزية، أو وسام أزرق، أو كأس ذهبي)
+    final Color buttonColor = isBlue ? primaryColor : colors.background;
+    final Color buttonTextColor = isBlue ? colors.card : colors.text;
+    
     IconData topIcon = Icons.star_rounded;
-    Color topIconBg = const Color(0xFFFFF3E0); // خلفية برتقالية فاتحة
-    Color topIconColor = const Color(0xFFE65100); // برتقالي
+    Color topIconBg = colors.warning.withValues(alpha: 0.1);
+    Color topIconColor = colors.warning;
 
     if (package.id == 2 || isBlue) {
       topIcon = Icons.workspace_premium_rounded;
-      topIconBg = Colors.white.withOpacity(0.2);
-      topIconColor = Colors.white;
+      topIconBg = primaryColor.withValues(alpha: 0.1);
+      topIconColor = primaryColor;
     } else if (package.id == 3 || (package.price > 250)) {
       topIcon = Icons.emoji_events_rounded;
-      topIconBg = const Color(0xFFFFF8E1); // أصفر فاتح
-      topIconColor = const Color(0xFFFFB300); // ذهبي
+      topIconBg = colors.warning.withValues(alpha: 0.1);
+      topIconColor = colors.warning;
     }
 
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(32), // حواف دائرية كبيرة كما في التصميم
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(
+          color: isBlue ? primaryColor.withValues(alpha: 0.2) : colors.textSub.withValues(alpha: 0.05),
+          width: 1,
+        ),
         boxShadow: [
-          if (!isBlue)
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 20,
-              offset: const Offset(0, 5),
-            ),
+          BoxShadow(
+            color: colors.text.withValues(alpha: 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 5),
+          ),
           if (isBlue)
             BoxShadow(
-              color: const Color(0xFF5CA4B8).withOpacity(0.3),
+              color: primaryColor.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -211,7 +184,6 @@ class VerificationPackagesView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🏷️ الشارة (Badge) والأيقونة العلوية
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -219,7 +191,7 @@ class VerificationPackagesView extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
-                      color: isBlue ? const Color(0xFF5CA4B8).withOpacity(0.1) : const Color(0xFFFFF3E0),
+                      color: isBlue ? primaryColor.withValues(alpha: 0.1) : colors.warning.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -227,7 +199,7 @@ class VerificationPackagesView extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: isBlue ? const Color(0xFF5CA4B8) : const Color(0xFFE65100),
+                        color: isBlue ? primaryColor : colors.warning,
                       ),
                     ),
                   )
@@ -237,16 +209,15 @@ class VerificationPackagesView extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: isBlue ? const Color(0xFF5CA4B8).withOpacity(0.1) : topIconBg,
+                    color: topIconBg,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(topIcon, color: isBlue ? const Color(0xFF5CA4B8) : topIconColor, size: 22),
+                  child: Icon(topIcon, color: topIconColor, size: 22),
                 ),
               ],
             ),
             const SizedBox(height: 20),
 
-            // 📝 عنوان الباقة ووصفها
             Center(
               child: Text(
                 package.title,
@@ -267,7 +238,6 @@ class VerificationPackagesView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // 💰 السعر
             Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -278,7 +248,7 @@ class VerificationPackagesView extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 42,
                       fontWeight: FontWeight.w900,
-                      color: isBlue ? Colors.white : const Color(0xFF5CA4B8),
+                      color: primaryColor,
                       height: 1.0,
                     ),
                   ),
@@ -286,11 +256,11 @@ class VerificationPackagesView extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
-                      context.tr('currency_rs'),
+                      context.tr('sar'),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: isBlue ? Colors.white : const Color(0xFF5CA4B8),
+                        color: primaryColor,
                       ),
                     ),
                   ),
@@ -299,7 +269,6 @@ class VerificationPackagesView extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // ✅ المميزات (Features)
             ...package.features.map((feature) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 14),
@@ -308,12 +277,12 @@ class VerificationPackagesView extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
-                        color: isBlue ? Colors.white : const Color(0xFF22C55E),
+                        color: colors.success.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.check,
-                        color: isBlue ? const Color(0xFF5CA4B8) : Colors.white,
+                        color: colors.success,
                         size: 14,
                       ),
                     ),
@@ -335,7 +304,6 @@ class VerificationPackagesView extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // 🔘 الزر (Button)
             SizedBox(
               width: double.infinity,
               height: 55,
@@ -345,15 +313,16 @@ class VerificationPackagesView extends StatelessWidget {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: buttonColor,
+                  foregroundColor: buttonTextColor,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
+                  side: isBlue ? null : BorderSide(color: primaryColor.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   context.tr('choose_package'),
                   style: TextStyle(
-                    color: buttonTextColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
                   ),
@@ -381,19 +350,19 @@ class VerificationPackagesView extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildWhyItem(Icons.trending_up_rounded, context.tr('increase_orders'), colors),
-            const SizedBox(width: 60), // مسافة بين العنصرين كما في التصميم
-            _buildWhyItem(Icons.shield_rounded, context.tr('customer_trust'), colors),
+            _buildWhyItem(context, Icons.trending_up_rounded, context.tr('increase_orders'), colors),
+            const SizedBox(width: 60),
+            _buildWhyItem(context, Icons.shield_rounded, context.tr('customer_trust'), colors),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildWhyItem(IconData icon, String text, dynamic colors) {
+  Widget _buildWhyItem(BuildContext context, IconData icon, String text, dynamic colors) {
     return Column(
       children: [
-        Icon(icon, color: const Color(0xFF5CA4B8), size: 28),
+        Icon(icon, color: colors.primary, size: 28),
         const SizedBox(height: 12),
         Text(
           text,

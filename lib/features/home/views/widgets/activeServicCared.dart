@@ -10,15 +10,15 @@ class ActiveServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: context.qsColors.text.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Container(
           decoration: BoxDecoration(
-            border: Border(right: BorderSide(color: Colors.amber.shade400, width: 6)), // الخط الأصفر الجانبي
+            border: Border(right: BorderSide(color: context.qsColors.warning, width: 6)), // الخط الأصفر الجانبي
           ),
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -32,8 +32,8 @@ class ActiveServiceCard extends StatelessWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: Colors.amber.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
-                          child: Text(context.tr('in_progress'), style: TextStyle(color: Colors.amber.shade700, fontSize: 11, fontWeight: FontWeight.bold)),
+                          decoration: BoxDecoration(color: context.qsColors.warning.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
+                          child: Text(context.tr('in_progress'), style: TextStyle(color: context.qsColors.warning, fontSize: 11, fontWeight: FontWeight.bold)),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -56,13 +56,13 @@ class ActiveServiceCard extends StatelessWidget {
                   ),
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.amber.withOpacity(0.1), shape: BoxShape.circle),
-                    child: Icon(Icons.engineering_outlined, color: Colors.amber.shade600, size: 28),
+                    decoration: BoxDecoration(color: context.qsColors.warning.withValues(alpha: 0.1), shape: BoxShape.circle),
+                    child: Icon(Icons.engineering_outlined, color: context.qsColors.warning, size: 28),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              Divider(color: context.qsColors.textSub.withOpacity(0.1)),
+              Divider(color: context.qsColors.textSub.withValues(alpha: 0.1)),
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -56,7 +56,7 @@ class WelcomeView extends StatelessWidget {
                       color: context.qsColors.text,
                     ),
                     style: IconButton.styleFrom(
-                      backgroundColor: context.qsColors.text.withOpacity(0.05),
+                      backgroundColor: context.qsColors.text.withValues(alpha: 0.05),
                       padding: const EdgeInsets.all(12),
                     ),
                   ),
@@ -86,7 +86,7 @@ class WelcomeView extends StatelessWidget {
                       ),
                     ),
                     style: TextButton.styleFrom(
-                      backgroundColor: context.qsColors.text.withOpacity(0.05),
+                      backgroundColor: context.qsColors.text.withValues(alpha: 0.05),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,
@@ -116,7 +116,7 @@ class WelcomeView extends StatelessWidget {
                 context.tr('welcome_subtitle'),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontSize: 14,
-                  color: context.qsColors.textSub.withOpacity(0.7),
+                  color: context.qsColors.textSub.withValues(alpha: 0.7),
                 ),
               ),
               Spacer(flex: 3),

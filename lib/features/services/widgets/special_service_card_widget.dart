@@ -19,8 +19,8 @@ class SpecialServiceCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isActive = service.isActive;
-    final statusColor = isActive ? Colors.green.shade600 : Colors.red.shade600;
-    final statusBgColor = isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1);
+    final statusColor = isActive ? context.qsColors.success : context.qsColors.error;
+    final statusBgColor = isActive ? context.qsColors.success.withValues(alpha: 0.1) : context.qsColors.error.withValues(alpha: 0.1);
 
     return GestureDetector(
       onTap: () async {
@@ -32,14 +32,14 @@ class SpecialServiceCardWidget extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isActive ? Colors.white : Colors.red.withOpacity(0.05),
+          color: isActive ? context.qsColors.card : context.qsColors.error.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: context.qsColors.textSub.withOpacity(0.05),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: context.qsColors.text.withValues(alpha: 0.04),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -72,9 +72,9 @@ class SpecialServiceCardWidget extends StatelessWidget {
                               child: Switch.adaptive(
                                 value: service.isActive,
                                 onChanged: (_) => onToggleStatus!(service),
-                                activeColor: Colors.green.shade600,
-                                inactiveThumbColor: Colors.red.shade600,
-                                inactiveTrackColor: Colors.red.withOpacity(0.2),
+                                activeColor: context.qsColors.success,
+                                inactiveThumbColor: context.qsColors.error,
+                                inactiveTrackColor: context.qsColors.error.withValues(alpha: 0.2),
                               ),
                             ),
                         ],
@@ -97,8 +97,8 @@ class SpecialServiceCardWidget extends StatelessWidget {
                     service.imageUrl.isNotEmpty ? service.imageUrl : 'https://via.placeholder.com/80',
                     width: 70, height: 70, fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
-                      width: 70, height: 70, color: Colors.grey.shade100,
-                      child: Icon(isCustomType ? Icons.design_services : Icons.meeting_room, color: Colors.grey.shade400),
+                      width: 70, height: 70, color: context.qsColors.textSub.withValues(alpha: 0.1),
+                      child: Icon(isCustomType ? Icons.design_services : Icons.meeting_room, color: context.qsColors.textSub),
                     ),
                   ),
                 ),

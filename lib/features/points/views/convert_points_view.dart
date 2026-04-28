@@ -38,31 +38,36 @@ class _ConvertPointsViewState extends State<ConvertPointsView> {
   Future<void> _handleConvert(ConvertPointsViewModel viewModel) async {
     if (viewModel.amount <= 0) return;
 
-    // 1. التحقق من الرصيد أولاً قبل إظهار التاكيد
     if (viewModel.amount > widget.availablePaidPoints) {
       DialogHelper.showErrorDialog(context, context.tr('insufficient_balance'));
       return;
     }
 
-    // 2. إظهار رسالة التأكيد
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: context.qsColors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(context.tr('conversion_confirmation')),
-        content: Text(context.tr('conversion_confirmation_msg', args: {'amount': viewModel.amount.toStringAsFixed(2)})),
+        title: Text(
+          context.tr('conversion_confirmation'),
+          style: TextStyle(color: context.qsColors.text),
+        ),
+        content: Text(
+          context.tr('conversion_confirmation_msg', args: {'amount': viewModel.amount.toStringAsFixed(2)}),
+          style: TextStyle(color: context.qsColors.text),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(context.tr('cancel'), style: const TextStyle(color: Colors.grey)),
+            child: Text(context.tr('cancel'), style: TextStyle(color: context.qsColors.textSub)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1CB0F6),
+              backgroundColor: context.qsColors.primary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: Text(context.tr('confirm'), style: const TextStyle(color: Colors.white)),
+            child: Text(context.tr('confirm'), style: TextStyle(color: context.qsColors.card)),
           ),
         ],
       ),
@@ -75,7 +80,7 @@ class _ConvertPointsViewState extends State<ConvertPointsView> {
 
       if (success && mounted) {
         await DialogHelper.showSuccessDialog(context, context.tr('conversion_success'));
-        if (mounted) Navigator.pop(context, true); // العودة مع تحديث البيانات
+        if (mounted) Navigator.pop(context, true);
       } else if (mounted && viewModel.errorMessage != null) {
         DialogHelper.showErrorDialog(context, context.tr(viewModel.errorMessage!));
         viewModel.clearError();
@@ -87,12 +92,12 @@ class _ConvertPointsViewState extends State<ConvertPointsView> {
   Widget build(BuildContext context) {
     final colors = context.qsColors;
     final viewModel = context.watch<ConvertPointsViewModel>();
-    const Color primaryColor = Color(0xFF1CB0F6);
+    final Color primaryColor = colors.primary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: colors.card,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -119,7 +124,7 @@ class _ConvertPointsViewState extends State<ConvertPointsView> {
                   context,
                   title: context.tr('withdrawable_points'),
                   value: widget.availablePaidPoints.toStringAsFixed(0),
-                  color: const Color(0xFF4CAF50),
+                  color: colors.success,
                   icon: Icons.monetization_on_rounded,
                 ),
                 const SizedBox(width: 12),
@@ -127,7 +132,7 @@ class _ConvertPointsViewState extends State<ConvertPointsView> {
                   context,
                   title: context.tr('bonus_points_wallet'),
                   value: widget.currentBonusPoints.toStringAsFixed(0),
-                  color: const Color(0xFFFF9800),
+                  color: colors.warning,
                   icon: Icons.account_balance_wallet_rounded,
                 ),
               ],
@@ -144,12 +149,13 @@ class _ConvertPointsViewState extends State<ConvertPointsView> {
               controller: _amountController,
               onChanged: (val) => _onAmountChanged(val, viewModel),
               keyboardType: TextInputType.number,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colors.text),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: colors.card,
                 hintText: '0.00',
-                prefixIcon: const Icon(Icons.swap_horiz_rounded, color: primaryColor),
+                hintStyle: TextStyle(color: colors.textSub),
+                prefixIcon: Icon(Icons.swap_horiz_rounded, color: primaryColor),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
               ),
             ),
@@ -160,18 +166,18 @@ class _ConvertPointsViewState extends State<ConvertPointsView> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.1),
+                  color: primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: primaryColor.withOpacity(0.3)),
+                  border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.stars_rounded, color: primaryColor),
+                    Icon(Icons.stars_rounded, color: primaryColor),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         context.tr('conversion_bonus_note', args: {'total': viewModel.totalWithBonus.toStringAsFixed(2)}),
-                        style: const TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -187,12 +193,12 @@ class _ConvertPointsViewState extends State<ConvertPointsView> {
                 onPressed: viewModel.isLoading ? null : () => _handleConvert(viewModel),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
+                  foregroundColor: colors.card,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
                 child: viewModel.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? CircularProgressIndicator(color: colors.card)
                     : Text(
                         context.tr('confirm'),
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -216,15 +222,21 @@ class _ConvertPointsViewState extends State<ConvertPointsView> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.qsColors.card,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(
+              color: context.qsColors.text.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: [
             Icon(icon, color: color, size: 28),
             const SizedBox(height: 8),
-            Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey), textAlign: TextAlign.center),
+            Text(title, style: TextStyle(fontSize: 12, color: context.qsColors.textSub), textAlign: TextAlign.center),
             const SizedBox(height: 4),
             Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
           ],

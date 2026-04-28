@@ -1,4 +1,6 @@
+﻿
 import 'package:flutter/material.dart';
+import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import '../models/bank_model.dart';
 import '../viewmodels/contact_info_viewmodel.dart';
 
@@ -41,9 +43,9 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (!hasBanks)
-              const Padding(
-                padding: EdgeInsets.only(bottom: 16.0),
-                child: Text('جاري جلب قائمة البنوك أو لا توجد بنوك متاحة...', style: TextStyle(color: Colors.redAccent, fontSize: 12)),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Text('جاري جلب قائمة البنوك أو لا توجد بنوك متاحة...', style: TextStyle(color: context.qsColors.error, fontSize: 12)),
               ),
             DropdownButtonFormField<int>(
               value: _selectedBankId,
@@ -72,14 +74,14 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
             ),
             const SizedBox(height: 16),
             // 🔘 حالة النشاط
-            const Align(
+            Align(
               alignment: Alignment.centerRight,
               child: Text(
                 'حالة الحساب',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
-                  color: Colors.black87,
+                  color: context.qsColors.text,
                 ),
               ),
             ),
@@ -102,7 +104,7 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
                     title: const Text('غير نشط', style: TextStyle(fontSize: 14)),
                     value: false,
                     groupValue: _isActive,
-                    activeColor: Colors.redAccent,
+                    activeColor: context.qsColors.error,
                     contentPadding: EdgeInsets.zero,
                     dense: true,
                     onChanged: (val) => setState(() => _isActive = val!),
@@ -167,3 +169,4 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
     );
   }
 }
+

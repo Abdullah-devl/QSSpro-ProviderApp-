@@ -24,7 +24,7 @@ class _SystemComplaintsListViewState extends State<SystemComplaintsListView> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<SystemComplaintsViewModel>();
-    final bgColor = const Color(0xFFF8F9FA);
+    final bgColor = context.qsColors.background;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -32,8 +32,8 @@ class _SystemComplaintsListViewState extends State<SystemComplaintsListView> {
         title: Text(context.tr('system_complaints')),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: context.qsColors.card,
+        foregroundColor: context.qsColors.text,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: FloatingActionButton.extended(
@@ -43,16 +43,16 @@ class _SystemComplaintsListViewState extends State<SystemComplaintsListView> {
             MaterialPageRoute(builder: (_) => const SubmitSystemComplaintView()),
           );
         },
-        backgroundColor: const Color(0xFF5CA4B8),
-        icon: const Icon(Icons.add, color: Colors.white),
+        backgroundColor: context.qsColors.primary,
+        icon: Icon(Icons.add, color: context.qsColors.card),
         label: Text(
           context.tr('add_complaint'),
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: context.qsColors.card, fontWeight: FontWeight.bold),
         ),
       ),
       body: RefreshIndicator(
-        color: Colors.grey, // السهم باللون الرمادي
-        backgroundColor: Colors.white, // الدائرة باللون الأبيض
+        color: context.qsColors.textSub, // السهم باللون الرمادي
+        backgroundColor: context.qsColors.card, // الدائرة باللون الأبيض
         onRefresh: () => viewModel.fetchComplaints(),
         child: _buildBody(context, viewModel),
       ),
@@ -61,7 +61,7 @@ class _SystemComplaintsListViewState extends State<SystemComplaintsListView> {
 
   Widget _buildBody(BuildContext context, SystemComplaintsViewModel viewModel) {
     if (viewModel.isLoading && viewModel.complaints.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: Color(0xFF5CA4B8)));
+      return Center(child: CircularProgressIndicator(color: context.qsColors.primary));
     }
 
     if (viewModel.errorMessage != null) {
@@ -69,7 +69,7 @@ class _SystemComplaintsListViewState extends State<SystemComplaintsListView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+            Icon(Icons.error_outline, size: 48, color: context.qsColors.error),
             const SizedBox(height: 16),
             Text(viewModel.errorMessage!),
             TextButton(
@@ -90,11 +90,11 @@ class _SystemComplaintsListViewState extends State<SystemComplaintsListView> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.speaker_notes_off_outlined, size: 64, color: Colors.grey.shade300),
+                Icon(Icons.speaker_notes_off_outlined, size: 64, color: context.qsColors.textSub),
                 const SizedBox(height: 16),
                 Text(
                   context.tr('no_system_complaints'),
-                  style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+                  style: TextStyle(color: context.qsColors.textSub, fontSize: 16),
                 ),
               ],
             ),
@@ -119,11 +119,11 @@ class _SystemComplaintsListViewState extends State<SystemComplaintsListView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: context.qsColors.text.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -150,16 +150,16 @@ class _SystemComplaintsListViewState extends State<SystemComplaintsListView> {
           const SizedBox(height: 8),
           Text(
             complaint.content,
-            style: TextStyle(fontSize: 14, color: Colors.grey.shade600, height: 1.5),
+            style: TextStyle(fontSize: 14, color: context.qsColors.textSub, height: 1.5),
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.category_outlined, size: 14, color: Colors.grey),
+              Icon(Icons.category_outlined, size: 14, color: context.qsColors.textSub),
               const SizedBox(width: 4),
               Text(
                 context.tr(complaint.type),
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(fontSize: 12, color: context.qsColors.textSub),
               ),
             ],
           ),
@@ -174,15 +174,15 @@ class _SystemComplaintsListViewState extends State<SystemComplaintsListView> {
 
     switch (status) {
       case 'resolved':
-        color = Colors.green;
+        color = context.qsColors.success;
         label = context.tr('status_resolved');
         break;
       case 'closed':
-        color = Colors.grey;
+        color = context.qsColors.textSub;
         label = context.tr('status_closed');
         break;
       default:
-        color = Colors.orange;
+        color = context.qsColors.warning;
         label = context.tr('status_pending');
     }
 
@@ -203,3 +203,5 @@ class _SystemComplaintsListViewState extends State<SystemComplaintsListView> {
     );
   }
 }
+
+

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/theme/qs_color_extension.dart';
 import 'package:service_provider_app/features/commissions/models/history_models.dart';
 
 class HistoryListItem extends StatelessWidget {
@@ -77,12 +78,12 @@ class HistoryListItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: context.qsColors.textSub.withValues(alpha: 0.08)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.01),
+            color: context.qsColors.text.withValues(alpha: 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -110,10 +111,10 @@ class HistoryListItem extends StatelessWidget {
                   item.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: context.qsColors.text,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -121,7 +122,7 @@ class HistoryListItem extends StatelessWidget {
                   item.date,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.grey.shade500,
+                    color: context.qsColors.textSub,
                   ),
                 ),
               ],
@@ -136,10 +137,10 @@ class HistoryListItem extends StatelessWidget {
                 children: [
                   Text(
                     item.amount > 0 ? item.amount.toStringAsFixed(0) : '0',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: context.qsColors.text,
                     ),
                   ),
                   const SizedBox(width: 3),
@@ -148,7 +149,7 @@ class HistoryListItem extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade500,
+                      color: context.qsColors.textSub,
                     ),
                   ),
                 ],

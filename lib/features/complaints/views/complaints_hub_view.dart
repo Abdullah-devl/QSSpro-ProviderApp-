@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/theme/qs_color_extension.dart';
 import 'system_complaints_list_view.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/network/api_client.dart';
+import '../repositories/complaints_repository.dart';
+import '../viewmodels/order_complaints_viewmodel.dart';
+import 'order_complaints_list_view.dart';
 
 class ComplaintsView extends StatelessWidget {
   const ComplaintsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = const Color(0xFFF8F9FA);
+    final bgColor = context.qsColors.background;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -16,8 +21,8 @@ class ComplaintsView extends StatelessWidget {
         title: Text(context.tr('complaints_hub')),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: context.qsColors.card,
+        foregroundColor: context.qsColors.text,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -29,7 +34,7 @@ class ComplaintsView extends StatelessWidget {
               title: context.tr('system_complaints'),
               description: context.tr('system_complaints_desc'),
               icon: Icons.settings_suggest_outlined,
-              color: const Color(0xFF5CA4B8),
+              color: context.qsColors.primary,
               onTap: () {
                 Navigator.push(
                   context,
@@ -43,11 +48,18 @@ class ComplaintsView extends StatelessWidget {
               title: context.tr('order_complaints'),
               description: context.tr('order_complaints_desc'),
               icon: Icons.assignment_outlined,
-              color: Colors.orange,
+              color: context.qsColors.primary,
               onTap: () {
-                // Placeholder for now
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(context.tr('coming_soon'))),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (ctx) => ChangeNotifierProvider(
+                      create: (c) => OrderComplaintsViewModel(
+                        ComplaintsRepository(c.read<ApiService>()),
+                      ),
+                      child: const OrderComplaintsListView(),
+                    ),
+                  ),
                 );
               },
             ),
@@ -71,11 +83,11 @@ class ComplaintsView extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.qsColors.card,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: context.qsColors.text.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -98,10 +110,10 @@ class ComplaintsView extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: context.qsColors.text,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -109,16 +121,18 @@ class ComplaintsView extends StatelessWidget {
                     description,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.grey.shade600,
+                      color: context.qsColors.textSub,
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey.shade300, size: 16),
+            Icon(Icons.arrow_forward_ios_rounded, color: context.qsColors.textSub, size: 16),
           ],
         ),
       ),
     );
   }
 }
+
+

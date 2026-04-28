@@ -13,13 +13,12 @@ import '../viewmodels/edit_service_viewmodel.dart';
 import 'edit_service_schedule_view.dart';
 
 class EditServiceView extends StatelessWidget {
-  final ServiceDetailsModel service; // استقبال بيانات الخدمة
+  final ServiceDetailsModel service;
 
   const EditServiceView({super.key, required this.service});
 
   @override
   Widget build(BuildContext context) {
-    // تجهيز الـ Repository لهذه الشاشة
     final tokenStorage = TokenStorage();
     final apiService = ApiService(tokenStorage);
     final repository = ManageServicesRepository(apiService);
@@ -28,7 +27,7 @@ class EditServiceView extends StatelessWidget {
       create: (_) => EditServiceViewModel(
         repository,
         service,
-      ), // استخدام الـ ViewModel الخاص بالتعديل
+      ),
       child: _EditServiceBody(service: service),
     );
   }
@@ -41,8 +40,8 @@ class _EditServiceBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<EditServiceViewModel>(context);
+    final colors = context.qsColors;
 
-    // تجهيز عرض الصورة (الجديدة إن وجدت، وإلا القديمة إن وجدت)
     DecorationImage? imageDecoration;
     if (viewModel.imageFile != null) {
       imageDecoration = DecorationImage(
@@ -57,20 +56,20 @@ class _EditServiceBody extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: context.qsColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: context.qsColors.background,
+        backgroundColor: colors.background,
         elevation: 0,
         centerTitle: true,
         title: Text(
           context.tr('edit_service'),
           style: TextStyle(
-            color: context.qsColors.text,
+            color: colors.text,
             fontWeight: FontWeight.bold,
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: context.qsColors.text),
+          icon: Icon(Icons.arrow_back_ios, color: colors.text),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -79,24 +78,22 @@ class _EditServiceBody extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ==========================================
             // 1. تغيير الصورة
-            // ==========================================
             GestureDetector(
               onTap: viewModel.pickImage,
               child: Container(
                 width: double.infinity,
                 height: 180,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colors.card,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: context.qsColors.textSub.withOpacity(0.15),
+                    color: colors.textSub.withValues(alpha: 0.15),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
+                      color: colors.text.withValues(alpha: 0.03),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     ),
@@ -110,13 +107,13 @@ class _EditServiceBody extends StatelessWidget {
                           Icon(
                             Icons.add_a_photo_outlined,
                             size: 40,
-                            color: context.qsColors.textSub,
+                            color: colors.textSub,
                           ),
                           const SizedBox(height: 12),
                           Text(
                             context.tr('change_service_image'),
                             style: TextStyle(
-                              color: context.qsColors.text,
+                              color: colors.text,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -124,7 +121,7 @@ class _EditServiceBody extends StatelessWidget {
                           Text(
                             context.tr('recommended_image_size'),
                             style: TextStyle(
-                              color: context.qsColors.textSub,
+                              color: colors.textSub,
                               fontSize: 12,
                             ),
                           ),
@@ -135,16 +132,14 @@ class _EditServiceBody extends StatelessWidget {
             ),
             const SizedBox(height: 30),
 
-            // ==========================================
             // 2. عنوان القسم (تفاصيل الخدمة)
-            // ==========================================
             Row(
               children: [
                 Container(
                   width: 4,
                   height: 20,
                   decoration: BoxDecoration(
-                    color: context.qsColors.primary,
+                    color: colors.primary,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -152,7 +147,7 @@ class _EditServiceBody extends StatelessWidget {
                 Text(
                   context.tr('service_details'),
                   style: TextStyle(
-                    color: context.qsColors.text,
+                    color: colors.text,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -161,9 +156,7 @@ class _EditServiceBody extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // ==========================================
             // 3. الحقول
-            // ==========================================
             _buildLabel(context, context.tr('service_name')),
             _buildTextField(
               context,
@@ -193,9 +186,7 @@ class _EditServiceBody extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // ==========================================
             // 3.1. حالة الخدمة (نشط / غير نشط)
-            // ==========================================
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -203,34 +194,29 @@ class _EditServiceBody extends StatelessWidget {
                 Switch.adaptive(
                   value: viewModel.isActive,
                   onChanged: viewModel.setIsActive,
-                  activeColor: context.qsColors.primary,
+                  activeColor: colors.primary,
                 ),
               ],
             ),
             const SizedBox(height: 16),
 
-            // ==========================================
             // 3.2. تسعير المسافة
-            // ==========================================
             _buildDistancePricingSection(context, viewModel),
             const SizedBox(height: 24),
 
-            // ==========================================
             // 3.2. جدولة الخدمة (الانتقال لصفحة مستقلة)
-            // ==========================================
             _buildScheduleConfigButton(context),
 
             const SizedBox(height: 40),
 
-            // ==========================================
             // 4. زر حفظ التعديلات
-            // ==========================================
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: context.qsColors.primary,
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.card,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -249,22 +235,22 @@ class _EditServiceBody extends StatelessWidget {
                         }
                       },
                 child: viewModel.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? CircularProgressIndicator(color: colors.card)
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             context.tr('save_changes'),
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: colors.card,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(
+                          Icon(
                             Icons.save_rounded,
-                            color: Colors.white,
+                            color: colors.card,
                             size: 20,
                           ),
                         ],
@@ -276,8 +262,6 @@ class _EditServiceBody extends StatelessWidget {
       ),
     );
   }
-
-  // --- دوال مساعدة لرسم الحقول بتصميمك ---
 
   Widget _buildLabel(BuildContext context, String text) {
     return Padding(
@@ -299,19 +283,21 @@ class _EditServiceBody extends StatelessWidget {
     required String hint,
     int maxLines = 1,
   }) {
+    final colors = context.qsColors;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.qsColors.textSub.withOpacity(0.1)),
+        border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
       ),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
+        style: TextStyle(color: colors.text),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(
-            color: context.qsColors.textSub.withOpacity(0.5),
+            color: colors.textSub.withValues(alpha: 0.5),
             fontSize: 13,
           ),
           border: InputBorder.none,
@@ -325,21 +311,22 @@ class _EditServiceBody extends StatelessWidget {
   }
 
   Widget _buildDropdown(BuildContext context, EditServiceViewModel viewModel) {
+    final colors = context.qsColors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.qsColors.textSub.withOpacity(0.1)),
+        border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
       ),
       child: viewModel.isLoadingCategories
-          ? const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
+          ? Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: Center(
                 child: SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(strokeWidth: 2, color: colors.primary),
                 ),
               ),
             )
@@ -347,23 +334,24 @@ class _EditServiceBody extends StatelessWidget {
               child: DropdownButton<int>(
                 isExpanded: true,
                 value: viewModel.selectedCategoryId,
+                dropdownColor: colors.card,
                 hint: Text(
                   context.tr('choose_category'),
                   style: TextStyle(
-                    color: context.qsColors.textSub.withOpacity(0.5),
+                    color: colors.textSub.withValues(alpha: 0.5),
                     fontSize: 13,
                   ),
                 ),
                 icon: Icon(
                   Icons.keyboard_arrow_down,
-                  color: context.qsColors.textSub,
+                  color: colors.textSub,
                 ),
                 items: viewModel.categories.map((category) {
                   return DropdownMenuItem<int>(
                     value: category.id,
                     child: Text(
                       category.name,
-                      style: TextStyle(color: context.qsColors.text),
+                      style: TextStyle(color: colors.text),
                     ),
                   );
                 }).toList(),
@@ -377,11 +365,12 @@ class _EditServiceBody extends StatelessWidget {
     BuildContext context,
     TextEditingController controller,
   ) {
+    final colors = context.qsColors;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.qsColors.textSub.withOpacity(0.1)),
+        border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -389,10 +378,11 @@ class _EditServiceBody extends StatelessWidget {
             child: TextField(
               controller: controller,
               keyboardType: TextInputType.number,
+              style: TextStyle(color: colors.text),
               decoration: InputDecoration(
                 hintText: '0.00',
                 hintStyle: TextStyle(
-                  color: context.qsColors.textSub.withOpacity(0.5),
+                  color: colors.textSub.withValues(alpha: 0.5),
                 ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -403,15 +393,15 @@ class _EditServiceBody extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
               border: Border(
-                right: BorderSide(
-                  color: context.qsColors.textSub.withOpacity(0.1),
+                left: BorderSide(
+                  color: colors.textSub.withValues(alpha: 0.1),
                 ),
               ),
             ),
             child: Text(
-              context.tr('currency_sar') ?? 'ر.س',
+              context.tr('sar'),
               style: TextStyle(
-                color: context.qsColors.primary,
+                color: colors.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -425,11 +415,12 @@ class _EditServiceBody extends StatelessWidget {
     BuildContext context,
     TextEditingController controller,
   ) {
+    final colors = context.qsColors;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.qsColors.textSub.withOpacity(0.1)),
+        border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -437,10 +428,11 @@ class _EditServiceBody extends StatelessWidget {
             child: TextField(
               controller: controller,
               keyboardType: TextInputType.number,
+              style: TextStyle(color: colors.text),
               decoration: InputDecoration(
                 hintText: '40',
                 hintStyle: TextStyle(
-                  color: context.qsColors.textSub.withOpacity(0.5),
+                  color: colors.textSub.withValues(alpha: 0.5),
                 ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -451,15 +443,15 @@ class _EditServiceBody extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
               border: Border(
-                right: BorderSide(
-                  color: context.qsColors.textSub.withOpacity(0.1),
+                left: BorderSide(
+                  color: colors.textSub.withValues(alpha: 0.1),
                 ),
               ),
             ),
             child: Text(
               '%',
               style: TextStyle(
-                color: context.qsColors.primary,
+                color: colors.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -473,6 +465,7 @@ class _EditServiceBody extends StatelessWidget {
     BuildContext context,
     EditServiceViewModel viewModel,
   ) {
+    final colors = context.qsColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -483,7 +476,7 @@ class _EditServiceBody extends StatelessWidget {
             Switch.adaptive(
               value: viewModel.distanceBasedPrice,
               onChanged: viewModel.setDistanceBasedPrice,
-              activeColor: context.qsColors.primary,
+              activeColor: colors.primary,
             ),
           ],
         ),
@@ -497,6 +490,7 @@ class _EditServiceBody extends StatelessWidget {
   }
 
   Widget _buildScheduleConfigButton(BuildContext context) {
+    final colors = context.qsColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -506,7 +500,7 @@ class _EditServiceBody extends StatelessWidget {
               width: 4,
               height: 20,
               decoration: BoxDecoration(
-                color: context.qsColors.primary,
+                color: colors.primary,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -514,7 +508,7 @@ class _EditServiceBody extends StatelessWidget {
             Text(
               context.tr('service_schedule'),
               style: TextStyle(
-                color: context.qsColors.text,
+                color: colors.text,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -538,10 +532,10 @@ class _EditServiceBody extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: colors.card,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: context.qsColors.primary.withOpacity(0.2),
+                color: colors.primary.withValues(alpha: 0.2),
                 width: 1.5,
               ),
             ),
@@ -550,11 +544,11 @@ class _EditServiceBody extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: context.qsColors.primary.withOpacity(0.1),
+                    color: colors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(Icons.calendar_month_outlined,
-                      color: context.qsColors.primary, size: 24),
+                      color: colors.primary, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -562,19 +556,18 @@ class _EditServiceBody extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        context.tr('configure_schedule') ?? 'إعداد جدول المواعيد',
+                        context.tr('configure_schedule'),
                         style: TextStyle(
-                          color: context.qsColors.text,
+                          color: colors.text,
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        context.tr('configure_schedule_hint') ??
-                            'حدد أيام العمل وساعات التوفر',
+                        context.tr('configure_schedule_hint'),
                         style: TextStyle(
-                          color: context.qsColors.textSub,
+                          color: colors.textSub,
                           fontSize: 12,
                         ),
                       ),
@@ -582,7 +575,7 @@ class _EditServiceBody extends StatelessWidget {
                   ),
                 ),
                 Icon(Icons.arrow_forward_ios,
-                    color: context.qsColors.primary, size: 16),
+                    color: colors.primary, size: 16),
               ],
             ),
           ),

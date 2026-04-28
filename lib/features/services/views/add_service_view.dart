@@ -8,15 +8,13 @@ import '../../../core/theme/qs_color_extension.dart';
 import '../../../core/storage/token_storage.dart';
 import '../repositories/manage_services_repository.dart';
 import '../viewmodels/add_service_viewmodel.dart';
-
 import 'service_details_view.dart';
-// import 'dart:io';
+
 class AddServiceView extends StatelessWidget {
   const AddServiceView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // تجهيز الـ Repository لهذه الشاشة
     final tokenStorage = TokenStorage();
     final apiService = ApiService(tokenStorage);
     final repository = ManageServicesRepository(apiService);
@@ -34,22 +32,23 @@ class _AddServiceBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<AddServiceViewModel>(context);
+    final colors = context.qsColors;
 
     return Scaffold(
-      backgroundColor: context.qsColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: context.qsColors.background,
+        backgroundColor: colors.background,
         elevation: 0,
         centerTitle: true,
         title: Text(
           context.tr('add_new_service'),
           style: TextStyle(
-            color: context.qsColors.text,
+            color: colors.text,
             fontWeight: FontWeight.bold,
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: context.qsColors.text),
+          icon: Icon(Icons.arrow_back_ios, color: colors.text),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -58,24 +57,22 @@ class _AddServiceBody extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ==========================================
             // 1. رفع الصورة
-            // ==========================================
             GestureDetector(
               onTap: viewModel.pickImage,
               child: Container(
                 width: double.infinity,
                 height: 180,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colors.card,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: context.qsColors.textSub.withOpacity(0.15),
+                    color: colors.textSub.withValues(alpha: 0.15),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
+                      color: colors.text.withValues(alpha: 0.03),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     ),
@@ -94,13 +91,13 @@ class _AddServiceBody extends StatelessWidget {
                           Icon(
                             Icons.add_a_photo_outlined,
                             size: 40,
-                            color: context.qsColors.textSub,
+                            color: colors.textSub,
                           ),
                           const SizedBox(height: 12),
                           Text(
                             context.tr('upload_service_image'),
                             style: TextStyle(
-                              color: context.qsColors.text,
+                              color: colors.text,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -108,7 +105,7 @@ class _AddServiceBody extends StatelessWidget {
                           Text(
                             context.tr('recommended_image_size'),
                             style: TextStyle(
-                              color: context.qsColors.textSub,
+                              color: colors.textSub,
                               fontSize: 12,
                             ),
                           ),
@@ -119,16 +116,14 @@ class _AddServiceBody extends StatelessWidget {
             ),
             const SizedBox(height: 30),
 
-            // ==========================================
             // 2. عنوان القسم (تفاصيل الخدمة)
-            // ==========================================
             Row(
               children: [
                 Container(
                   width: 4,
                   height: 20,
                   decoration: BoxDecoration(
-                    color: context.qsColors.primary,
+                    color: colors.primary,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -136,7 +131,7 @@ class _AddServiceBody extends StatelessWidget {
                 Text(
                   context.tr('service_details'),
                   style: TextStyle(
-                    color: context.qsColors.text,
+                    color: colors.text,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -145,9 +140,7 @@ class _AddServiceBody extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // ==========================================
             // 3. الحقول
-            // ==========================================
             _buildLabel(context, context.tr('service_name')),
             _buildTextField(
               context,
@@ -177,28 +170,23 @@ class _AddServiceBody extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // ==========================================
             // 3.1. تسعير المسافة
-            // ==========================================
             _buildDistancePricingSection(context, viewModel),
             const SizedBox(height: 24),
 
-            // ==========================================
             // 3.2. جدولة الخدمة
-            // ==========================================
             _buildScheduleSection(context, viewModel),
 
             const SizedBox(height: 40),
 
-            // ==========================================
             // 4. زر النشر
-            // ==========================================
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: context.qsColors.primary,
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.card,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -210,12 +198,11 @@ class _AddServiceBody extends StatelessWidget {
                         int? serviceId = await viewModel.submitService(context);
                         if (serviceId != null && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('تم نشر الخدمة بنجاح!'),
-                              backgroundColor: Colors.green,
+                             SnackBar(
+                              content: Text(context.tr('service_published_success')),
+                              backgroundColor: colors.success,
                             ),
                           );
-                          // الانتقال لصفحة تفاصيل الخدمة الجديدة مع استبدال الصفحة الحالية
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -225,22 +212,22 @@ class _AddServiceBody extends StatelessWidget {
                         }
                       },
                 child: viewModel.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? CircularProgressIndicator(color: colors.card)
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             context.tr('publish_service'),
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: colors.card,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(
+                          Icon(
                             Icons.rocket_launch,
-                            color: Colors.white,
+                            color: colors.card,
                             size: 20,
                           ),
                         ],
@@ -252,8 +239,6 @@ class _AddServiceBody extends StatelessWidget {
       ),
     );
   }
-
-  // --- دوال مساعدة لرسم الحقول بتصميمك ---
 
   Widget _buildLabel(BuildContext context, String text) {
     return Padding(
@@ -275,19 +260,21 @@ class _AddServiceBody extends StatelessWidget {
     required String hint,
     int maxLines = 1,
   }) {
+    final colors = context.qsColors;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.qsColors.textSub.withOpacity(0.1)),
+        border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
       ),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
+        style: TextStyle(color: colors.text),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(
-            color: context.qsColors.textSub.withOpacity(0.5),
+            color: colors.textSub.withValues(alpha: 0.5),
             fontSize: 13,
           ),
           border: InputBorder.none,
@@ -301,21 +288,22 @@ class _AddServiceBody extends StatelessWidget {
   }
 
   Widget _buildDropdown(BuildContext context, AddServiceViewModel viewModel) {
+    final colors = context.qsColors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.qsColors.textSub.withOpacity(0.1)),
+        border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
       ),
       child: viewModel.isLoadingCategories
-          ? const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
+          ? Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: Center(
                 child: SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(strokeWidth: 2, color: colors.primary),
                 ),
               ),
             )
@@ -323,24 +311,24 @@ class _AddServiceBody extends StatelessWidget {
               child: DropdownButton<int>(
                 isExpanded: true,
                 value: viewModel.selectedCategoryId,
+                dropdownColor: colors.card,
                 hint: Text(
                   context.tr('choose_category'),
                   style: TextStyle(
-                    color: context.qsColors.textSub.withOpacity(0.5),
+                    color: colors.textSub.withValues(alpha: 0.5),
                     fontSize: 13,
                   ),
                 ),
                 icon: Icon(
                   Icons.keyboard_arrow_down,
-                  color: context.qsColors.textSub,
+                  color: colors.textSub,
                 ),
-                // ربطنا العناصر بالقائمة الديناميكية القادمة من السيرفر
                 items: viewModel.categories.map((category) {
                   return DropdownMenuItem<int>(
                     value: category.id,
                     child: Text(
                       category.name,
-                      style: TextStyle(color: context.qsColors.text),
+                      style: TextStyle(color: colors.text),
                     ),
                   );
                 }).toList(),
@@ -354,11 +342,12 @@ class _AddServiceBody extends StatelessWidget {
     BuildContext context,
     TextEditingController controller,
   ) {
+    final colors = context.qsColors;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.qsColors.textSub.withOpacity(0.1)),
+        border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -366,10 +355,11 @@ class _AddServiceBody extends StatelessWidget {
             child: TextField(
               controller: controller,
               keyboardType: TextInputType.number,
+              style: TextStyle(color: colors.text),
               decoration: InputDecoration(
                 hintText: '0.00',
                 hintStyle: TextStyle(
-                  color: context.qsColors.textSub.withOpacity(0.5),
+                  color: colors.textSub.withValues(alpha: 0.5),
                 ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -380,15 +370,15 @@ class _AddServiceBody extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
               border: Border(
-                right: BorderSide(
-                  color: context.qsColors.textSub.withOpacity(0.1),
+                left: BorderSide(
+                  color: colors.textSub.withValues(alpha: 0.1),
                 ),
               ),
             ),
             child: Text(
-              'ر.س',
+              context.tr('sar'),
               style: TextStyle(
-                color: context.qsColors.primary,
+                color: colors.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -402,11 +392,12 @@ class _AddServiceBody extends StatelessWidget {
     BuildContext context,
     TextEditingController controller,
   ) {
+    final colors = context.qsColors;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.qsColors.textSub.withOpacity(0.1)),
+        border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -414,10 +405,11 @@ class _AddServiceBody extends StatelessWidget {
             child: TextField(
               controller: controller,
               keyboardType: TextInputType.number,
+              style: TextStyle(color: colors.text),
               decoration: InputDecoration(
                 hintText: '40',
                 hintStyle: TextStyle(
-                  color: context.qsColors.textSub.withOpacity(0.5),
+                  color: colors.textSub.withValues(alpha: 0.5),
                 ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -428,15 +420,15 @@ class _AddServiceBody extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
               border: Border(
-                right: BorderSide(
-                  color: context.qsColors.textSub.withOpacity(0.1),
+                left: BorderSide(
+                  color: colors.textSub.withValues(alpha: 0.1),
                 ),
               ),
             ),
             child: Text(
               '%',
               style: TextStyle(
-                color: context.qsColors.primary,
+                color: colors.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -450,6 +442,7 @@ class _AddServiceBody extends StatelessWidget {
     BuildContext context,
     AddServiceViewModel viewModel,
   ) {
+    final colors = context.qsColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -460,7 +453,7 @@ class _AddServiceBody extends StatelessWidget {
             Switch.adaptive(
               value: viewModel.distanceBasedPrice,
               onChanged: viewModel.setDistanceBasedPrice,
-              activeColor: context.qsColors.primary,
+              activeColor: colors.primary,
             ),
           ],
         ),
@@ -477,6 +470,7 @@ class _AddServiceBody extends StatelessWidget {
     BuildContext context,
     AddServiceViewModel viewModel,
   ) {
+    final colors = context.qsColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -486,7 +480,7 @@ class _AddServiceBody extends StatelessWidget {
               width: 4,
               height: 20,
               decoration: BoxDecoration(
-                color: context.qsColors.primary,
+                color: colors.primary,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -494,7 +488,7 @@ class _AddServiceBody extends StatelessWidget {
             Text(
               context.tr('service_schedule'),
               style: TextStyle(
-                color: context.qsColors.text,
+                color: colors.text,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -512,10 +506,10 @@ class _AddServiceBody extends StatelessWidget {
             return Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
+                color: colors.card,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: context.qsColors.textSub.withOpacity(0.1),
+                  color: colors.textSub.withValues(alpha: 0.1),
                 ),
               ),
               child: Column(
@@ -526,14 +520,14 @@ class _AddServiceBody extends StatelessWidget {
                       Text(
                         context.tr(schedule.days.isNotEmpty ? schedule.days.first.toLowerCase() : ''),
                         style: TextStyle(
-                          color: context.qsColors.text,
+                          color: colors.text,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Switch.adaptive(
                         value: schedule.isActive,
                         onChanged: (_) => viewModel.toggleDay(index),
-                        activeColor: context.qsColors.primary,
+                        activeColor: colors.primary,
                       ),
                     ],
                   ),
@@ -550,6 +544,19 @@ class _AddServiceBody extends StatelessWidget {
                               final picked = await showTimePicker(
                                 context: context,
                                 initialTime: TimeOfDay.now(),
+                                builder: (context, child) {
+                                  return Theme(
+                                    data: Theme.of(context).copyWith(
+                                      colorScheme: ColorScheme.light(
+                                        primary: colors.primary,
+                                        onPrimary: colors.card,
+                                        surface: colors.card,
+                                        onSurface: colors.text,
+                                      ),
+                                    ),
+                                    child: child!,
+                                  );
+                                },
                               );
                               if (picked != null) {
                                 viewModel.updateStartTime(
@@ -570,6 +577,19 @@ class _AddServiceBody extends StatelessWidget {
                               final picked = await showTimePicker(
                                 context: context,
                                 initialTime: TimeOfDay.now(),
+                                builder: (context, child) {
+                                  return Theme(
+                                    data: Theme.of(context).copyWith(
+                                      colorScheme: ColorScheme.light(
+                                        primary: colors.primary,
+                                        onPrimary: colors.card,
+                                        surface: colors.card,
+                                        onSurface: colors.text,
+                                      ),
+                                    ),
+                                    child: child!,
+                                  );
+                                },
                               );
                               if (picked != null) {
                                 viewModel.updateEndTime(
@@ -598,6 +618,7 @@ class _AddServiceBody extends StatelessWidget {
     required String time,
     required VoidCallback onTap,
   }) {
+    final colors = context.qsColors;
     return InkWell(
       onTap: onTap,
       child: Column(
@@ -605,7 +626,7 @@ class _AddServiceBody extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(color: context.qsColors.textSub, fontSize: 12),
+            style: TextStyle(color: colors.textSub, fontSize: 12),
           ),
           const SizedBox(height: 4),
           Container(
@@ -613,7 +634,7 @@ class _AddServiceBody extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: context.qsColors.textSub.withOpacity(0.1),
+                color: colors.textSub.withValues(alpha: 0.1),
               ),
             ),
             child: Row(
@@ -622,14 +643,14 @@ class _AddServiceBody extends StatelessWidget {
                 Text(
                   time,
                   style: TextStyle(
-                    color: context.qsColors.text,
+                    color: colors.text,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Icon(
                   Icons.access_time,
                   size: 16,
-                  color: context.qsColors.primary,
+                  color: colors.primary,
                 ),
               ],
             ),

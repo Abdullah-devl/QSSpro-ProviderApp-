@@ -1,11 +1,11 @@
-// مسار الملف: lib/features/commissions/views/pay_commissions_view.dart
+// ???? ?????: lib/features/commissions/views/pay_commissions_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../../profile/viewmodels/profile_viewmodel.dart';
-import '../../profile/models/profile_model.dart';
+// import '../../profile/models/profile_model.dart';
 import '../viewmodels/pay_commissions_viewmodel.dart';
 import 'widgets/reward_points_card.dart';
 import 'widgets/payment_method_option_widget.dart';
@@ -31,7 +31,7 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
   @override
   void initState() {
     super.initState();
-    // جلب البيانات فور تحميل الصفحة باستخدام الـ userId الخاص بالمستخدم
+    // ??? ???????? ??? ????? ?????? ???????? ??? userId ????? ?????????
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final profileViewModel = context.read<ProfileViewModel>();
       final userId = profileViewModel.profile?.id ?? 0;
@@ -42,7 +42,7 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<PayCommissionsViewModel>(context);
-    final Color bgColor = const Color(0xFFF8F9FA);
+    final Color bgColor = context.qsColors.background;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -80,11 +80,11 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // 1. بطاقة إجمالي العمولة المستحقة
+                      // 1. ????? ?????? ??????? ????????
                       TotalDueCommissionCard(amount: widget.amount),
                       const SizedBox(height: 16),
 
-                      // 2. بطاقة نقاط المكافآت (الديناميكية)
+                      // 2. ????? ???? ???????? (???????????)
                       RewardPointsCard(
                         pointsBalance:
                             viewModel.commissionData?.summary.bonusPoints ??
@@ -92,13 +92,13 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
                       ),
                       const SizedBox(height: 32),
 
-                      // 3. قسم تحديد وسيلة السداد
+                      // 3. ??? ????? ????? ??????
                       Text(
                         context.tr('select_payment_method'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: context.qsColors.text,
                         ),
                         textAlign: TextAlign.start,
                       ),
@@ -108,7 +108,7 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
                         title: context.tr('pay_by_receipt'),
                         subtitle: context.tr('receipt_upload_subtitle'),
                         iconData: Icons.attach_file_rounded,
-                        iconColor: Colors.blueGrey,
+                        iconColor: context.qsColors.textSub,
                         isSelected:
                             viewModel.selectedMethod ==
                             PaymentMethodType.bankTransfer,
@@ -120,7 +120,7 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
                         title: context.tr('pay_by_points'),
                         subtitle: context.tr('pay_points_subtitle'),
                         iconData: Icons.card_giftcard_rounded,
-                        iconColor: const Color(0xFFE68A00),
+                        iconColor: context.qsColors.warning,
                         isSelected:
                             viewModel.selectedMethod ==
                             PaymentMethodType.rewardPoints,
@@ -141,8 +141,8 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
                       onPressed: () {
                         if (viewModel.selectedMethod ==
                             PaymentMethodType.rewardPoints) {
-                          // إزالة شرط الإيقاف في حال كانت البيانات null للاستمرار في عرض الصفحة
-                          // استخدام قيم افتراضية إذا لم ينجح الـ API في جلب البيانات
+                          // ????? ??? ??????? ?? ??? ???? ???????? null ????????? ?? ??? ??????
+                          // ??????? ??? ???????? ??? ?? ???? ??? API ?? ??? ????????
                           final summary = viewModel.commissionData?.summary;
 
                           Navigator.push(
@@ -173,7 +173,7 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
                       // onPressed: () {
                       //   if (viewModel.selectedMethod ==
                       //       PaymentMethodType.rewardPoints) {
-                      //     // التأكد من وجود البيانات قبل الانتقال
+                      //     // ?????? ?? ???? ???????? ??? ????????
                       //     final summary = viewModel.commissionData?.summary;
                       //     if (summary != null) {
                       //       Navigator.push(
@@ -201,8 +201,8 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
                       //   }
                       // },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5CA4B8),
-                        foregroundColor: Colors.white,
+                        backgroundColor: context.qsColors.primary,
+                        foregroundColor: context.qsColors.card,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -230,3 +230,6 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
     );
   }
 }
+
+
+

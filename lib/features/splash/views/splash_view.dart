@@ -4,7 +4,9 @@ import 'package:service_provider_app/features/auth/views/welcome_view.dart';
 
 // 👇 الاستدعاءات الجديدة الخاصة بالتخزين والشاشة الرئيسية
 import 'package:service_provider_app/core/storage/token_storage.dart';
-import 'package:service_provider_app/features/home/views/main_view.dart'; // إذا كان اسم شاشتك الرئيسية مختلفاً (مثل MainView) قم بتعديله هنا
+import 'package:service_provider_app/features/home/views/main_view.dart';
+import 'package:service_provider_app/features/auth/viewmodels/auth_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -56,13 +58,18 @@ class _SplashViewState extends State<SplashView>
 
     // 3. الشرط الذكي: هل يوجد توكن؟
     if (token != null && token.isNotEmpty) {
+      // ✅ تحديث توكن الإشعارات لضمان وصولها
+      if (mounted) {
+        context.read<AuthViewModel>().syncFCMToken();
+      }
+
       // ✅ المستخدم لديه حساب ومسجل دخول -> نوجهه للرئيسية
-      // ✅ نوجهه لـ MainView (التي تحتوي على شريط التنقل) وليس HomeDashboardView
+
+      // ✅ المستخدم لديه حساب ومسجل دخول -> نوجهه للرئيسية
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MainView()),
+        MaterialPageRoute(builder: (context) => const MainView()),
       );
-      ;
     } else {
       // ❌ المستخدم غير مسجل -> نوجهه لشاشة الترحيب/التسجيل
       Navigator.pushReplacement(

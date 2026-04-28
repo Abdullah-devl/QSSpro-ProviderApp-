@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -19,6 +20,10 @@ import 'package:service_provider_app/features/points/repositories/points_reposit
 import 'package:service_provider_app/features/points/viewmodels/convert_points_viewmodel.dart';
 import 'features/auth/repositories/auth_repository.dart';
 import 'features/auth/viewmodels/auth_viewmodel.dart';
+import 'features/notifications/repositories/notification_repository.dart';
+import 'features/notifications/viewmodels/notification_viewmodel.dart';
+import 'core/network/fcm_notification_service.dart';
+import 'features/notifications/views/notifications_view.dart';
 // 1. استدعاء ملفات الشبكة والتخزين (التي نسيناها) 🌐
 import 'core/storage/token_storage.dart';
 import 'core/network/navigation_service.dart'; // 🌍 استدعاء مفتاح التنقل
@@ -48,6 +53,14 @@ void main() async {
   // تهيئة قاعدة البيانات المحلية
   await HiveHelper.init();
 
+  // تهيئة Firebase والإشعارات
+  try {
+    await Firebase.initializeApp();
+    await FCMNotificationService().initialize();
+  } catch (e) {
+    print("Error initializing Firebase: $e");
+  }
+
   // ========================================================
   // 🚀 👇 التعديل الجوهري هنا: تجهيز الاعتماديات (API & Repository)
   // ========================================================
@@ -63,6 +76,7 @@ void main() async {
   final ordersRepository = OrdersRepository(apiService);
   final authRepository = AuthRepository(apiService, tokenStorage);
   final complaintsRepository = ComplaintsRepository(apiService);
+  final notificationRepository = NotificationRepository(apiService);
 
   runApp(
     MultiProvider(
@@ -74,12 +88,16 @@ void main() async {
         Provider<ProfileRepository>.value(value: profileRepository),
         Provider<PaymentsHistoryRepository>.value(value: paymentsHistoryRepository),
         Provider<AuthRepository>.value(value: authRepository),
+        Provider<NotificationRepository>.value(value: notificationRepository),
 
         // ⚙️ 👇 التعديل هنا: أضفنا SettingsProvider لكي لا يتعطل التطبيق!
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         
         // 🔐 ViewModel الخاص بالمصادقة (تسجيل الخروج)
-        ChangeNotifierProvider(create: (_) => AuthViewModel(authRepository)),
+        ChangeNotifierProvider(create: (_) => AuthViewModel(authRepository, notificationRepository)),
+
+        // 🔔 ViewModel الخاص بالإشعارات
+        ChangeNotifierProvider(create: (_) => NotificationViewModel(notificationRepository)),
 
         // 📱 ViewModel الخاص بشريط التنقل السفلي
         ChangeNotifierProvider(create: (_) => MainViewModel()),
@@ -161,6 +179,7 @@ class MyApp extends StatelessWidget {
       // 🗺️ الطرق (Routes)
       routes: {
         '/login': (context) => const LoginView(),
+        '/notifications': (context) => const NotificationsView(),
       },
 
       home: const SplashView(),

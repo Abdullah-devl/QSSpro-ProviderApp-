@@ -1,11 +1,11 @@
-// مسار الملف: lib/features/services/views/edit_service_schedule_view.dart
+﻿// مسار الملف: lib/features/services/views/edit_service_schedule_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/service_schedule_viewmodel.dart';
-import '../models/service_schedule_model.dart';
+// import '../models/service_schedule_model.dart';
 
 class EditServiceScheduleView extends StatelessWidget {
   const EditServiceScheduleView({super.key});
@@ -32,7 +32,7 @@ class EditServiceScheduleView extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          viewModel.initialSchedule != null ? context.tr('edit') ?? 'تعديل موعد' : context.tr('add_schedule_slot') ?? 'إضافة موعد',
+          viewModel.initialSchedule != null ? context.tr('edit') : context.tr('add_schedule_slot'),
           style: TextStyle(
             color: context.qsColors.text,
             fontWeight: FontWeight.bold,
@@ -83,14 +83,14 @@ class EditServiceScheduleView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.qsColors.card,
                 borderRadius: BorderRadius.circular(16),
                 border: Border(
                   right: BorderSide(color: context.qsColors.primary, width: 5),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: context.qsColors.text.withOpacity(0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -113,7 +113,7 @@ class EditServiceScheduleView extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      context.tr('working_schedule') ?? 'يرجى تحديد أوقات وأيام العمل لهذه الفترة.',
+                      context.tr('working_schedule'),
                       style: TextStyle(
                         color: context.qsColors.text,
                         fontSize: 13,
@@ -129,7 +129,7 @@ class EditServiceScheduleView extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.qsColors.card,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: schedule.isActive
@@ -139,7 +139,7 @@ class EditServiceScheduleView extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
+                    color: context.qsColors.text.withOpacity(0.02),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -285,3 +285,4 @@ class EditServiceScheduleView extends StatelessWidget {
     );
   }
 }
+

@@ -17,9 +17,9 @@ class EditWorkView extends StatelessWidget {
       appBar: AppBar(
         title: Text(context.tr('edit_work') != 'edit_work' ? context.tr('edit_work') : 'تعديل العمل', style: TextStyle(color: colors.text, fontWeight: FontWeight.bold)),
         centerTitle: true, 
-        backgroundColor: Colors.white, 
+        backgroundColor: context.qsColors.card, 
         elevation: 0,
-        leading: IconButton(icon: const Icon(Icons.close, color: Colors.grey), onPressed: () => Navigator.pop(context)),
+        leading: IconButton(icon: Icon(Icons.close, color: context.qsColors.textSub), onPressed: () => Navigator.pop(context)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -31,7 +31,7 @@ class EditWorkView extends StatelessWidget {
               child: Container(
                 height: 200, width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(24),
+                  color: context.qsColors.card, borderRadius: BorderRadius.circular(24),
                   border: Border.all(color: const Color(0xFF5CA4B8).withOpacity(0.3)),
                 ),
                 child: vm.image != null 
@@ -45,9 +45,9 @@ class EditWorkView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            _buildInput(context.tr('work_title'), vm.titleController),
+            _buildInput(context, context.tr('work_title'), vm.titleController),
             const SizedBox(height: 16),
-            _buildInput(context.tr('work_description'), vm.descController, maxLines: 4),
+            _buildInput(context, context.tr('work_description'), vm.descController, maxLines: 4),
             const SizedBox(height: 40),
             
             // Save button
@@ -61,8 +61,8 @@ class EditWorkView extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))
                 ),
                 child: vm.isLoading 
-                    ? const CircularProgressIndicator(color: Colors.white) 
-                    : Text(context.tr('save_work') != 'save_work' ? context.tr('save_work') : 'حفظ التعديلات', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ? CircularProgressIndicator(color: context.qsColors.card) 
+                    : Text(context.tr('save_work') != 'save_work' ? context.tr('save_work') : 'حفظ التعديلات', style: TextStyle(color: context.qsColors.card, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -71,7 +71,7 @@ class EditWorkView extends StatelessWidget {
     );
   }
 
-  Widget _buildInput(String label, TextEditingController controller, {int maxLines = 1}) {
+  Widget _buildInput(BuildContext context, String label, TextEditingController controller, {int maxLines = 1}) {
     return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
       Text(label, style: const TextStyle(color: Color(0xFF5CA4B8), fontWeight: FontWeight.bold)),
       const SizedBox(height: 8),
@@ -81,10 +81,12 @@ class EditWorkView extends StatelessWidget {
         textAlign: TextAlign.right,
         decoration: InputDecoration(
           filled: true, 
-          fillColor: Colors.white, 
+          fillColor: context.qsColors.card, 
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none)
         ),
       ),
     ]);
   }
 }
+
+

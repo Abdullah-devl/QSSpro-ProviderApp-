@@ -1,4 +1,4 @@
-// مسار الملف: lib/features/orders/views/orders_view.dart
+﻿// مسار الملف: lib/features/orders/views/orders_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +40,7 @@ class _OrdersBody extends StatelessWidget {
     final viewModel = Provider.of<OrdersViewModel>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: context.qsColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -67,15 +67,15 @@ class _OrdersBody extends StatelessWidget {
       body: Column(
         children: [
           _buildTabs(context, viewModel),
-          const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
+          Divider(height: 1, thickness: 1, color: context.qsColors.textSub.withValues(alpha: 0.1)),
           Expanded(
             child: viewModel.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : viewModel.errorMessage != null
                 ? _buildErrorWidget(context, viewModel)
                 : RefreshIndicator(
-                    color: Colors.grey, // السهم رمادي
-                    backgroundColor: Colors.white, // الخلفية بيضاء
+                    color: context.qsColors.primary,
+                    backgroundColor: context.qsColors.card,
                     onRefresh: () => viewModel.fetchOrders(),
                     child: viewModel.filteredOrders.isEmpty
                         ? _buildEmptyState(context)
@@ -100,7 +100,7 @@ class _OrdersBody extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 60, color: Colors.red),
+          Icon(Icons.error_outline, size: 60, color: context.qsColors.error),
           const SizedBox(height: 16),
           Text(
             context.tr('error_loading_orders'),
@@ -124,12 +124,12 @@ class _OrdersBody extends StatelessWidget {
           Icon(
             Icons.inventory_2_outlined,
             size: 80,
-            color: Colors.grey.shade300,
+            color: context.qsColors.textSub.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           Text(
             context.tr('no_orders_yet'),
-            style: TextStyle(fontSize: 18, color: Colors.grey.shade500),
+            style: TextStyle(fontSize: 18, color: context.qsColors.textSub),
           ),
         ],
       ),
@@ -150,16 +150,16 @@ class _OrdersBody extends StatelessWidget {
               margin: const EdgeInsets.only(left: 8),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF1CB0F6) : Colors.white,
+                color: isSelected ? context.qsColors.primary : context.qsColors.card,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: isSelected ? Colors.transparent : Colors.grey.shade300,
+                  color: isSelected ? Colors.transparent : context.qsColors.textSub.withValues(alpha: 0.3),
                 ),
               ),
               child: Text(
                 context.tr(viewModel.tabs[index]),
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.grey.shade600,
+                  color: isSelected ? context.qsColors.card : context.qsColors.textSub,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   fontSize: 14,
                 ),
@@ -181,11 +181,11 @@ class _OrderCardWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: context.qsColors.text.withValues(alpha: 0.06),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -198,7 +198,7 @@ class _OrderCardWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
-              color: _getStatusColor(order.status).withOpacity(0.08),
+              color: _getStatusColor(context, order.status).withValues(alpha: 0.08),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(24),
               ),
@@ -212,14 +212,14 @@ class _OrderCardWidget extends StatelessWidget {
                     Icon(
                       Icons.watch_later_outlined,
                       size: 16,
-                      color: _getStatusColor(order.status),
+                      color: _getStatusColor(context, order.status),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       order
                           .timeAgo, // Displaying only the hour:minute as updated in the model
                       style: TextStyle(
-                        color: _getStatusColor(order.status),
+                        color: _getStatusColor(context, order.status),
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'Roboto',
@@ -244,14 +244,14 @@ class _OrderCardWidget extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 32,
-                          backgroundColor: Colors.grey.shade50,
+                          backgroundColor: context.qsColors.background,
                           backgroundImage: order.customerImage.isNotEmpty
                               ? NetworkImage(order.customerImage)
                               : null,
                           child: order.customerImage.isEmpty
                               ? Icon(
                                   Icons.person_outline,
-                                  color: Colors.grey.shade400,
+                                  color: context.qsColors.textSub,
                                   size: 36,
                                 )
                               : null,
@@ -262,13 +262,13 @@ class _OrderCardWidget extends StatelessWidget {
                             left: 0,
                             child: Container(
                               padding: const EdgeInsets.all(2),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
+                              decoration: BoxDecoration(
+                                color: context.qsColors.card,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.verified,
-                                color: Color(0xFF1CB0F6),
+                                color: context.qsColors.primary,
                                 size: 20,
                               ),
                             ),
@@ -294,14 +294,14 @@ class _OrderCardWidget extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
+                              color: context.qsColors.background,
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               order.serviceName,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey.shade700,
+                                color: context.qsColors.text,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -323,7 +323,7 @@ class _OrderCardWidget extends StatelessWidget {
                           Icon(
                             Icons.location_on_outlined,
                             size: 18,
-                            color: Colors.grey.shade400,
+                            color: context.qsColors.textSub,
                           ),
                           const SizedBox(width: 6),
                           Expanded(
@@ -332,7 +332,7 @@ class _OrderCardWidget extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: Colors.grey.shade600,
+                                color: context.qsColors.textSub,
                                 fontSize: 13,
                               ),
                             ),
@@ -347,7 +347,7 @@ class _OrderCardWidget extends StatelessWidget {
                           context.tr('total_price_label'),
                           style: TextStyle(
                             fontSize: 11,
-                            color: Colors.grey.shade400,
+                            color: context.qsColors.textSub,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -356,8 +356,8 @@ class _OrderCardWidget extends StatelessWidget {
                             children: [
                               TextSpan(
                                 text: '${order.price.toInt()}',
-                                style: const TextStyle(
-                                  color: Color(0xFF2D3436),
+                                style: TextStyle(
+                                  color: context.qsColors.text,
                                   fontSize: 26,
                                   fontWeight: FontWeight.w900,
                                   fontFamily: 'Roboto',
@@ -365,8 +365,8 @@ class _OrderCardWidget extends StatelessWidget {
                               ),
                               TextSpan(
                                 text: ' ${context.tr('currency_sar')}',
-                                style: const TextStyle(
-                                  color: Color(0xFF1CB0F6),
+                                style: TextStyle(
+                                  color: context.qsColors.primary,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -390,10 +390,10 @@ class _OrderCardWidget extends StatelessWidget {
                       child: TextButton(
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: Colors.grey.shade50,
+                          backgroundColor: context.qsColors.background,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
-                            side: BorderSide(color: Colors.grey.shade200),
+                            side: BorderSide(color: context.qsColors.textSub.withValues(alpha: 0.2)),
                           ),
                         ),
                         onPressed: () {
@@ -401,14 +401,14 @@ class _OrderCardWidget extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  OrderDetailView(order: order),
+                                  OrderDetailView(order: order,),
                             ),
                           );
                         },
                         child: Text(
                           context.tr('details'),
-                          style: const TextStyle(
-                            color: Color(0xFF2D3436),
+                          style: TextStyle(
+                            color: context.qsColors.text,
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
                           ),
@@ -422,8 +422,8 @@ class _OrderCardWidget extends StatelessWidget {
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF4757),
-                            foregroundColor: Colors.white,
+                            backgroundColor: context.qsColors.error,
+                            foregroundColor: context.qsColors.card,
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
@@ -450,26 +450,26 @@ class _OrderCardWidget extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(BuildContext context, String status) {
     switch (status.toLowerCase()) {
       case 'pending':
       case 'new':
       case 'new_order':
       case 'accepted_initial': // Waiting
-        return const Color(0xFF03A9F4); // Sky Blue / Azure
+        return context.qsColors.primary;
       case 'accepted':
       case 'in_progress':
       case 'accepted_partial_paid':
       case 'accepted_full_paid':
-        return const Color(0xFFFF9800); // Orange
+        return context.qsColors.warning;
       case 'completed':
       case 'finished':
-        return const Color(0xFF388E3C); // Dark Green
+        return context.qsColors.success;
       case 'canceled':
       case 'rejected':
-        return const Color(0xFFFF4757); // Red
+        return context.qsColors.error;
       default:
-        return const Color(0xFF03A9F4);
+        return context.qsColors.primary;
     }
   }
 
@@ -504,13 +504,13 @@ class _OrderCardWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: _getStatusColor(status),
+        color: _getStatusColor(context, status),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         context.tr(textKey).toUpperCase(),
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: context.qsColors.card,
           fontSize: 11,
           fontWeight: FontWeight.w900,
         ),
@@ -518,3 +518,5 @@ class _OrderCardWidget extends StatelessWidget {
     );
   }
 }
+
+

@@ -1,5 +1,6 @@
-// مسار الملف: lib/features/profile/viewmodels/add_work_viewmodel.dart
+﻿// مسار الملف: lib/features/profile/viewmodels/add_work_viewmodel.dart
 import 'dart:io';
+import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../repositories/profile_repository.dart';
@@ -27,11 +28,11 @@ class AddWorkViewModel extends ChangeNotifier {
 
   Future<void> save(BuildContext context) async {
     if (image == null) {
-       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('error_image_required')), backgroundColor: Colors.red));
+       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('error_image_required')), backgroundColor: context.qsColors.error));
        return;
     }
     if (titleController.text.trim().isEmpty) {
-       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('error_title_required')), backgroundColor: Colors.red));
+       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('error_title_required')), backgroundColor: context.qsColors.error));
        return;
     }
 
@@ -57,7 +58,7 @@ class AddWorkViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: context.qsColors.error));
       }
     }
   }

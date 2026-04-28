@@ -1,6 +1,6 @@
 // مسار الملف: lib/features/profile/views/edit_profile_view.dart
 
-import 'dart:io';
+// import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
@@ -53,20 +53,22 @@ class EditProfileView extends StatelessWidget {
 
             // 📝 البطاقة الأولى: الاسم والمهنة
             _buildCardContainer(
+              context,
               children: [
                 _buildInputLabel(context.tr('full_name'), const Color(0xFF5CA4B8)),
                 const SizedBox(height: 8),
-                _buildTextField(vm.nameController, Icons.person_outline),
+                _buildTextField(context, vm.nameController, Icons.person_outline),
                 const SizedBox(height: 20),
                 _buildInputLabel(context.tr('profession'), const Color(0xFF5CA4B8)),
                 const SizedBox(height: 8),
-                _buildTextField(vm.jobTitleController, Icons.build_outlined),
+                _buildTextField(context, vm.jobTitleController, Icons.build_outlined),
               ],
             ),
             const SizedBox(height: 24),
 
             // 📄 البطاقة الثانية: الوصف الشخصي
             _buildCardContainer(
+              context,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -80,7 +82,7 @@ class EditProfileView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                _buildTextField(vm.bioController, null, maxLines: 5),
+                _buildTextField(context, vm.bioController, null, maxLines: 5),
               ],
             ),
             const SizedBox(height: 24),
@@ -140,8 +142,8 @@ class EditProfileView extends StatelessWidget {
                 height: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)],
+                  border: Border.all(color: context.qsColors.card, width: 4),
+                  boxShadow: [BoxShadow(color: context.qsColors.text.withOpacity(0.1), blurRadius: 10)],
                   image: vm.newAvatar != null
                       ? DecorationImage(image: FileImage(vm.newAvatar!), fit: BoxFit.cover)
                       : DecorationImage(
@@ -154,8 +156,8 @@ class EditProfileView extends StatelessWidget {
               ),
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: const Color(0xFF5CA4B8), shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-                child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 20),
+                decoration: BoxDecoration(color: const Color(0xFF5CA4B8), shape: BoxShape.circle, border: Border.all(color: context.qsColors.card, width: 2)),
+                child: Icon(Icons.camera_alt_rounded, color: context.qsColors.card, size: 20),
               ),
             ],
           ),
@@ -169,13 +171,13 @@ class EditProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildCardContainer({required List<Widget> children}) {
+  Widget _buildCardContainer(BuildContext context, {required List<Widget> children}) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(32),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 5))],
+        boxShadow: [BoxShadow(color: context.qsColors.text.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 5))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: children),
     );
@@ -185,18 +187,20 @@ class EditProfileView extends StatelessWidget {
     return Text(text, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14));
   }
 
-  Widget _buildTextField(TextEditingController controller, IconData? icon, {int maxLines = 1}) {
+  Widget _buildTextField(BuildContext context, TextEditingController controller, IconData? icon, {int maxLines = 1}) {
     return TextField(
       controller: controller,
       maxLines: maxLines,
       textAlign: TextAlign.right,
       decoration: InputDecoration(
         filled: true,
-        fillColor: const Color(0xFFF3F4F6), // لون الرصاصي الفاتح داخل الحقل
-        prefixIcon: icon != null ? Icon(icon, color: Colors.grey) : null,
+        fillColor: context.qsColors.background,
+        prefixIcon: icon != null ? Icon(icon, color: context.qsColors.textSub) : null,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
     );
   }
 }
+
+

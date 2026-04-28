@@ -9,7 +9,7 @@ import 'package:service_provider_app/features/commissions/views/widgets/verifica
 import 'package:service_provider_app/features/commissions/views/widgets/buy_points_banner_widget.dart';
 import 'package:service_provider_app/features/commissions/views/widgets/points_actions_banner_widget.dart';
 import 'package:service_provider_app/features/commissions/views/widgets/commissions_stats_banner.dart';
-import 'package:service_provider_app/features/commissions/views/widgets/due_commission_card.dart';
+// import 'package:service_provider_app/features/commissions/views/widgets/due_commission_card.dart';
 import 'package:service_provider_app/features/commissions/views/widgets/payments_history_section.dart';
 import 'package:service_provider_app/features/commissions/viewmodels/commissions_stats_viewmodel.dart';
 import 'package:service_provider_app/features/commissions/viewmodels/payments_history_viewmodel.dart';
@@ -20,12 +20,12 @@ class CommissionsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // نفترض أن ViewModel تم توفيره عبر Provider (مثلاً في main.dart)
-    final viewModel  = Provider.of<CommissionsViewModel>(context);
-
+    Provider.of<CommissionsViewModel>(context);
+    
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: context.qsColors.background,
       appBar: AppBar(
-        backgroundColor: bgColor,
+        backgroundColor: context.qsColors.background,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -46,8 +46,8 @@ class CommissionsView extends StatelessWidget {
             context.read<PaymentsHistoryViewModel>().fetchAllHistory(),
           ]);
         },
-        backgroundColor: Colors.white,
-        color: Colors.grey,
+        backgroundColor: context.qsColors.card,
+        color: context.qsColors.primary,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

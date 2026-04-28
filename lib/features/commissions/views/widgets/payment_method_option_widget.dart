@@ -1,6 +1,7 @@
 // مسار الملف: lib/features/commissions/views/widgets/payment_method_option_widget.dart
 
 import 'package:flutter/material.dart';
+import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 
 class PaymentMethodOptionWidget extends StatelessWidget {
   final String title;
@@ -28,16 +29,16 @@ class PaymentMethodOptionWidget extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF0F9FF) : Colors.white, // خلفية زرقاء خفيفة عند التحديد
+          color: isSelected ? context.qsColors.primary.withOpacity(0.1) : context.qsColors.card, // خلفية زرقاء خفيفة عند التحديد
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xFF1CB0F6) : Colors.grey.shade300,
+            color: isSelected ? context.qsColors.primary : context.qsColors.textSub,
             width: isSelected ? 1.5 : 1.0,
           ),
           boxShadow: [
             if (!isSelected)
               BoxShadow(
-                color: Colors.black.withOpacity(0.01),
+                color: context.qsColors.text.withOpacity(0.01),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -53,7 +54,7 @@ class PaymentMethodOptionWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF1CB0F6) : Colors.grey.shade400,
+                  color: isSelected ? context.qsColors.primary : context.qsColors.textSub,
                   width: 2,
                 ),
               ),
@@ -62,8 +63,8 @@ class PaymentMethodOptionWidget extends StatelessWidget {
                       child: Container(
                         width: 12,
                         height: 12,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF1CB0F6),
+                        decoration:  BoxDecoration(
+                          color: context.qsColors.primary,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -80,10 +81,10 @@ class PaymentMethodOptionWidget extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: context.qsColors.text,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -91,7 +92,7 @@ class PaymentMethodOptionWidget extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.grey.shade500,
+                      color: context.qsColors.textSub,
                     ),
                   ),
                 ],
@@ -112,3 +113,5 @@ class PaymentMethodOptionWidget extends StatelessWidget {
     );
   }
 }
+
+

@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/services_viewmodel.dart';
 
@@ -21,7 +22,7 @@ class ServicesView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(vm.errorMessage!, style: const TextStyle(color: Colors.red)),
+            Text(vm.errorMessage!, style: TextStyle(color: context.qsColors.error)),
             ElevatedButton(
               onPressed: vm.fetchServices,
               child: const Text('إعادة المحاولة'),
@@ -35,15 +36,15 @@ class ServicesView extends StatelessWidget {
 
     if (services.isEmpty) {
       return RefreshIndicator(
-        color: Colors.grey,
-        backgroundColor: Colors.white,
+        color: context.qsColors.textSub,
+        backgroundColor: context.qsColors.card,
         onRefresh: vm.fetchServices,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             SizedBox(height: MediaQuery.of(context).size.height * 0.3),
-            const Center(
-              child: Text('لا توجد خدمات حالياً', style: TextStyle(color: Colors.grey)),
+            Center(
+              child: Text('لا توجد خدمات حالياً', style: TextStyle(color: context.qsColors.textSub)),
             ),
           ],
         ),
@@ -51,8 +52,8 @@ class ServicesView extends StatelessWidget {
     }
 
     return RefreshIndicator(
-      color: Colors.grey,
-      backgroundColor: Colors.white,
+      color: context.qsColors.textSub,
+      backgroundColor: context.qsColors.card,
       onRefresh: vm.fetchServices,
       child: ListView.separated(
         padding: const EdgeInsets.all(16),
@@ -62,9 +63,9 @@ class ServicesView extends StatelessWidget {
           final service = services[index];
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.qsColors.card,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: context.qsColors.textSub),
             ),
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -80,8 +81,8 @@ class ServicesView extends StatelessWidget {
                     errorBuilder: (_, __, ___) => Container(
                       width: 60,
                       height: 60,
-                      color: Colors.grey.shade200,
-                      child: const Icon(Icons.miscellaneous_services, color: Colors.grey),
+                      color: context.qsColors.textSub,
+                      child: Icon(Icons.miscellaneous_services, color: context.qsColors.textSub),
                     ),
                   ),
                 ),
@@ -105,13 +106,13 @@ class ServicesView extends StatelessWidget {
                         children: List.generate(5, (starIndex) {
                           if (starIndex < service.rating.floor()) {
                             // نجمة كاملة
-                            return const Icon(Icons.star, color: Colors.amber, size: 18);
+                            return Icon(Icons.star, color: context.qsColors.warning, size: 18);
                           } else if (starIndex < service.rating) {
                             // نصف نجمة
-                            return const Icon(Icons.star_half, color: Colors.amber, size: 18);
+                            return Icon(Icons.star_half, color: context.qsColors.warning, size: 18);
                           } else {
                             // نجمة فارغة
-                            return const Icon(Icons.star_border, color: Colors.amber, size: 18);
+                            return Icon(Icons.star_border, color: context.qsColors.warning, size: 18);
                           }
                         }),
                       ),
@@ -138,3 +139,5 @@ class ServicesView extends StatelessWidget {
     );
   }
 }
+
+

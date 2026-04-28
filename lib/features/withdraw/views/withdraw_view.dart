@@ -49,25 +49,21 @@ class _WithdrawViewState extends State<WithdrawView> {
   Widget build(BuildContext context) {
     final colors = context.qsColors;
     final viewModel = context.watch<WithdrawViewModel>();
-    final Color primaryColor = const Color(0xFF1CB0F6);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: colors.background,
         elevation: 0,
         centerTitle: true,
         title: Text(
           context.tr('withdraw_points'),
           style: TextStyle(color: colors.text, fontWeight: FontWeight.bold),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.arrow_forward_ios, color: colors.text, size: 20),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-        leading: const SizedBox.shrink(),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new, color: colors.text, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -79,14 +75,14 @@ class _WithdrawViewState extends State<WithdrawView> {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [primaryColor, primaryColor.withOpacity(0.8)],
+                  colors: [colors.primary, colors.primary.withValues(alpha: 0.8)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: primaryColor.withOpacity(0.3),
+                    color: colors.primary.withValues(alpha: 0.3),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   ),
@@ -96,13 +92,13 @@ class _WithdrawViewState extends State<WithdrawView> {
                 children: [
                   Text(
                     context.tr('available_balance'),
-                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                    style: TextStyle(color: colors.card.withValues(alpha: 0.7), fontSize: 14),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '${widget.availablePoints}',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: colors.card,
                       fontSize: 36,
                       fontWeight: FontWeight.w900,
                     ),
@@ -110,7 +106,7 @@ class _WithdrawViewState extends State<WithdrawView> {
                   const SizedBox(height: 4),
                   Text(
                     context.tr('pts'),
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    style: TextStyle(color: colors.card, fontSize: 16),
                   ),
                 ],
               ),
@@ -130,19 +126,24 @@ class _WithdrawViewState extends State<WithdrawView> {
             TextField(
               controller: _amountController,
               keyboardType: TextInputType.number,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colors.text),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: colors.card,
                 hintText: context.tr('enter_amount'),
-                prefixIcon: const Icon(Icons.account_balance_wallet_outlined, color: Color(0xFF1CB0F6)),
+                hintStyle: TextStyle(color: colors.textSub.withValues(alpha: 0.5)),
+                prefixIcon: Icon(Icons.account_balance_wallet_outlined, color: colors.primary),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide(color: colors.textSub.withValues(alpha: 0.1)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide(color: colors.textSub.withValues(alpha: 0.1)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: colors.primary),
                 ),
               ),
             ),
@@ -154,15 +155,15 @@ class _WithdrawViewState extends State<WithdrawView> {
               child: ElevatedButton(
                 onPressed: viewModel.isLoading ? null : () => _handleWithdraw(viewModel),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.card,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
                 child: viewModel.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? CircularProgressIndicator(color: colors.card)
                     : Text(
                         context.tr('withdraw_points'),
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

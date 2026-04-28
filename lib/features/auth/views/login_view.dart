@@ -1,4 +1,4 @@
-// // مسار الملف: lib/features/auth/views/login_view.dart
+﻿// // مسار الملف: lib/features/auth/views/login_view.dart
 
 // import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
@@ -43,7 +43,7 @@
 //                 borderRadius: BorderRadius.circular(24),
 //                 boxShadow: [
 //                   BoxShadow(
-//                     color: Colors.black.withOpacity(0.05),
+//                     color: context.qsColors.text.withOpacity(0.05),
 //                     blurRadius: 20,
 //                     offset: const Offset(0, 10),
 //                   ),
@@ -69,9 +69,9 @@
 //                         ),
 //                       ],
 //                     ),
-//                     child: const Icon(
+//                     child: Icon(
 //                       Icons.handshake_rounded,
-//                       color: Colors.white,
+//                       color: context.qsColors.card,
 //                       size: 35,
 //                     ),
 //                   ),
@@ -300,11 +300,11 @@ class _LoginViewBody extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
+                color: context.qsColors.card,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: context.qsColors.text.withValues(alpha: 0.05),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -324,15 +324,15 @@ class _LoginViewBody extends StatelessWidget {
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: context.qsColors.primary.withOpacity(0.3),
+                          color: context.qsColors.primary.withValues(alpha: 0.3),
                           blurRadius: 15,
                           offset: const Offset(0, 5),
                         ),
                       ],
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.handshake_rounded,
-                      color: Colors.white,
+                      color: context.qsColors.card,
                       size: 35,
                     ),
                   ),
@@ -353,7 +353,7 @@ class _LoginViewBody extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: context.qsColors.primary.withOpacity(0.1),
+                      color: context.qsColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -409,7 +409,7 @@ class _LoginViewBody extends StatelessWidget {
                         viewModel.isObscure
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: context.qsColors.textSub.withOpacity(0.7),
+                        color: context.qsColors.textSub.withValues(alpha: 0.7),
                       ),
                       onPressed: viewModel.togglePasswordVisibility,
                     ),
@@ -461,7 +461,7 @@ class _LoginViewBody extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Divider(
-                          color: context.qsColors.textSub.withOpacity(0.2),
+                          color: context.qsColors.textSub.withValues(alpha: 0.2),
                         ),
                       ),
                       Padding(
@@ -473,7 +473,7 @@ class _LoginViewBody extends StatelessWidget {
                       ),
                       Expanded(
                         child: Divider(
-                          color: context.qsColors.textSub.withOpacity(0.2),
+                          color: context.qsColors.textSub.withValues(alpha: 0.2),
                         ),
                       ),
                     ],
@@ -507,3 +507,5 @@ class _LoginViewBody extends StatelessWidget {
     );
   }
 }
+
+

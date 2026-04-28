@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:service_provider_app/core/network/api_client.dart';
 import 'package:service_provider_app/core/storage/token_storage.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../repositories/manage_services_repository.dart';
 import '../viewmodels/meeting_service_viewmodel.dart';
@@ -31,22 +32,26 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<MeetingServiceViewModel>(context);
+    final colors = context.qsColors;
 
     return Scaffold(
-      backgroundColor: context.qsColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        title: Text('تفاصيل خدمة الحضور', style: TextStyle(color: context.qsColors.text, fontWeight: FontWeight.bold)),
-        backgroundColor: context.qsColors.background,
+        title: Text(
+          context.tr('attendance_service_details'),
+          style: TextStyle(color: colors.text, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: colors.background,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: context.qsColors.text, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new, color: colors.text, size: 20),
           onPressed: () => Navigator.pop(context, true),
         ),
         actions: [
           if (viewModel.service != null)
             IconButton(
-              icon: Icon(Icons.edit, color: context.qsColors.primary),
+              icon: Icon(Icons.edit, color: colors.primary),
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
@@ -65,9 +70,9 @@ class _Body extends StatelessWidget {
         ],
       ),
       body: viewModel.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: colors.primary))
           : viewModel.errorMessage != null
-              ? Center(child: Text(viewModel.errorMessage!, style: const TextStyle(color: Colors.red)))
+              ? Center(child: Text(viewModel.errorMessage!, style: TextStyle(color: colors.error)))
               : SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -77,24 +82,24 @@ class _Body extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
+                          color: colors.card,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: context.qsColors.textSub.withOpacity(0.1)),
+                          border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'الحالة: ${viewModel.service!.status}',
+                              context.tr('status_label', args: {'status': viewModel.service!.status}),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: viewModel.service!.isActive ? Colors.green : context.qsColors.textSub,
+                                color: viewModel.service!.isActive ? colors.success : colors.textSub,
                               ),
                             ),
                             Icon(
                               viewModel.service!.isActive ? Icons.check_circle : Icons.cancel,
-                              color: viewModel.service!.isActive ? Colors.green : context.qsColors.textSub,
+                              color: viewModel.service!.isActive ? colors.success : colors.textSub,
                             ),
                           ],
                         ),
@@ -107,7 +112,7 @@ class _Body extends StatelessWidget {
                           Expanded(
                             child: _buildInfoCard(
                               context,
-                              title: 'سعر الخدمة',
+                              title: context.tr('service_price'),
                               value: viewModel.service!.priceText,
                               icon: Icons.attach_money,
                             ),
@@ -116,8 +121,8 @@ class _Body extends StatelessWidget {
                           Expanded(
                             child: _buildInfoCard(
                               context,
-                              title: 'سعر الكيلومتر',
-                              value: '${viewModel.service!.pricePerKm} ر.س',
+                              title: context.tr('price_per_km_label'),
+                              value: '${viewModel.service!.pricePerKm} ${context.tr('sar')}',
                               icon: Icons.directions_car,
                             ),
                           ),
@@ -127,21 +132,21 @@ class _Body extends StatelessWidget {
 
                       // الوصف
                       Text(
-                        'وصف الخدمة',
-                        style: TextStyle(color: context.qsColors.primary, fontSize: 18, fontWeight: FontWeight.bold),
+                        context.tr('service_description'),
+                        style: TextStyle(color: colors.primary, fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
+                          color: colors.card,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: context.qsColors.textSub.withOpacity(0.1)),
+                          border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
                         ),
                         child: Text(
-                          viewModel.service!.description.isNotEmpty ? viewModel.service!.description : 'لا يوجد وصف حالياً.',
-                          style: TextStyle(color: context.qsColors.text, fontSize: 15, height: 1.6),
+                          viewModel.service!.description.isNotEmpty ? viewModel.service!.description : context.tr('no_description_available'),
+                          style: TextStyle(color: colors.text, fontSize: 15, height: 1.6),
                         ),
                       ),
                     ],
@@ -151,21 +156,22 @@ class _Body extends StatelessWidget {
   }
 
   Widget _buildInfoCard(BuildContext context, {required String title, required String value, required IconData icon}) {
+    final colors = context.qsColors;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.qsColors.textSub.withOpacity(0.1)),
+        border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: context.qsColors.primary, size: 24),
+          Icon(icon, color: colors.primary, size: 24),
           const SizedBox(height: 12),
-          Text(title, style: TextStyle(color: context.qsColors.textSub, fontSize: 13)),
+          Text(title, style: TextStyle(color: colors.textSub, fontSize: 13)),
           const SizedBox(height: 4),
-          Text(value, style: TextStyle(color: context.qsColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(value, style: TextStyle(color: colors.text, fontSize: 16, fontWeight: FontWeight.bold)),
         ],
       ),
     );

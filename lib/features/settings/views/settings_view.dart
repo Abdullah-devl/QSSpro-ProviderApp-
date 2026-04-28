@@ -15,13 +15,13 @@ class SettingsView extends StatelessWidget {
     final colors = context.qsColors;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.card,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.blue),
+          icon: Icon(Icons.arrow_back, color: colors.primary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -40,7 +40,7 @@ class SettingsView extends StatelessWidget {
           children: [
             // 🎨 Section: Appearance
             _buildSectionTitle(context, 'appearance'),
-            _buildSettingsCard([
+            _buildSettingsCard(context, [
               _buildSettingTile(
                 context,
                 icon: Icons.dark_mode_outlined,
@@ -57,7 +57,7 @@ class SettingsView extends StatelessWidget {
 
             // 🌍 Section: Preferences
             _buildSectionTitle(context, 'preferences'),
-            _buildSettingsCard([
+            _buildSettingsCard(context, [
               _buildSettingTile(
                 context,
                 icon: Icons.language_outlined,
@@ -73,7 +73,7 @@ class SettingsView extends StatelessWidget {
 
             // 🛠️ Section: Support
             _buildSectionTitle(context, 'support_hub'),
-            _buildSettingsCard([
+            _buildSettingsCard(context, [
               _buildSettingTile(
                 context,
                 icon: Icons.report_problem_outlined,
@@ -91,7 +91,7 @@ class SettingsView extends StatelessWidget {
 
             // 📜 Section: Legal & About
             _buildSectionTitle(context, 'legal_about'),
-            _buildSettingsCard([
+            _buildSettingsCard(context, [
               _buildSettingTile(
                 context,
                 icon: Icons.privacy_tip_outlined,
@@ -110,9 +110,9 @@ class SettingsView extends StatelessWidget {
                 context,
                 icon: Icons.info_outline,
                 title: context.tr('app_version'),
-                trailing: const Text(
+                trailing: Text(
                   '2.4.0',
-                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: colors.textSub, fontWeight: FontWeight.bold),
                 ),
               ),
             ]),
@@ -131,12 +131,13 @@ class SettingsView extends StatelessWidget {
   }
 
   Widget _buildSectionTitle(BuildContext context, String key) {
+    final colors = context.qsColors;
     return Padding(
       padding: const EdgeInsets.only(left: 8, bottom: 8),
       child: Text(
         context.tr(key).toUpperCase(),
-        style: const TextStyle(
-          color: Colors.blueGrey,
+        style: TextStyle(
+          color: colors.textSub,
           fontSize: 12,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
@@ -145,14 +146,14 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsCard(List<Widget> children) {
+  Widget _buildSettingsCard(BuildContext context, List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: context.qsColors.text.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -174,19 +175,19 @@ class SettingsView extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.05),
+          color: context.qsColors.primary.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: Colors.blue, size: 22),
+        child: Icon(icon, color: context.qsColors.primary, size: 22),
       ),
       title: Text(
         title,
         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
       ),
       subtitle: subtitle != null 
-          ? Text(subtitle, style: const TextStyle(fontSize: 13, color: Colors.grey)) 
+          ? Text(subtitle, style: TextStyle(fontSize: 13, color: context.qsColors.textSub)) 
           : null,
-      trailing: trailing ?? const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+      trailing: trailing ?? Icon(Icons.arrow_forward_ios, size: 14, color: context.qsColors.textSub),
       onTap: onTap,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );

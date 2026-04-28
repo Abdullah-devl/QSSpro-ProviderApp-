@@ -1,4 +1,4 @@
-package com.example.provider
+package com.qss.provider
 
 import io.flutter.embedding.android.FlutterActivity
 

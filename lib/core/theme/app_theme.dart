@@ -22,11 +22,14 @@ class AppTheme {
       primary: CustomColor.lightPrimary, // اللون الأساسي
       secondary: CustomColor.lightSecondary, // اللون الثانوي
 
-      surface: CustomColor.lightAccent, // لون العناصر السطحية (Cards, Dialogs)
+      surface: CustomColor.lightCard, // لون العناصر السطحية (Cards, Dialogs)
       onPrimary: Colors.white, // لون النصوص/الأيقونات فوق اللون الأساسي
       onSurface: CustomColor.lightText, // لون النصوص فوق الأسطح
-      error: Colors.red, // لون الخطأ
+      error: CustomColor.error, // لون الخطأ الموحد
     ),
+    
+    // لون البطاقات
+    cardColor: CustomColor.lightCard,
 
     // تخصيص الخطوط
     textTheme: AppFonts.applyCairo(
@@ -64,11 +67,13 @@ class AppTheme {
       primary: CustomColor.darkPrimary,
       secondary: CustomColor.darkSecondary,
 
-      surface: CustomColor.darkAccent,
+      surface: CustomColor.darkCard,
       onPrimary: Colors.white,
       onSurface: CustomColor.darkText,
-      error: Colors.red,
+      error: CustomColor.error,
     ),
+
+    cardColor: CustomColor.darkCard,
 
     textTheme: AppFonts.applyCairo(
       const TextTheme(

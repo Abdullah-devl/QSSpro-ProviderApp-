@@ -1,4 +1,4 @@
-// // مسار الملف: lib/features/services/viewmodels/add_service_viewmodel.dart
+﻿// // مسار الملف: lib/features/services/viewmodels/add_service_viewmodel.dart
 
 // import 'dart:io';
 // import 'package:flutter/material.dart';
@@ -152,7 +152,7 @@
 //   //   ScaffoldMessenger.of(context).showSnackBar(
 //   //     SnackBar(
 //   //       content: Text(msg, style: const TextStyle(fontFamily: 'Cairo')),
-//   //       backgroundColor: Colors.red.shade700,
+//   //       backgroundColor: context.qsColors.error,
 //   //       behavior: SnackBarBehavior.floating,
 //   //     )
 //   //   );
@@ -174,6 +174,7 @@
 // مسار الملف: lib/features/services/viewmodels/add_service_viewmodel.dart
 
 import 'dart:io';
+// import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:service_provider_app/core/network/error/failure.dart';

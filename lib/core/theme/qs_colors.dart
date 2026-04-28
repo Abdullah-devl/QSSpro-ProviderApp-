@@ -23,6 +23,21 @@ class QSColors {
   /// لون التمييز (Accent).
   final Color accent;
 
+  /// الأحمر (للخطأ).
+  final Color error;
+
+  /// الأخضر (للنجاح).
+  final Color success;
+
+  /// الأصفر (للتحذير).
+  final Color warning;
+
+  /// لون المعلومات (Info).
+  final Color info;
+
+  /// لون البطاقات (Cards).
+  final Color card;
+
   /// 🏗️ البناء (Constructor): يتطلب تمرير جميع الألوان.
   const QSColors({
     required this.text,
@@ -31,5 +46,10 @@ class QSColors {
     required this.primary,
     required this.secondary,
     required this.accent,
+    required this.error,
+    required this.success,
+    required this.warning,
+    required this.info,
+    required this.card,
   });
 }

@@ -1,8 +1,8 @@
-// مسار الملف: lib/features/commissions/views/pay_with_receipt_view.dart
+﻿// مسار الملف: lib/features/commissions/views/pay_with_receipt_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:io';
+// import 'dart:io';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../../../core/utils/dialog_helper.dart';
@@ -56,8 +56,8 @@ class _PayWithReceiptViewState extends State<PayWithReceiptView> {
           child: InkWell(
             onTap: () => Navigator.pop(context),
             child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: context.qsColors.card,
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.arrow_forward_ios,
@@ -79,9 +79,9 @@ class _PayWithReceiptViewState extends State<PayWithReceiptView> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.qsColors.card,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.grey.withOpacity(0.1)),
+                    border: Border.all(color: context.qsColors.textSub.withOpacity(0.1)),
                   ),
                   child: Column(
                     children: [
@@ -100,10 +100,10 @@ class _PayWithReceiptViewState extends State<PayWithReceiptView> {
                       const SizedBox(height: 16),
                       Text(
                         context.tr('receipt_upload_title'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: context.qsColors.text,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -111,7 +111,7 @@ class _PayWithReceiptViewState extends State<PayWithReceiptView> {
                         context.tr('receipt_upload_subtitle'),
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.grey.shade500,
+                          color: context.qsColors.textSub,
                           fontWeight: FontWeight.w500,
                           height: 1.5,
                         ),
@@ -160,7 +160,7 @@ class _PayWithReceiptViewState extends State<PayWithReceiptView> {
                                     Text(
                                       context.tr('upload_limit_hint'),
                                       style: TextStyle(
-                                        color: Colors.grey.shade400,
+                                        color: context.qsColors.textSub,
                                         fontSize: 12,
                                       ),
                                     ),
@@ -177,10 +177,10 @@ class _PayWithReceiptViewState extends State<PayWithReceiptView> {
                 // 2. حقول البيانات
                 Text(
                   context.tr('bank_details'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: context.qsColors.text,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -249,7 +249,7 @@ class _PayWithReceiptViewState extends State<PayWithReceiptView> {
                   elevation: 0,
                 ),
                 child: viewModel.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? CircularProgressIndicator(color: context.qsColors.card)
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -285,10 +285,10 @@ class _PayWithReceiptViewState extends State<PayWithReceiptView> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: context.qsColors.text,
           ),
         ),
         const SizedBox(height: 8),
@@ -301,16 +301,16 @@ class _PayWithReceiptViewState extends State<PayWithReceiptView> {
             hintText: hint,
             prefixIcon: Icon(icon, color: const Color(0xFF5CA4B8), size: 20),
             filled: true,
-            fillColor: readOnly ? Colors.grey.shade100 : Colors.white,
+            fillColor: readOnly ? context.qsColors.textSub : context.qsColors.card,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(color: context.qsColors.textSub),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(color: context.qsColors.textSub),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -322,3 +322,5 @@ class _PayWithReceiptViewState extends State<PayWithReceiptView> {
     );
   }
 }
+
+

@@ -11,12 +11,13 @@ class CommissionsStatsBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.qsColors;
     final viewModel = context.watch<CommissionsStatsViewModel>();
 
     if (viewModel.isLoading && viewModel.statsSummary == null) {
-      return const SizedBox(
+      return SizedBox(
         height: 180,
-        child: Center(child: CircularProgressIndicator(color: Color(0xFF1CB0F6))),
+        child: Center(child: CircularProgressIndicator(color: colors.primary)),
       );
     }
 
@@ -26,9 +27,9 @@ class CommissionsStatsBanner extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: 2,
-          crossAxisSpacing: 12, // تقليل المسافات الجانبية قليلاً لزيادة عرض الكارت
+          crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 1.1, // تعديل الطول ليكون الحجم مناسباً للنصوص بدون زحمة
+          childAspectRatio: 1.1,
           children: [
             // 💰 1. العمولة المستحقة
             _buildStatCard(
@@ -37,7 +38,7 @@ class CommissionsStatsBanner extends StatelessWidget {
               value: '${viewModel.statsSummary?.currentBalance.toInt() ?? 0}',
               unit: context.tr('currency_sar'),
               icon: Icons.account_balance_wallet_rounded,
-              color: const Color(0xFF1CB0F6),
+              color: colors.primary,
             ),
 
             // 💵 2. أرباح قابلة للسحب
@@ -47,7 +48,7 @@ class CommissionsStatsBanner extends StatelessWidget {
               value: '${viewModel.pointsBalance?.paidPoints.toInt() ?? 0}',
               unit: context.tr('pts'),
               icon: Icons.monetization_on_rounded,
-              color: const Color(0xFF4CAF50),
+              color: colors.success,
             ),
 
             // 🎁 3. نقاط المكافأة
@@ -57,7 +58,7 @@ class CommissionsStatsBanner extends StatelessWidget {
               value: '${viewModel.pointsBalance?.bonusPoints.toInt() ?? 0}',
               unit: context.tr('pts'),
               icon: Icons.card_giftcard_rounded,
-              color: const Color(0xFFFF9800),
+              color: colors.warning,
             ),
 
             // 📅 4. أيام التوثيق المتبقية
@@ -69,7 +70,7 @@ class CommissionsStatsBanner extends StatelessWidget {
                   : context.tr('not_verified'),
               unit: viewModel.isVerified ? context.tr('days_label') : '',
               icon: Icons.verified_user_rounded,
-              color: viewModel.isVerified ? const Color(0xFF9C27B0) : Colors.grey,
+              color: viewModel.isVerified ? const Color(0xFF9C27B0) : colors.textSub,
               isDayCount: viewModel.isVerified,
             ),
           ],
@@ -92,11 +93,11 @@ class CommissionsStatsBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16), // جعل الزوايا أقل حدة لتوفير مساحة
+        color: colors.card,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: colors.text.withValues(alpha: 0.03),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -108,15 +109,15 @@ class CommissionsStatsBanner extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 22),
           ),
-          const Spacer(), // يضمن توزيعاً عادلاً بين الأيقونة في الأعلى والنصوص في الأسفل
+          const Spacer(),
           Text(
             title,
-            maxLines: 2, // السماح بسطرين لضمان عدم اختفاء النص الطويل
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 10.5,
@@ -126,7 +127,7 @@ class CommissionsStatsBanner extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          FittedBox( // يضمن ظهور الرقم بالكامل حتى لو كان كبيراً
+          FittedBox(
             fit: BoxFit.scaleDown,
             alignment: AlignmentDirectional.topStart,
             child: Row(

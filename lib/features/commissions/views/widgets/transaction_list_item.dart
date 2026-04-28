@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/theme/qs_color_extension.dart';
 import '../../models/commission_model.dart';
 
 class TransactionListItem extends StatelessWidget {
@@ -87,11 +88,11 @@ class TransactionListItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: context.qsColors.text.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -119,10 +120,10 @@ class TransactionListItem extends StatelessWidget {
               children: [
                 Text(
                   transaction.title,
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: context.qsColors.text,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -132,18 +133,18 @@ class TransactionListItem extends StatelessWidget {
                       transaction.id,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade500,
+                        color: context.qsColors.textSub,
                       ),
                     ),
                     if (transaction.date.isNotEmpty) ...[
                       const SizedBox(width: 6),
-                      Icon(Icons.circle, size: 4, color: Colors.grey.shade400),
+                      Icon(Icons.circle, size: 4, color: context.qsColors.textSub.withValues(alpha: 0.6)),
                       const SizedBox(width: 6),
                       Text(
                         transaction.date,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade500,
+                          color: context.qsColors.textSub,
                         ),
                       ),
                     ],
@@ -164,10 +165,10 @@ class TransactionListItem extends StatelessWidget {
                 children: [
                   Text(
                     transaction.amount.toStringAsFixed(2),
-                    style: const TextStyle(
+                    style:  TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: context.qsColors.text,
                     ),
                   ),
                   const SizedBox(width: 4),
@@ -176,7 +177,7 @@ class TransactionListItem extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade600,
+                      color: context.qsColors.textSub,
                     ),
                   ),
                 ],

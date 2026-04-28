@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/custom_service_viewmodel.dart';
@@ -39,7 +39,7 @@ class EditCustomServiceView extends StatelessWidget {
                 Switch.adaptive(
                   value: viewModel.isActive,
                   onChanged: viewModel.setIsActive,
-                  activeColor: Colors.green.shade600,
+                  activeColor: context.qsColors.success,
                 ),
               ],
             ),
@@ -90,10 +90,10 @@ class EditCustomServiceView extends StatelessWidget {
                         }
                       },
                 child: viewModel.isSaving
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
+                    ? CircularProgressIndicator(color: context.qsColors.card)
+                    : Text(
                         'حفظ التعديلات',
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: context.qsColors.card, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
               ),
             ),
@@ -103,3 +103,6 @@ class EditCustomServiceView extends StatelessWidget {
     );
   }
 }
+
+
+

@@ -20,11 +20,11 @@ class PointsActionsBannerWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.card,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: colors.text.withValues(alpha: 0.04),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -38,12 +38,12 @@ class PointsActionsBannerWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1CB0F6).withOpacity(0.1),
+                  color: colors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.swap_horizontal_circle_outlined,
-                  color: Color(0xFF1CB0F6),
+                  color: colors.primary,
                   size: 28,
                 ),
               ),
@@ -92,8 +92,8 @@ class PointsActionsBannerWidget extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1CB0F6),
-                    foregroundColor: Colors.white,
+                    backgroundColor: colors.primary,
+                    foregroundColor: colors.card,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -122,7 +122,7 @@ class PointsActionsBannerWidget extends StatelessWidget {
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF1CB0F6)),
+                    side: BorderSide(color: colors.primary),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
@@ -130,8 +130,8 @@ class PointsActionsBannerWidget extends StatelessWidget {
                   ),
                   child: Text(
                     context.tr('withdraw_points'),
-                    style: const TextStyle(
-                      color: Color(0xFF1CB0F6),
+                    style: TextStyle(
+                      color: colors.primary,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),

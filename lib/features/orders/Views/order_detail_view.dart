@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/qs_color_extension.dart';
 import '../Models/order_model.dart';
 import '../ViewModels/orders_viewmodel.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -34,16 +35,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       orElse: () => widget.order,
     );
 
-
-    // 🕵️ طباعة بيانات التشخيص عند بناء الصفحة
-    debugPrint(
-      '🔍 [VIEW] Displaying OrderDetailView for ID: ${currentOrder.id}',
-    );
-    if (currentOrder.rawJson != null) {
-      debugPrint('📦 [VIEW] Raw JSON for this Order: ${currentOrder.rawJson}');
-    }
-
-    // حساب العمولة في بداية الـ build لتكون متاحة لكل الأجزاء
+    // حساب العمولة
     final double commissionAmount =
         double.tryParse(
           currentOrder.rawJson?['order_commission']?.toString() ?? '',
@@ -53,27 +45,27 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF6F9FB),
+        backgroundColor: context.qsColors.background,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: context.qsColors.card,
           elevation: 0,
           centerTitle: true,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward, color: Colors.black87),
+            icon: Icon(Icons.arrow_forward, color: context.qsColors.text),
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: Text(
             context.tr('details'),
-            style: const TextStyle(
-              color: Color(0xFF1D2126),
+            style: TextStyle(
+              color: context.qsColors.text,
               fontWeight: FontWeight.w800,
               fontSize: 20,
             ),
           ),
         ),
         body: RefreshIndicator(
-          color: Colors.grey,
-          backgroundColor: Colors.white,
+          color: context.qsColors.primary,
+          backgroundColor: context.qsColors.card,
           onRefresh: () => viewModel.refreshOrderDetail(currentOrder.id),
           child: Stack(
             children: [
@@ -97,7 +89,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       const SizedBox(height: 32),
                     ],
 
-                    // 💰 قسم إدارة الدفع والحالة (تتبع الحالة والمبالغ)
+                    // 💰 قسم إدارة الدفع والحالة
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 500),
                       child: currentStatusIndex(currentOrder.status) >= 1
@@ -117,7 +109,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                           : const SizedBox.shrink(),
                     ),
 
-                    // 🏆 قسم العمولة (يظهر فقط عند اكتمال الطلب)
+                    // 🏆 قسم العمولة
                     if (currentOrder.status == 'completed' ||
                         currentOrder.status == 'finished') ...[
                       _buildCommissionCard(
@@ -128,8 +120,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       const SizedBox(height: 16),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFA502),
-                          foregroundColor: Colors.white,
+                          backgroundColor: context.qsColors.warning,
+                          foregroundColor: context.qsColors.card,
                           minimumSize: const Size(double.infinity, 60),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
@@ -165,14 +157,13 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       currentOrder,
                     ),
 
-                    // 🚩 زر إرسال شكوى (يظهر فقط في مرحلة جاري العمل)
+                    // 🚩 زر إرسال شكوى
                     if (currentOrder.status == 'accepted_partial_paid' ||
                         currentOrder.status == 'accepted_full_paid' ||
                         currentOrder.status == 'processing') ...[
                       const SizedBox(height: 16),
                       _buildComplaintButton(context, currentOrder.id),
                     ],
-
 
                     const SizedBox(height: 48),
 
@@ -183,7 +174,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               ),
               if (viewModel.isLoading)
                 Container(
-                  color: Colors.black26.withOpacity(0.1),
+                  color: context.qsColors.text.withValues(alpha: 0.05),
                   child: const Center(child: CircularProgressIndicator()),
                 ),
             ],
@@ -199,20 +190,22 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 
-  // --- المكونات الفرعية (Sub-widgets) ---
-
   Widget _buildSectionHeader(BuildContext context, String titleKey) {
     return Text(
       context.tr(titleKey),
-      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w900,
+        color: context.qsColors.text,
+      ),
     );
   }
 
   Widget _buildComplaintButton(BuildContext context, String orderId) {
     return OutlinedButton.icon(
       style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.redAccent,
-        side: const BorderSide(color: Colors.redAccent, width: 2),
+        foregroundColor: context.qsColors.error,
+        side: BorderSide(color: context.qsColors.error, width: 2),
         minimumSize: const Size(double.infinity, 56),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
@@ -244,11 +237,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             width: 100,
             margin: const EdgeInsets.only(left: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.qsColors.card,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: context.qsColors.text.withValues(alpha: 0.05),
                   blurRadius: 10,
                 ),
               ],
@@ -266,16 +259,17 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                             fit: BoxFit.cover,
                             width: double.infinity,
                           )
-                        : const Icon(Icons.receipt_long, color: Colors.grey),
+                        : Icon(Icons.receipt_long, color: context.qsColors.textSub),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: Text(
                     bond.bondNumber,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
+                      color: context.qsColors.text,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -299,31 +293,30 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20),
+          BoxShadow(color: context.qsColors.text.withValues(alpha: 0.04), blurRadius: 20),
         ],
       ),
       child: Column(
         children: [
-          // 1. بطاقات الإحصاءات (Cards Row)
           Row(
             children: [
               _buildSummaryCard(
                 context,
                 context.tr('paid_currently'),
                 '${order.paidAmount}',
-                const Color(0xFFE8F6FF),
-                const Color(0xFF1CB0F6),
+                context.qsColors.primary.withValues(alpha: 0.1),
+                context.qsColors.primary,
               ),
               const SizedBox(width: 12),
               _buildSummaryCard(
                 context,
-                '${((order.paidAmount / order.price) * 100).toStringAsFixed(0)}%', // The label is actually the amount label above it? Wait, line 294 code says "'المدفوع حالياً', // Actual Paid %"
                 '${((order.paidAmount / order.price) * 100).toStringAsFixed(0)}%',
-                const Color(0xFFE8F5E9),
-                const Color(0xFF2ECC71),
+                '${((order.paidAmount / order.price) * 100).toStringAsFixed(0)}%',
+                context.qsColors.success.withValues(alpha: 0.1),
+                context.qsColors.success,
                 hasBorder: true,
               ),
               const SizedBox(width: 12),
@@ -331,26 +324,25 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 context,
                 context.tr('remaining_amount'),
                 '${order.remainingAmount}',
-                const Color(0xFFFFF1F1),
-                const Color(0xFFFF5252),
+                context.qsColors.error.withValues(alpha: 0.1),
+                context.qsColors.error,
               ),
             ],
           ),
           const SizedBox(height: 16),
-          // عرض النسبة المطلوبة (التعميد) بشكل منفصل وأنيق
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
+              color: context.qsColors.background,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.info_outline,
                   size: 16,
-                  color: Color(0xFF64748B),
+                  color: context.qsColors.textSub,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -360,10 +352,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       'percentage': order.requiredPartialPercentage.toString(),
                     },
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF64748B),
+                    color: context.qsColors.textSub,
                   ),
                 ),
               ],
@@ -371,62 +363,60 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           ),
           const SizedBox(height: 24),
 
-          // 2. شيبس تتبع الحالة (Status Chips)
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
                 _buildStatusChip(
                   'pending',
-                  context.tr('pending_status'), // New
+                  context.tr('pending_status'),
                   order.status,
-                  const Color(0xFF03A9F4), // Sky Blue/Azure
-                  const Color(0xFFE1F5FE),
+                  context.qsColors.info,
+                  context.qsColors.info.withValues(alpha: 0.1),
                 ),
                 _buildStatusChip(
                   'accepted_initial',
-                  context.tr('accepted_status'), // Waiting
+                  context.tr('accepted_status'),
                   order.status,
-                  const Color(0xFF03A9F4), // Sky Blue/Azure
-                  const Color(0xFFE1F5FE),
+                  context.qsColors.info,
+                  context.qsColors.info.withValues(alpha: 0.1),
                 ),
                 _buildStatusChip(
                   'accepted_partial_paid',
-                  context.tr('working_status'), // In Progress
+                  context.tr('working_status'),
                   order.status,
-                  const Color(0xFFFF9800), // Orange
-                  const Color(0xFFFFF3E0),
+                  context.qsColors.warning,
+                  context.qsColors.warning.withValues(alpha: 0.1),
                 ),
                 _buildStatusChip(
                   'completed',
-                  context.tr('completed_status'), // Completed
+                  context.tr('completed_status'),
                   order.status,
-                  const Color(0xFF388E3C), // Dark Green
-                  const Color(0xFFE8F5E9),
+                  context.qsColors.success,
+                  context.qsColors.success.withValues(alpha: 0.1),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 24),
 
-          // 3. حقل إدخال المبلغ وزر الإرسال
           if (!isCompleted)
             Row(
               children: [
                 Expanded(
                   child: Container(
-                    height: 70, // تكبير المربع
+                    height: 70,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.qsColors.card,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: const Color(0xFF1CB0F6),
+                        color: context.qsColors.primary,
                         width: 2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF1CB0F6).withOpacity(0.1),
+                          color: context.qsColors.primary.withValues(alpha: 0.1),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -436,22 +426,22 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       controller: _amountController,
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1D2126),
+                        color: context.qsColors.text,
                       ),
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: '0.0',
-                        hintStyle: TextStyle(color: Colors.grey.shade400),
+                        hintStyle: TextStyle(color: context.qsColors.textSub),
                         suffixIcon: Padding(
                           padding: const EdgeInsets.only(top: 14),
                           child: Text(
                             context.tr('currency_sar'),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.grey,
+                              color: context.qsColors.textSub,
                             ),
                           ),
                         ),
@@ -482,16 +472,16 @@ class _OrderDetailViewState extends State<OrderDetailView> {
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(20),
-          border: hasBorder ? Border.all(color: const Color(0xFFE8F6FF)) : null,
+          border: hasBorder ? Border.all(color: context.qsColors.primary.withValues(alpha: 0.1)) : null,
         ),
         child: Column(
           children: [
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF90A4AE),
+                color: context.qsColors.textSub,
               ),
             ),
             const SizedBox(height: 8),
@@ -560,18 +550,18 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       decoration: BoxDecoration(
         color: isActive
             ? bgColor
-            : (isPast ? bgColor.withOpacity(0.4) : const Color(0xFFF9FAFB)),
+            : (isPast ? bgColor.withValues(alpha: 0.4) : context.qsColors.background),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isActive
               ? color
-              : (isPast ? color.withOpacity(0.5) : const Color(0xFFF1F5F9)),
+              : (isPast ? color.withValues(alpha: 0.5) : context.qsColors.background),
           width: isActive ? 2.5 : 1,
         ),
         boxShadow: isActive
             ? [
                 BoxShadow(
-                  color: color.withOpacity(0.2),
+                  color: color.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -590,8 +580,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             label,
             style: TextStyle(
               color: isActive
-                  ? color.withOpacity(0.9)
-                  : (isPast ? color.withOpacity(0.7) : const Color(0xFF94A3B8)),
+                  ? color.withValues(alpha: 0.9)
+                  : (isPast ? color.withValues(alpha: 0.7) : context.qsColors.textSub),
               fontWeight: isActive ? FontWeight.w900 : FontWeight.bold,
               fontSize: isActive ? 14 : 12,
             ),
@@ -606,18 +596,17 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     OrdersViewModel viewModel,
     OrderModel order,
   ) {
-    // 🚦 التحقق من الحالة: لا يمكن إضافة مبلغ إذا كان الطلب لا يزال "في الانتظار"
     final bool canPay = currentStatusIndex(order.status) > 0;
 
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
         backgroundColor: canPay
-            ? const Color(0xFF1CB0F6)
-            : Colors.grey.shade400,
-        foregroundColor: Colors.white,
+            ? context.qsColors.primary
+            : context.qsColors.textSub,
+        foregroundColor: context.qsColors.card,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        elevation: viewModel.isLoading ? 0 : 0,
+        elevation: 0,
       ),
       onPressed: (viewModel.isLoading || !canPay)
           ? null
@@ -629,9 +618,6 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 );
                 return;
               }
-              debugPrint(
-                '🎯 [VIEW] User clicked Add Amount for Order ID: ${order.id}',
-              );
               final success = await viewModel.addPaidAmount(order.id, amount);
               if (success) {
                 _amountController.clear();
@@ -643,11 +629,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               }
             },
       icon: viewModel.isLoading
-          ? const SizedBox(
+          ? SizedBox(
               width: 18,
               height: 18,
               child: CircularProgressIndicator(
-                color: Colors.white,
+                color: context.qsColors.card,
                 strokeWidth: 2,
               ),
             )
@@ -664,11 +650,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
   Widget _buildUnifiedRequestCard(BuildContext context, OrderModel order) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: context.qsColors.text.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -677,7 +663,6 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 👨‍💼 1. رأس البطاقة: بيانات العميل
           Padding(
             padding: const EdgeInsets.all(20),
             child: Row(
@@ -690,7 +675,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       height: 80,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(24),
-                        color: const Color(0xFFF1F5F9),
+                        color: context.qsColors.background,
                         image: order.customerImage.isNotEmpty
                             ? DecorationImage(
                                 image: NetworkImage(order.customerImage),
@@ -699,10 +684,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                             : null,
                       ),
                       child: order.customerImage.isEmpty
-                          ? const Icon(
+                          ? Icon(
                               Icons.person,
                               size: 40,
-                              color: Color(0xFF90A4AE),
+                              color: context.qsColors.textSub,
                             )
                           : null,
                     ),
@@ -710,9 +695,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       width: 18,
                       height: 18,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2ECC71),
+                        color: context.qsColors.success,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 3),
+                        border: Border.all(color: context.qsColors.card, width: 3),
                       ),
                     ),
                   ],
@@ -726,17 +711,17 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         children: [
                           Text(
                             order.customerName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
-                              color: Color(0xFF1D2126),
+                              color: context.qsColors.text,
                             ),
                           ),
                           if (order.isVerified) ...[
                             const SizedBox(width: 8),
-                            const Icon(
+                            Icon(
                               Icons.verified,
-                              color: Color(0xFF1CB0F6),
+                              color: context.qsColors.primary,
                               size: 20,
                             ),
                           ],
@@ -747,10 +732,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         order.customerPhone.isNotEmpty
                             ? order.customerPhone
                             : '---',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF90A4AE),
+                          color: context.qsColors.textSub,
                         ),
                       ),
                     ],
@@ -759,16 +744,15 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 const SizedBox(width: 16),
                 _buildActionIcon(
                   Icons.chat_bubble_outline,
-                  const Color(0xFFE8F6FF),
-                  const Color(0xFF1CB0F6),
+                  context.qsColors.primary.withValues(alpha: 0.1),
+                  context.qsColors.primary,
                 ),
               ],
             ),
           ),
 
-          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+          Divider(height: 1, color: context.qsColors.background),
 
-          // 📝 2. وصف الطلب
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -778,20 +762,19 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 const SizedBox(height: 8),
                 Text(
                   order.description ?? '---',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     height: 1.6,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF5A6B7A),
+                    color: context.qsColors.text,
                   ),
                 ),
               ],
             ),
           ),
 
-          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+          Divider(height: 1, color: context.qsColors.background),
 
-          // 🛠️ 3. تفاصيل الخدمة (المفصلة برؤية المستخدم)
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -800,7 +783,6 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 _buildInlineSectionTitle(context, 'service_details_title'),
                 const SizedBox(height: 16),
 
-                // الخدمة الأساسية
                 _buildServiceRow(
                   context,
                   order.serviceName,
@@ -808,14 +790,14 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       order.subServices.fold(
                         0.0,
                         (sum, sub) => sum + sub.price,
-                      ), // السعر الأساسي = الإجمالي - الفرعي
+                      ),
                   isMain: true,
                 ),
 
                 if (order.subServices.isNotEmpty) ...[
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Divider(color: Color(0xFFF1F5F9), thickness: 0.5),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Divider(color: context.qsColors.background, thickness: 0.5),
                   ),
                   ...order.subServices.map(
                     (sub) => _buildServiceRow(context, sub.name, sub.price),
@@ -825,9 +807,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             ),
           ),
 
-          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+          Divider(height: 1, color: context.qsColors.background),
 
-          // 📍 4. الموقع المرسل مع الطلب
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -840,12 +821,12 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFF1F1),
+                        color: context.qsColors.error.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.location_on,
-                        color: Color(0xFFFF4D4D),
+                        color: context.qsColors.error,
                         size: 20,
                       ),
                     ),
@@ -856,18 +837,18 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         children: [
                           Text(
                             order.location,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF1D2126),
+                              color: context.qsColors.text,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             context.tr('click_to_open_google_maps'),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF90A4AE),
+                              color: context.qsColors.textSub,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -888,8 +869,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       },
                       child: _buildActionIcon(
                         Icons.near_me_outlined,
-                        const Color(0xFFE8F6FF),
-                        const Color(0xFF1CB0F6),
+                        context.qsColors.primary.withValues(alpha: 0.1),
+                        context.qsColors.primary,
                       ),
                     ),
                   ],
@@ -920,8 +901,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   isMain ? Icons.star_rounded : Icons.add_circle_outline,
                   size: 18,
                   color: isMain
-                      ? const Color(0xFFFFA502)
-                      : const Color(0xFF1CB0F6),
+                      ? context.qsColors.warning
+                      : context.qsColors.primary,
                 ),
                 const SizedBox(width: 10),
                 Flexible(
@@ -931,8 +912,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       fontSize: 15,
                       fontWeight: isMain ? FontWeight.w800 : FontWeight.w600,
                       color: isMain
-                          ? const Color(0xFF1D2126)
-                          : const Color(0xFF5A6B7A),
+                          ? context.qsColors.text
+                          : context.qsColors.textSub,
                     ),
                   ),
                 ),
@@ -944,7 +925,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w900,
-              color: isMain ? const Color(0xFF1CB0F6) : const Color(0xFF1D2126),
+              color: isMain ? context.qsColors.primary : context.qsColors.text,
             ),
           ),
         ],
@@ -955,10 +936,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
   Widget _buildInlineSectionTitle(BuildContext context, String titleKey) {
     return Text(
       context.tr(titleKey),
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w900,
-        color: Color(0xFF90A4AE),
+        color: context.qsColors.textSub,
         letterSpacing: 0.5,
       ),
     );
@@ -976,16 +957,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 
-
-
-
-
   Widget _buildProviderFinishAction(
     BuildContext context,
     OrdersViewModel viewModel,
     OrderModel order,
   ) {
-    // الشروط: حالة الدفع جزئي أو كلي، ولم يسبق تأكيد الانتهاء
     final bool canFinish =
         (order.status == 'accepted_partial_paid' ||
             order.status == 'accepted_full_paid') &&
@@ -998,15 +974,15 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF1CB0F6), Color(0xFF1976D2)],
+          gradient: LinearGradient(
+            colors: [context.qsColors.primary, context.qsColors.primary.withValues(alpha: 0.8)],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF1CB0F6).withOpacity(0.3),
+              color: context.qsColors.primary.withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -1016,13 +992,13 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           children: [
             Row(
               children: [
-                const Icon(Icons.celebration, color: Colors.white, size: 28),
+                Icon(Icons.celebration, color: context.qsColors.card, size: 28),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     context.tr('finish_work_question'),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: context.qsColors.card,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1049,8 +1025,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         }
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF1CB0F6),
+                  backgroundColor: context.qsColors.card,
+                  foregroundColor: context.qsColors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -1058,10 +1034,13 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   elevation: 0,
                 ),
                 child: viewModel.isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          color: context.qsColors.primary,
+                          strokeWidth: 2,
+                        ),
                       )
                     : Text(
                         context.tr('confirm_finish_work'),
@@ -1083,10 +1062,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       children: [
         Text(
           context.tr('total_order_price'),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF90A4AE),
+            color: context.qsColors.textSub,
           ),
         ),
         const SizedBox(height: 4),
@@ -1097,19 +1076,19 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           children: [
             Text(
               '${order.price.toInt()}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 56,
                 fontWeight: FontWeight.w900,
-                color: Color(0xFF1CB0F6),
+                color: context.qsColors.primary,
               ),
             ),
             const SizedBox(width: 8),
             Text(
               context.tr('currency_sar'),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w900,
-                color: Color(0xFF1CB0F6),
+                color: context.qsColors.primary,
               ),
             ),
           ],
@@ -1132,11 +1111,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.qsColors.card,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: context.qsColors.text.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -1149,13 +1128,13 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   flex: 2,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1CB0F6),
-                      foregroundColor: Colors.white,
+                      backgroundColor: context.qsColors.primary,
+                      foregroundColor: context.qsColors.card,
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
-                      elevation: viewModel.isLoading ? 0 : 0,
+                      elevation: 0,
                     ),
                     onPressed: viewModel.isLoading
                         ? null
@@ -1175,11 +1154,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                             }
                           },
                     icon: viewModel.isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                              color: Colors.white,
+                              color: context.qsColors.card,
                               strokeWidth: 2,
                             ),
                           )
@@ -1199,8 +1178,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 Expanded(
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF1F5F9),
-                      foregroundColor: const Color(0xFF5A6B7A),
+                      backgroundColor: context.qsColors.background,
+                      foregroundColor: context.qsColors.textSub,
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
@@ -1225,11 +1204,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                             }
                           },
                     icon: viewModel.isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                              color: Color(0xFF5A6B7A),
+                              color: context.qsColors.textSub,
                               strokeWidth: 2,
                             ),
                           )
@@ -1255,8 +1234,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFA502),
-                    foregroundColor: Colors.white,
+                    backgroundColor: context.qsColors.warning,
+                    foregroundColor: context.qsColors.card,
                     minimumSize: const Size(double.infinity, 60),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
@@ -1289,35 +1268,32 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 order.status == 'in_progress')
           ? ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2ECC71),
-                foregroundColor: Colors.white,
+                backgroundColor: context.qsColors.success,
+                foregroundColor: context.qsColors.card,
                 minimumSize: const Size(double.infinity, 64),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
-                elevation: viewModel.isLoading ? 0 : 8,
-                shadowColor: const Color(0xFF2ECC71).withOpacity(0.4),
+                elevation: 0,
+                shadowColor: context.qsColors.success.withValues(alpha: 0.4),
               ),
               onPressed: viewModel.isLoading
                   ? null
                     : () async {
                        await viewModel.updateStatus(order.id, 'completed');
-
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'سيتم تفعيل هذا الزر قريباً مع اللوجك الجديد',
-                          ),
-                          backgroundColor: Color(0xFF2ECC71),
+                        SnackBar(
+                          content: Text(context.tr('commission_note')),
+                          backgroundColor: context.qsColors.success,
                         ),
                       );
                     },
               icon: viewModel.isLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
-                        color: Colors.white,
+                        color: context.qsColors.card,
                         strokeWidth: 2,
                       ),
                     )
@@ -1345,16 +1321,16 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFF9DB), Color(0xFFFFF4D6)],
+        gradient: LinearGradient(
+          colors: [context.qsColors.warning.withValues(alpha: 0.1), context.qsColors.warning.withValues(alpha: 0.05)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFFFA502).withOpacity(0.3)),
+        border: Border.all(color: context.qsColors.warning.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFFFA502).withOpacity(0.1),
+            color: context.qsColors.warning.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -1367,12 +1343,12 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFA502),
+                  color: context.qsColors.warning,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.account_balance_wallet_outlined,
-                  color: Colors.white,
+                  color: context.qsColors.card,
                   size: 20,
                 ),
               ),
@@ -1380,36 +1356,36 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               Expanded(
                 child: Text(
                   context.tr('total_due_commission'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF8B5E00),
+                    color: context.qsColors.text,
                   ),
                 ),
               ),
               Text(
                 '${commissionAmount.toInt()} ${context.tr('currency_sar')}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFFD48100),
+                  color: context.qsColors.warning,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          const Divider(color: Color(0xFFFFA502), thickness: 0.5),
+          Divider(color: context.qsColors.warning.withValues(alpha: 0.3), thickness: 0.5),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'إجمالي قيمة الطلب: ${order.price.toInt()} ر.س',
-                style: const TextStyle(fontSize: 11, color: Color(0xFF8B5E00)),
+                context.tr('total_order_price_value', args: {'price': order.price.toInt().toString()}),
+                style: TextStyle(fontSize: 11, color: context.qsColors.textSub),
               ),
-              const Text(
-                'نسبة العمولة: 10%',
-                style: TextStyle(fontSize: 11, color: Color(0xFF8B5E00)),
+              Text(
+                context.tr('commission_percentage_value', args: {'percentage': '10'}),
+                style: TextStyle(fontSize: 11, color: context.qsColors.textSub),
               ),
             ],
           ),

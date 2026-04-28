@@ -1,4 +1,4 @@
-// مسار الملف: lib/features/services/views/manage_services_view.dart
+﻿// مسار الملف: lib/features/services/views/manage_services_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +16,7 @@ class ManageServicesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<ManageServicesViewModel>(context);
-    final mainViewModel = Provider.of<MainViewModel>(context, listen: false);
+    Provider.of<MainViewModel>(context, listen: false);
 
     final filters = [
       context.tr('filter_all'),
@@ -47,8 +47,8 @@ class ManageServicesView extends StatelessWidget {
 
           Expanded(
             child: RefreshIndicator(
-              color: Colors.grey,
-              backgroundColor: Colors.white,
+              color: context.qsColors.primary,
+              backgroundColor: context.qsColors.card,
               onRefresh: () async => await viewModel.fetchServices(),
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -58,11 +58,11 @@ class ManageServicesView extends StatelessWidget {
                     // 2. شريط البحث
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.qsColors.card,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
+                            color: context.qsColors.text.withValues(alpha: 0.04),
                             blurRadius: 10,
                             offset: const Offset(0, 2),
                           ),
@@ -111,7 +111,7 @@ class ManageServicesView extends StatelessWidget {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.add, color: Colors.white, size: 18),
+                                  Icon(Icons.add, color: context.qsColors.card, size: 18),
                                   const SizedBox(width: 2),
                                   Flexible(
                                     child: FittedBox(
@@ -119,7 +119,7 @@ class ManageServicesView extends StatelessWidget {
                                       child: Text(
                                         context.tr('add_service'),
                                         style: TextStyle(
-                                          color: Colors.white,
+                                          color: context.qsColors.card,
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
                                         ),
@@ -198,7 +198,7 @@ class ManageServicesView extends StatelessWidget {
                                 color: isSelected
                                     ? context.qsColors.primary
                                     // ? context.qsColors.text
-                                    : Colors.white,
+                                    : context.qsColors.card,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: isSelected
@@ -212,7 +212,7 @@ class ManageServicesView extends StatelessWidget {
                                 filters[index],
                                 style: TextStyle(
                                   color: isSelected
-                                      ? Colors.white
+                                      ? context.qsColors.card
                                       : context.qsColors.textSub,
                                   fontWeight: isSelected
                                       ? FontWeight.bold
@@ -228,16 +228,16 @@ class ManageServicesView extends StatelessWidget {
 
                     // 4. الحالات (تحميل، خطأ، أو عرض البيانات)
                     if (viewModel.isLoading)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 50),
-                        child: CircularProgressIndicator(),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 50),
+                        child: CircularProgressIndicator(color: context.qsColors.primary),
                       )
                     else if (viewModel.errorMessage != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 50),
                         child: Text(
                           viewModel.errorMessage!,
-                          style: const TextStyle(color: Colors.red),
+                          style: TextStyle(color: context.qsColors.error),
                         ),
                       )
                     else if (viewModel.filteredServices.isEmpty)
@@ -261,3 +261,5 @@ class ManageServicesView extends StatelessWidget {
     );
   }
 }
+
+

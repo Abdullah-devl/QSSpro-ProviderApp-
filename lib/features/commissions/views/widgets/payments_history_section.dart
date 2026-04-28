@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:service_provider_app/core/localization/app_localizations.dart';
+import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:service_provider_app/features/commissions/viewmodels/payments_history_viewmodel.dart';
 import 'package:service_provider_app/features/commissions/views/widgets/history_list_item.dart';
 
@@ -17,10 +18,10 @@ class PaymentsHistorySection extends StatelessWidget {
             // العنوان الرئيسي
             Text(
               context.tr('payments_history'),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: context.qsColors.text,
               ),
             ),
             const SizedBox(height: 16),
@@ -37,16 +38,16 @@ class PaymentsHistorySection extends StatelessWidget {
                       margin: const EdgeInsets.only(left: 10),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF2196F3) : Colors.grey.shade100,
+                        color: isSelected ? context.qsColors.primary : context.qsColors.card,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: isSelected ? Colors.transparent : Colors.grey.shade200,
+                          color: isSelected ? Colors.transparent : context.qsColors.textSub.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Text(
                         context.tr(viewModel.tabKeys[index]),
                         style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.grey.shade600,
+                          color: isSelected ? context.qsColors.card : context.qsColors.textSub,
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           fontSize: 13,
                         ),
@@ -79,11 +80,11 @@ class PaymentsHistorySection extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 60),
                   child: Column(
                     children: [
-                      Icon(Icons.history_rounded, size: 48, color: Colors.grey.shade300),
+                      Icon(Icons.history_rounded, size: 48, color: context.qsColors.textSub.withValues(alpha: 0.4)),
                       const SizedBox(height: 12),
                       Text(
                         context.tr('no_transactions_currently'),
-                        style: TextStyle(color: Colors.grey.shade500),
+                        style: TextStyle(color: context.qsColors.textSub),
                       ),
                     ],
                   ),
@@ -104,3 +105,4 @@ class PaymentsHistorySection extends StatelessWidget {
     );
   }
 }
+

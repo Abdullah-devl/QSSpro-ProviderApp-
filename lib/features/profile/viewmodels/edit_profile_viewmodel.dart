@@ -1,6 +1,7 @@
-// مسار الملف: lib/features/profile/viewmodels/edit_profile_viewmodel.dart
+﻿// مسار الملف: lib/features/profile/viewmodels/edit_profile_viewmodel.dart
 
 import 'dart:io';
+import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/profile_model.dart';
@@ -62,7 +63,7 @@ class EditProfileViewModel extends ChangeNotifier {
       notifyListeners();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.tr('profile_updated_successfully')), backgroundColor: Colors.green),
+        SnackBar(content: Text(context.tr('profile_updated_successfully')), backgroundColor: context.qsColors.success),
       );
 
       // 🚀 نعود للصفحة السابقة مع إرسال القيمة (true) لكي يتم التحديث فوراً
@@ -72,7 +73,7 @@ class EditProfileViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        SnackBar(content: Text(e.toString()), backgroundColor: context.qsColors.error),
       );
     }
   }

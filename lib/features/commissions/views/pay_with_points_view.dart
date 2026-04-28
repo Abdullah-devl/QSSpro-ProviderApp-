@@ -1,4 +1,4 @@
-// مسار الملف: lib/features/commissions/views/pay_with_points_view.dart
+﻿// مسار الملف: lib/features/commissions/views/pay_with_points_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -47,8 +47,8 @@ class PayWithPointsView extends StatelessWidget {
           child: InkWell(
             onTap: () => Navigator.pop(context),
             child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: context.qsColors.card,
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.arrow_forward_ios, color: context.qsColors.text, size: 18),
@@ -89,15 +89,15 @@ class PayWithPointsView extends StatelessWidget {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+                          border: Border.all(color: context.qsColors.card.withOpacity(0.5), width: 1.5),
                         ),
-                        child: const Icon(Icons.stars_rounded, color: Colors.white, size: 32),
+                        child: Icon(Icons.stars_rounded, color: context.qsColors.card, size: 32),
                       ),
                       const SizedBox(height: 12),
                       Text(
                         context.tr('total_available_points'),
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: context.qsColors.card.withOpacity(0.8),
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                         ),
@@ -105,8 +105,8 @@ class PayWithPointsView extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         availablePoints.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},'),
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: context.qsColors.card,
                           fontSize: 42,
                           fontWeight: FontWeight.bold,
                           height: 1.2,
@@ -114,8 +114,8 @@ class PayWithPointsView extends StatelessWidget {
                       ),
                       Text(
                         context.tr('points'),
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: context.qsColors.card,
                           fontSize: 24,
                           fontWeight: FontWeight.w600,
                         ),
@@ -129,10 +129,10 @@ class PayWithPointsView extends StatelessWidget {
                 // 2. تفاصيل العملية
                 Text(
                   context.tr('transaction_details'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: context.qsColors.text,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -140,9 +140,9 @@ class PayWithPointsView extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.qsColors.card,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey.withOpacity(0.1)),
+                    border: Border.all(color: context.qsColors.textSub.withOpacity(0.1)),
                   ),
                   child: Column(
                     children: [
@@ -163,7 +163,7 @@ class PayWithPointsView extends StatelessWidget {
                             150 ~/ 10,
                             (index) => Expanded(
                               child: Container(
-                                color: index % 2 == 0 ? Colors.grey.shade300 : Colors.transparent,
+                                color: index % 2 == 0 ? context.qsColors.textSub : Colors.transparent,
                                 height: 1,
                               ),
                             ),
@@ -273,7 +273,7 @@ class PayWithPointsView extends StatelessWidget {
                   elevation: 0,
                 ),
                 child: viewModel.isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? CircularProgressIndicator(color: context.qsColors.card)
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -319,7 +319,7 @@ class PayWithPointsView extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  color: Colors.grey.shade500,
+                  color: context.qsColors.textSub,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -328,7 +328,7 @@ class PayWithPointsView extends StatelessWidget {
               Text(
                 value,
                 style: TextStyle(
-                  color: valueColor ?? Colors.black87,
+                  color: valueColor ?? context.qsColors.text,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -340,3 +340,5 @@ class PayWithPointsView extends StatelessWidget {
     );
   }
 }
+
+

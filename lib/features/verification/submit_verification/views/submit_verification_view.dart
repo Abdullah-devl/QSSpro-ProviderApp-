@@ -6,7 +6,7 @@ import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import '../viewmodels/verification_viewmodel.dart';
 
 class SubmitVerificationView extends StatelessWidget {
-  final int packageId; // 🚀 استقبال رقم الباقة من الشاشة السابقة
+  final int packageId;
 
   const SubmitVerificationView({super.key, required this.packageId});
 
@@ -14,12 +14,11 @@ class SubmitVerificationView extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.qsColors;
     final vm = context.watch<VerificationViewModel>();
-    final bgColor = const Color(0xFFF8F9FA);
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: bgColor,
+        backgroundColor: colors.background,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -31,7 +30,7 @@ class SubmitVerificationView extends StatelessWidget {
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: colors.text, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new, color: colors.text, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -84,10 +83,10 @@ class SubmitVerificationView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.card,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: colors.text.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -100,11 +99,11 @@ class SubmitVerificationView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.lock_outline, color: Color(0xFF9CA3AF), size: 16),
+                Icon(Icons.lock_outline, color: colors.textSub.withValues(alpha: 0.5), size: 16),
                 const SizedBox(width: 6),
                 Text(
                   context.tr('data_encrypted_secure'),
-                  style: const TextStyle(color: Color(0xFF6B7280), fontSize: 12),
+                  style: TextStyle(color: colors.textSub, fontSize: 12),
                 ),
               ],
             ),
@@ -115,29 +114,30 @@ class SubmitVerificationView extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: vm.isLoading ? null : () => vm.submitVerification(context, packageId),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF5CA4B8),
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.card,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
                 child: vm.isLoading
-                    ? const SizedBox(
+                    ? 
+                     SizedBox(
                         width: 24,
                         height: 24,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        child: CircularProgressIndicator(color: colors.card, strokeWidth: 2),
                       )
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             context.tr('submit_for_review'),
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                          const Icon(Icons.arrow_forward_rounded, size: 20),
                         ],
                       ),
               ),
@@ -158,7 +158,7 @@ class SubmitVerificationView extends StatelessWidget {
               width: 8,
               height: 8,
               decoration: BoxDecoration(
-                color: const Color(0xFF5CA4B8).withOpacity(0.3),
+                color: colors.primary.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
             ),
@@ -167,7 +167,7 @@ class SubmitVerificationView extends StatelessWidget {
               width: 32,
               height: 8,
               decoration: BoxDecoration(
-                color: const Color(0xFF5CA4B8),
+                color: colors.primary,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -176,7 +176,7 @@ class SubmitVerificationView extends StatelessWidget {
               width: 8,
               height: 8,
               decoration: BoxDecoration(
-                color: const Color(0xFF5CA4B8).withOpacity(0.3),
+                color: colors.primary.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
             ),
@@ -200,7 +200,7 @@ class SubmitVerificationView extends StatelessWidget {
   Widget _buildSectionTitle(BuildContext context, IconData icon, String title, dynamic colors) {
     return Row(
       children: [
-        Icon(icon, color: const Color(0xFF5CA4B8), size: 22),
+        Icon(icon, color: colors.primary, size: 22),
         const SizedBox(width: 8),
         Text(
           title,
@@ -215,11 +215,12 @@ class SubmitVerificationView extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.card,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: colors.text.withValues(alpha: 0.02),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -236,14 +237,14 @@ class SubmitVerificationView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('صورة السند', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  Text(context.tr('bond_image_title'), style: TextStyle(color: colors.text, fontWeight: FontWeight.bold, fontSize: 14)),
                   const SizedBox(height: 4),
-                  Text('تم الرفع بنجاح', style: TextStyle(color: Colors.green.shade600, fontSize: 12)),
+                  Text(context.tr('upload_success'), style: TextStyle(color: colors.success, fontSize: 12)),
                 ],
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              icon: Icon(Icons.delete_outline, color: colors.error),
               onPressed: () => vm.removeImage(),
             ),
           ],
@@ -256,21 +257,21 @@ class SubmitVerificationView extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 40),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.card,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFD1D5DB), width: 1.5),
+          border: Border.all(color: colors.textSub.withValues(alpha: 0.2), width: 1.5),
         ),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(color: Color(0xFFF3F4F6), shape: BoxShape.circle),
-              child: const Icon(Icons.cloud_upload_outlined, color: Color(0xFF6B7280), size: 28),
+              decoration: BoxDecoration(color: colors.primary.withValues(alpha: 0.05), shape: BoxShape.circle),
+              child: Icon(Icons.cloud_upload_outlined, color: colors.primary, size: 28),
             ),
             const SizedBox(height: 12),
             Text(
               context.tr('click_to_upload_bond'),
-              style: const TextStyle(color: Color(0xFF4B5563), fontWeight: FontWeight.bold, fontSize: 14),
+              style: TextStyle(color: colors.textSub, fontWeight: FontWeight.bold, fontSize: 14),
             ),
           ],
         ),
@@ -281,11 +282,12 @@ class SubmitVerificationView extends StatelessWidget {
   Widget _buildTextField(BuildContext context, TextEditingController controller, String hint, dynamic colors) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.textSub.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: colors.text.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -294,10 +296,11 @@ class SubmitVerificationView extends StatelessWidget {
       child: TextField(
         controller: controller,
         keyboardType: TextInputType.number,
+        style: TextStyle(color: colors.text),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: colors.textSub, fontSize: 13),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+          hintStyle: TextStyle(color: colors.textSub.withValues(alpha: 0.5), fontSize: 13),
+          border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
       ),

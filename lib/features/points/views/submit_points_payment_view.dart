@@ -44,7 +44,7 @@ class _SubmitPointsPaymentViewState extends State<SubmitPointsPaymentView> {
       return;
     }
     if (_bankNameController.text.isEmpty) {
-      DialogHelper.showErrorDialog(context, context.tr('bank_name_required')); // سأضيف مفتاح الترجمة هذا أو أستخدم نصاً بسيطاً
+      DialogHelper.showErrorDialog(context, context.tr('bank_name_required'));
       return;
     }
     if (_selectedImage == null) {
@@ -77,12 +77,12 @@ class _SubmitPointsPaymentViewState extends State<SubmitPointsPaymentView> {
   Widget build(BuildContext context) {
     final colors = context.qsColors;
     final viewModel = context.watch<PointsViewModel>();
-    final Color bgColor = const Color(0xFFF8F9FA);
+    final Color bgColor = colors.background;
 
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: bgColor,
+        backgroundColor: colors.card,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -116,8 +116,9 @@ class _SubmitPointsPaymentViewState extends State<SubmitPointsPaymentView> {
               controller: _bondNumberController,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: colors.card,
                 hintText: context.tr('bond_number_hint'),
+                hintStyle: TextStyle(color: colors.textSub),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                   borderSide: BorderSide.none,
@@ -137,8 +138,9 @@ class _SubmitPointsPaymentViewState extends State<SubmitPointsPaymentView> {
               controller: _bankNameController,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: colors.card,
                 hintText: context.tr('bank_name_hint'),
+                hintStyle: TextStyle(color: colors.textSub),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                   borderSide: BorderSide.none,
@@ -159,9 +161,9 @@ class _SubmitPointsPaymentViewState extends State<SubmitPointsPaymentView> {
               child: Container(
                 height: 200,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colors.card,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF1CB0F6).withOpacity(0.2), width: 2),
+                  border: Border.all(color: colors.primary.withValues(alpha: 0.2), width: 2),
                 ),
                 child: _selectedImage != null
                     ? ClipRRect(
@@ -171,7 +173,7 @@ class _SubmitPointsPaymentViewState extends State<SubmitPointsPaymentView> {
                     : Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.cloud_upload_outlined, color: Color(0xFF1CB0F6), size: 48),
+                          Icon(Icons.cloud_upload_outlined, color: colors.primary, size: 48),
                           const SizedBox(height: 12),
                           Text(context.tr('click_to_upload_receipt'), style: TextStyle(color: colors.textSub)),
                         ],
@@ -186,13 +188,13 @@ class _SubmitPointsPaymentViewState extends State<SubmitPointsPaymentView> {
               child: ElevatedButton(
                 onPressed: viewModel.isLoading ? null : () => _submit(viewModel),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1CB0F6),
-                  foregroundColor: Colors.white,
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.card,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   elevation: 0,
                 ),
                 child: viewModel.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? CircularProgressIndicator(color: colors.card)
                     : Text(
                         context.tr('submit_payment'),
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -209,7 +211,7 @@ class _SubmitPointsPaymentViewState extends State<SubmitPointsPaymentView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1CB0F6).withOpacity(0.05),
+        color: colors.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -218,7 +220,7 @@ class _SubmitPointsPaymentViewState extends State<SubmitPointsPaymentView> {
           const SizedBox(height: 8),
           Text(
             '${widget.package.price.toInt()} ${context.tr('sar')}',
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF1CB0F6)),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: colors.primary),
           ),
           const SizedBox(height: 8),
           Text(

@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/previous_works_viewmodel.dart';
 import '../models/profile_model.dart';
@@ -23,8 +24,8 @@ class PreviousWorksView extends StatelessWidget {
           context.tr('previous_works') != 'previous_works'
               ? context.tr('previous_works')
               : 'الأعمال السابقة',
-          style: const TextStyle(
-            color: Colors.black,
+          style: TextStyle(
+            color: context.qsColors.text,
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
@@ -35,7 +36,7 @@ class PreviousWorksView extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.arrow_forward, color: Colors.black),
+            icon: Icon(Icons.arrow_forward, color: context.qsColors.text),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -48,13 +49,13 @@ class PreviousWorksView extends StatelessWidget {
           ? Center(
               child: Text(
                 vm.errorMessage!,
-                style: const TextStyle(color: Colors.red),
+                style: TextStyle(color: context.qsColors.error),
               ),
             )
           : vm.works.isEmpty
           ? RefreshIndicator(
-              color: Colors.grey,
-              backgroundColor: Colors.white,
+              color: context.qsColors.textSub,
+              backgroundColor: context.qsColors.card,
               onRefresh: vm.fetchWorks,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -65,8 +66,8 @@ class PreviousWorksView extends StatelessWidget {
               ),
             )
           : RefreshIndicator(
-              color: Colors.grey,
-              backgroundColor: Colors.white,
+              color: context.qsColors.textSub,
+              backgroundColor: context.qsColors.card,
               onRefresh: vm.fetchWorks,
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(
@@ -87,11 +88,11 @@ class PreviousWorksView extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.qsColors.card,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: context.qsColors.text.withOpacity(0.03),
             offset: const Offset(0, 8),
             blurRadius: 20,
           ),
@@ -112,10 +113,10 @@ class PreviousWorksView extends StatelessWidget {
                     children: [
                       Text(
                         profile.name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: context.qsColors.text,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -162,10 +163,10 @@ class PreviousWorksView extends StatelessWidget {
               errorBuilder: (context, error, stackTrace) => Container(
                 width: double.infinity,
                 height: 220,
-                color: Colors.grey.shade200,
-                child: const Icon(
+                color: context.qsColors.textSub,
+                child: Icon(
                   Icons.broken_image,
-                  color: Colors.grey,
+                  color: context.qsColors.textSub,
                   size: 50,
                 ),
               ),
@@ -202,10 +203,10 @@ class PreviousWorksView extends StatelessWidget {
               children: [
                 Text(
                   work.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: context.qsColors.text,
                   ),
                   textAlign: TextAlign.right,
                 ),
@@ -258,3 +259,5 @@ class PreviousWorksView extends StatelessWidget {
     );
   }
 }
+
+

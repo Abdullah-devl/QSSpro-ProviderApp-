@@ -17,6 +17,9 @@ import 'package:service_provider_app/features/profile/viewmodels/services_viewmo
 import 'package:service_provider_app/features/profile/views/services_view.dart';
 import 'package:service_provider_app/features/profile/views/contact_info_view.dart';
 import 'package:service_provider_app/features/profile/viewmodels/contact_info_viewmodel.dart';
+import 'package:service_provider_app/features/profile/views/provider_reviews_view.dart';
+import 'package:service_provider_app/features/profile/viewmodels/provider_reviews_viewmodel.dart';
+import 'package:service_provider_app/features/profile/repositories/review_repository.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/profile_viewmodel.dart';
@@ -33,7 +36,7 @@ class ProfileView extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.qsColors;
     final vm = context.watch<ProfileViewModel>();
-    final bgColor = const Color(0xFFF8F9FA); // الخلفية من التصميم
+    final bgColor = colors.background; // الخلفية من التصميم
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -41,22 +44,22 @@ class ProfileView extends StatelessWidget {
 
       // 🚀 التعديل 1: لا نظهر دائرة التحميل الكبيرة إلا في المرة الأولى
       body: vm.isLoading && vm.profile == null
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF5CA4B8)),
+          ? Center(
+              child: CircularProgressIndicator(color: colors.primary),
             )
           : vm.errorMessage != null && vm.profile == null
           ? Center(
               child: Text(
                 vm.errorMessage!,
-                style: const TextStyle(color: Colors.red),
+                style: TextStyle(color: colors.error),
               ),
             )
           : vm.profile == null
           ? const SizedBox()
           // 🚀 التعديل 2: تغليف الشاشة بالسحب للتحديث (Pull to Refresh)
           : RefreshIndicator(
-              color: Colors.grey,
-              backgroundColor: Colors.white,
+              color: colors.primary,
+              backgroundColor: colors.card,
               onRefresh: () async {
                 await vm.fetchProfile();
               },
@@ -105,9 +108,13 @@ class ProfileView extends StatelessWidget {
                         ),
                         child: ContactInfoView(profile: vm.profile!),
                       ),
-
-                      // داخل TabBarView
-                      Center(child: Text(context.tr('reviews_soon'))),
+                      ChangeNotifierProvider(
+                        create: (context) => ProviderReviewsViewModel(
+                          ReviewRepository(context.read<ApiService>()),
+                          vm.profile!.id,
+                        ),
+                        child: const ProviderReviewsView(),
+                      ),
                     ],
                   ),
                 ),
@@ -139,7 +146,7 @@ class ProfileView extends StatelessWidget {
         ),
       ),
       leading: PopupMenuButton<String>(
-        icon: const Icon(Icons.more_vert, color: Colors.blue),
+        icon: Icon(Icons.more_vert, color: colors.primary),
         onSelected: (value) => _handleMenuSelection(context, value),
         itemBuilder: (BuildContext context) => [
           PopupMenuItem(
@@ -166,11 +173,11 @@ class ProfileView extends StatelessWidget {
             value: 'logout',
             child: Row(
               children: [
-                const Icon(Icons.logout, color: Colors.red, size: 20),
+                Icon(Icons.logout, color: colors.error, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   context.tr('logout'),
-                  style: const TextStyle(color: Colors.red),
+                  style: TextStyle(color: colors.error),
                 ),
               ],
             ),
@@ -198,31 +205,12 @@ class ProfileView extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatItem(
-                context,
-                '${profile.yearsExperience}+',
-                context.tr('years_experience'),
-                colors,
-              ),
-              _buildStatItem(
-                context,
-                '${profile.ratingAvg}',
-                context.tr('rating'),
-                colors,
-              ),
-              _buildStatItem(
-                context,
-                '${profile.completedJobs}',
-                context.tr('completed_jobs'),
-                colors,
-              ),
-
               Container(
                 width: 85,
                 height: 85,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF5CA4B8), width: 3),
+                  border: Border.all(color: colors.primary, width: 3),
                   image: profile.avatarUrl.isNotEmpty
                       ? DecorationImage(
                           image: NetworkImage(profile.avatarUrl),
@@ -234,13 +222,31 @@ class ProfileView extends StatelessWidget {
                         ),
                 ),
               ),
+              _buildStatItem(
+                context,
+                '${profile.completedJobs}',
+                context.tr('completed_jobs'),
+                colors,
+              ),
+              _buildStatItem(
+                context,
+                '${profile.ratingAvg}',
+                context.tr('rating'),
+                colors,
+              ),
+              _buildStatItem(
+                context,
+                '${profile.yearsExperience}+',
+                context.tr('years_experience'),
+                colors,
+              ),
             ],
           ),
           const SizedBox(height: 16),
           Align(
-            alignment: AlignmentDirectional.centerEnd,
+            alignment: AlignmentDirectional.centerStart,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   profile.name,
@@ -253,9 +259,9 @@ class ProfileView extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   profile.jobTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: Color(0xFF5CA4B8),
+                    color: colors.primary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -292,7 +298,7 @@ class ProfileView extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: Color(0xFF5CA4B8)),
+          style: TextStyle(fontSize: 12, color: colors.primary),
         ),
       ],
     );
@@ -327,7 +333,7 @@ class ProfileView extends StatelessWidget {
                 if (result == true) vm.fetchProfile();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF5CA4B8),
+                backgroundColor: colors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
@@ -335,8 +341,8 @@ class ProfileView extends StatelessWidget {
               ),
               child: Text(
                 context.tr('edit_profile'),
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: context.qsColors.card,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -364,7 +370,7 @@ class ProfileView extends StatelessWidget {
                 if (result == true) vm.fetchProfile();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE5E7EB),
+                backgroundColor: colors.background,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
@@ -391,9 +397,9 @@ class ProfileView extends StatelessWidget {
 
   Widget _buildTabBar(BuildContext context, dynamic colors) {
     return TabBar(
-      labelColor: const Color(0xFF5CA4B8),
+      labelColor: colors.primary,
       unselectedLabelColor: colors.textSub,
-      indicatorColor: const Color(0xFF5CA4B8),
+      indicatorColor: colors.primary,
       indicatorWeight: 3,
       tabs: [
         Tab(
@@ -405,18 +411,19 @@ class ProfileView extends StatelessWidget {
           text: context.tr('tab_services'),
         ),
         Tab(
-          icon: const Icon(Icons.star_rate_rounded),
-          text: context.tr('tab_reviews'),
-        ),
-        Tab(
           icon: const Icon(Icons.contact_phone_rounded),
           text: context.tr('contact_info'),
+        ),
+        Tab(
+          icon: const Icon(Icons.star_rate_rounded),
+          text: context.tr('tab_reviews'),
         ),
       ],
     );
   }
 
   Widget _buildWorksTab(BuildContext context, ProfileViewModel vm) {
+    final colors = context.qsColors;
     final works = vm.works;
     return GridView.builder(
       padding: const EdgeInsets.all(2),
@@ -446,11 +453,11 @@ class ProfileView extends StatelessWidget {
               if (result == true) vm.fetchProfile();
             },
             child: Container(
-              color: const Color(0xFFE4F3F8),
-              child: const Center(
+              color: context.qsColors.primary.withValues(alpha: 0.1),
+              child: Center(
                 child: Icon(
                   Icons.add_a_photo_outlined,
-                  color: Color(0xFF5CA4B8),
+                  color: colors.primary,
                   size: 32,
                 ),
               ),
@@ -480,7 +487,7 @@ class ProfileView extends StatelessWidget {
             imageUrl,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) => Container(
-              color: Colors.grey.shade300,
+              color: context.qsColors.textSub.withValues(alpha: 0.1),
               child: const Icon(Icons.broken_image),
             ),
           ),
@@ -498,6 +505,7 @@ class ProfileView extends StatelessWidget {
     WorkModel work,
     ProfileViewModel vm,
   ) {
+    final colors = context.qsColors;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -513,13 +521,13 @@ class ProfileView extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: context.qsColors.textSub.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 24),
               ListTile(
-                leading: const Icon(Icons.edit, color: Color(0xFF5CA4B8)),
+                leading: Icon(Icons.edit, color: colors.primary),
                 title: Text(
                   context.tr('edit'),
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -542,7 +550,7 @@ class ProfileView extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.share, color: Colors.blue),
+                leading: Icon(Icons.share, color: colors.primary),
                 title: Text(
                   context.tr('share'),
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -555,12 +563,12 @@ class ProfileView extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
+                leading: Icon(Icons.delete, color: colors.error),
                 title: Text(
                   context.tr('delete'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.red,
+                    color: colors.error,
                   ),
                 ),
                 onTap: () {
@@ -580,6 +588,7 @@ class ProfileView extends StatelessWidget {
     WorkModel work,
     ProfileViewModel vm,
   ) {
+    final colors = context.qsColors;
     showDialog(
       context: context,
       builder: (ctx) {
@@ -604,7 +613,7 @@ class ProfileView extends StatelessWidget {
               onPressed: () => Navigator.pop(ctx),
               child: Text(
                 context.tr('cancel'),
-                style: const TextStyle(color: Colors.grey),
+                style: TextStyle(color: colors.textSub),
               ),
             ),
             ElevatedButton(
@@ -628,7 +637,7 @@ class ProfileView extends StatelessWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(context.tr('delete_success')),
-                      backgroundColor: Colors.green,
+                      backgroundColor: colors.success,
                     ),
                   );
                 } catch (e) {
@@ -636,13 +645,13 @@ class ProfileView extends StatelessWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(e.toString()),
-                      backgroundColor: Colors.red,
+                      backgroundColor: colors.error,
                     ),
                   );
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('حذف', style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(backgroundColor: colors.error),
+              child: Text('حذف', style: TextStyle(color: context.qsColors.card)),
             ),
           ],
         );
@@ -675,6 +684,7 @@ class ProfileView extends StatelessWidget {
   }
 
   void _showLogoutConfirmationDialog(BuildContext context) {
+    final colors = context.qsColors;
     showDialog(
       context: context,
       builder: (ctx) {
@@ -690,7 +700,7 @@ class ProfileView extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('إلغاء', style: TextStyle(color: Colors.grey)),
+              child: Text('إلغاء', style: TextStyle(color: colors.textSub)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -700,8 +710,8 @@ class ProfileView extends StatelessWidget {
                 showDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (_) => const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF5CA4B8)),
+                  builder: (_) => Center(
+                    child: CircularProgressIndicator(color: colors.primary),
                   ),
                 );
 
@@ -722,16 +732,16 @@ class ProfileView extends StatelessWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(context.tr('logout_failed')),
-                        backgroundColor: Colors.red,
+                        backgroundColor: colors.error,
                       ),
                     );
                   }
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              style: ElevatedButton.styleFrom(backgroundColor: colors.error),
               child: Text(
                 context.tr('exit'),
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: context.qsColors.card),
               ),
             ),
           ],
@@ -764,3 +774,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(_SliverAppBarDelegate oldDelegate) => false;
 }
+
+
+

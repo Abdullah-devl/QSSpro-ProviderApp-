@@ -1,204 +1,4 @@
 
-// import 'package:flutter/cupertino.dart';
-// import 'package:flutter/material.dart';
-// import 'package:provider/provider.dart';
-// import 'package:service_provider_app/features/home/views/widgets/activeServicCared.dart';
-// import 'package:service_provider_app/features/home/views/widgets/hederSection.dart';
-// import 'package:service_provider_app/features/home/views/widgets/newRequestCard.dart';
-// import 'package:service_provider_app/features/home/views/widgets/statCard.dart';
-// import '../../../core/localization/app_localizations.dart';
-// import '../../../core/theme/qs_color_extension.dart';
-// import '../viewmodels/main_viewmodel.dart';
-
-// class HomeDashboardView extends StatelessWidget {
-//   const HomeDashboardView({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final viewModel = Provider.of<MainViewModel>(context);
-
-//     return SafeArea(
-//       child: SingleChildScrollView(
-//         padding: const EdgeInsets.all(20.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             // ==========================================
-//             // 1. رأس الشاشة (Header)
-//             // ==========================================
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               children: [
-//                 Row(
-//                   children: [
-//                     Stack(
-//                       alignment: Alignment.bottomRight,
-//                       children: [
-//                         const CircleAvatar(
-//                           radius: 25,
-//                           backgroundImage: NetworkImage(
-//                             'https://i.pravatar.cc/150?img=11',
-//                           ),
-//                         ),
-//                         Container(
-//                           width: 14,
-//                           height: 14,
-//                           decoration: BoxDecoration(
-//                             color: context.qsColors.success,
-//                             shape: BoxShape.circle,
-//                             border: Border.all(
-//                               color: Theme.of(context).scaffoldBackgroundColor,
-//                               width: 2,
-//                             ),
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                     const SizedBox(width: 12),
-//                     Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: [
-//                         Text(
-//                           context.tr('welcome_back'),
-//                           style: TextStyle(
-//                             color: context.qsColors.textSub,
-//                             fontSize: 12,
-//                           ),
-//                         ),
-//                         Text(
-//                           'أحمد محمد',
-//                           style: TextStyle(
-//                             color: context.qsColors.text,
-//                             fontSize: 16,
-//                             fontWeight: FontWeight.bold,
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ],
-//                 ),
-//                 Row(
-//                   children: [
-//                     Transform.scale(
-//                       scale: 0.8,
-//                       child: CupertinoSwitch(
-//                         activeColor: context.qsColors.primary,
-//                         value: viewModel.isOnline,
-//                         onChanged: viewModel.toggleOnlineStatus,
-//                       ),
-//                     ),
-//                     const SizedBox(width: 10),
-//                     Container(
-//                       padding: const EdgeInsets.all(8),
-//                       decoration: BoxDecoration(
-//                         color: Theme.of(context).cardColor,
-//                         shape: BoxShape.circle,
-//                         boxShadow: [
-//                           BoxShadow(
-//                             color: context.qsColors.text.withOpacity(0.05),
-//                             blurRadius: 10,
-//                             offset: const Offset(0, 2),
-//                           ),
-//                         ],
-//                       ),
-//                       child: Stack(
-//                         alignment: Alignment.topRight,
-//                         children: [
-//                           Icon(
-//                             Icons.notifications_none_rounded,
-//                             color: context.qsColors.text,
-//                           ),
-//                           Container(
-//                             width: 8,
-//                             height: 8,
-//                             decoration: const BoxDecoration(
-//                               color: context.qsColors.error,
-//                               shape: BoxShape.circle,
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ],
-//             ),
-
-//             const SizedBox(height: 30),
-
-//             // ==========================================
-//             // 2. الإحصائيات (الأرباح والتقييم)
-//             // ==========================================
-//             Row(
-//               children: [
-//                 StatCard(
-//                   title: context.tr('general_rating'),
-//                   value: '4.8',
-//                   subtitle: '/ 5.0',
-//                   icon: Icons.star_rounded,
-//                   isPrimary: false,
-//                 ),
-//                 const SizedBox(width: 16),
-//                 StatCard(
-//                   title: context.tr('weekly_earnings'),
-//                   value: '1,250',
-//                   subtitle: context.tr('sar'),
-//                   icon: Icons.account_balance_wallet_rounded,
-//                   isPrimary: true,
-//                 ),
-//               ],
-//             ),
-
-//             const SizedBox(height: 30),
-
-//             // ==========================================
-//             // 3. الطلبات الجديدة
-//             // ==========================================
-//             SectionHeader(
-//               title: context.tr('new_requests'),
-//               badgeCount: 2,
-//               actionText: context.tr('view_all'),
-//               onActionTap: () {},
-//             ),
-//             const SizedBox(height: 16),
-
-//             // كروت الطلبات (مؤقتاً بيانات ثابتة مطابقة لتصميمك)
-//             const NewRequestCard(
-//               title: 'خدمة تنظيف - شقة سكنية',
-//               location: 'حي الملز، الرياض',
-//               distance: '5 كم',
-//               price: '150 ر.س',
-//               imageUrl:
-//                   'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=200&auto=format&fit=crop', // صورة تنظيف
-//             ),
-//             const NewRequestCard(
-//               title: 'صيانة تكييف سبليت',
-//               location: 'حي العليا، الرياض',
-//               distance: '2.5 كم',
-//               price: '200 ر.س',
-//               imageUrl:
-//                   'https://images.unsplash.com/photo-1527689638836-411945a2b57c?q=80&w=200&auto=format&fit=crop', // صورة تكييف
-//             ),
-
-//             const SizedBox(height: 20),
-
-//             // ==========================================
-//             // 4. الخدمات النشطة
-//             // ==========================================
-//             SectionHeader(title: context.tr('active_services')),
-//             const SizedBox(height: 16),
-//             const ActiveServiceCard(),
-
-//             const SizedBox(height: 40), // مسافة فارغة أسفل الشاشة
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// مسار الملف: lib/features/home/views/home_dashboard_view.dart
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -211,172 +11,165 @@ import 'package:service_provider_app/features/home/views/widgets/statCard.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/main_viewmodel.dart';
+import '../models/home_model.dart';
 import '../../notifications/viewmodels/notification_viewmodel.dart';
 import 'package:service_provider_app/features/profile/viewmodels/profile_viewmodel.dart';
 
-class HomeDashboardView extends StatelessWidget {
+import 'package:service_provider_app/features/home/views/widgets/ad_carousel.dart';
+import '../models/advertisement_model.dart';
+
+class HomeDashboardView extends StatefulWidget {
   const HomeDashboardView({super.key});
 
   @override
+  State<HomeDashboardView> createState() => _HomeDashboardViewState();
+}
+
+class _HomeDashboardViewState extends State<HomeDashboardView> {
+  bool _popupShown = false;
+
+  void _checkAndShowPopup(HomeViewModel vm) {
+    if (!_popupShown && vm.popupAd != null) {
+      _popupShown = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showAdPopup(context, vm.popupAd!, vm);
+      });
+    }
+  }
+
+  void _showAdPopup(BuildContext context, AdvertisementModel ad, HomeViewModel vm) {
+    vm.trackAdView(ad.id);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              alignment: Alignment.topRight,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    vm.handleAdClick(context, ad);
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.network(ad.imageUrl, fit: BoxFit.cover),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // استدعاء الـ ViewModels مباشرة (لأنها متوفرة الآن في main.dart)
-    final mainViewModel = Provider.of<MainViewModel>(context);
     final homeViewModel = Provider.of<HomeViewModel>(context);
     final profileViewModel = Provider.of<ProfileViewModel>(context);
+    final mainViewModel = Provider.of<MainViewModel>(context);
+    final colors = context.qsColors;
 
-    return SafeArea(
-      child: RefreshIndicator(
-        color: context.qsColors.primary,
-        backgroundColor: context.qsColors.card,
+    // تفعيل البوب أب إذا كان متاحاً
+    _checkAndShowPopup(homeViewModel);
+
+    return Scaffold(
+      backgroundColor: colors.background,
+      appBar: AppBar(
+        backgroundColor: colors.background,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: _buildHeader(context, profileViewModel, mainViewModel),
+      ),
+      body: RefreshIndicator(
+        color: colors.primary,
+        backgroundColor: colors.card,
         onRefresh: () async {
           await homeViewModel.fetchHomeData();
           await profileViewModel.fetchProfile();
+          await homeViewModel.fetchAds();
+          _popupShown = false;
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ==========================================
-              // 1. رأس الشاشة (Header)
-              // ==========================================
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 25,
-                        backgroundColor: context.qsColors.primary.withOpacity(0.1),
-                        backgroundImage: profileViewModel.profile?.avatarUrl != null && profileViewModel.profile!.avatarUrl.isNotEmpty
-                            ? NetworkImage(profileViewModel.profile!.avatarUrl)
-                            : const NetworkImage('https://cdn-icons-png.flaticon.com/512/149/149071.png'), // صورة افتراضية
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.tr('welcome_back'),
-                            style: TextStyle(color: context.qsColors.textSub, fontSize: 12),
-                          ),
-                          Text(
-                            profileViewModel.profile?.name ?? 'شريكنا العزيز', 
-                            style: TextStyle(color: context.qsColors.text, fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Transform.scale(
-                        scale: 0.8,
-                        child: CupertinoSwitch(
-                          activeColor: context.qsColors.primary,
-                          value: mainViewModel.isOnline,
-                          onChanged: mainViewModel.toggleOnlineStatus,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      InkWell(
-                        onTap: () => Navigator.pushNamed(context, '/notifications'),
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: context.qsColors.card,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(color: context.qsColors.text.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 2)),
-                            ],
-                          ),
-                          child: Consumer<NotificationViewModel>(
-                            builder: (context, notificationVM, child) {
-                              final unreadCount = notificationVM.unreadCount ;//?? 0;
-                              return Stack(
-                                alignment: Alignment.topRight,
-                                children: [
-                                  Icon(Icons.notifications_none_rounded, color: context.qsColors.text),
-                                  if (unreadCount > 0)
-                                    Container(
-                                      padding: const EdgeInsets.all(2),
-                                      decoration: BoxDecoration(
-                                        color: context.qsColors.error,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: context.qsColors.card, width: 1.5),
-                                      ),
-                                      constraints: const BoxConstraints(minWidth: 10, minHeight: 10),
-                                      child: Text(
-                                        unreadCount > 9 ? '+9' : unreadCount.toString(),
-                                        style: TextStyle(color: context.qsColors.card, fontSize: 8, fontWeight: FontWeight.bold),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-
-              // ==========================================
-              // 2. التحكم في حالة جلب البيانات (Loading / Error / Success)
+              // 2. حالة التحميل والخطأ
               // ==========================================
               if (homeViewModel.isLoading)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 50.0),
-                    child: CircularProgressIndicator(color: context.qsColors.primary),
-                  ),
-                )
+                _buildLoadingState(context)
               else if (homeViewModel.errorMessage != null)
-                Center(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 50),
-                      Icon(Icons.error_outline, color: context.qsColors.error, size: 50),
-                      const SizedBox(height: 16),
-                      Text(homeViewModel.errorMessage!, style: TextStyle(color: context.qsColors.error)),
-                      TextButton(
-                        onPressed: () => homeViewModel.fetchHomeData(),
-                        child: Text(context.tr('retry'), style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold)),
-                      )
-                    ],
-                  ),
-                )
+                _buildErrorState(context, homeViewModel)
               else if (homeViewModel.homeData != null) ...[
+                
                 // ==========================================
-                // البيانات الحقيقية تم جلبها بنجاح!
+                // 3. حالة التوثيق (Verification Banner)
                 // ==========================================
-                Row(
-                  children: [
-                    StatCard(
-                      title: context.tr('general_rating'),
-                      value: homeViewModel.homeData!.rating.toString(),
-                      subtitle: '/ 5.0',
-                      icon: Icons.star_rounded,
-                      isPrimary: false,
-                    ),
-                    const SizedBox(width: 16),
-                    StatCard(
-                      title: context.tr('weekly_earnings'),
-                      value: homeViewModel.homeData!.weeklyEarnings.toString(),
-                      subtitle: context.tr('sar'),
-                      icon: Icons.account_balance_wallet_rounded,
-                      isPrimary: true,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
+                _buildVerificationBanner(context, homeViewModel.homeData!.verification),
 
-                SectionHeader( // استبدل بـ hederSection إذا كان هذا هو اسمه لديك
+                const SizedBox(height: 25),
+
+                // ==========================================
+                // 4. الإحصائيات العامة (3 كروت صغيرة)
+                // ==========================================
+                _buildGeneralStats(context, homeViewModel.homeData!),
+
+                const SizedBox(height: 20),
+
+                // ==========================================
+                // 5. إعلانات الكاروسيل (Carousel Ads)
+                // ==========================================
+                AdCarousel(ads: homeViewModel.carouselAds),
+
+                const SizedBox(height: 10),
+
+                // ==========================================
+                // 6. قسم العمولات (Commissions)
+                // ==========================================
+                _buildCommissionsCard(context, homeViewModel.homeData!.commissions),
+
+                const SizedBox(height: 25),
+
+                // ==========================================
+                // 7. قسم الدخل (Income)
+                // ==========================================
+                SectionHeader(title: context.tr('income')),
+                const SizedBox(height: 12),
+                _buildIncomeSection(context, homeViewModel.homeData!.income),
+
+                const SizedBox(height: 25),
+
+                // ==========================================
+                // 9. أداء الخدمات (Services Performance)
+                // ==========================================
+                SectionHeader(
+                  title: context.tr('services_performance'),
+                  actionText: context.tr('view_all'),
+                  onActionTap: () {
+                    // Navigate to services details
+                  },
+                ),
+                const SizedBox(height: 12),
+                _buildServicesPerformance(context, homeViewModel.homeData!.servicesPerformance),
+
+                const SizedBox(height: 25),
+
+                // ==========================================
+                // 8. الطلبات الجديدة (New Requests)
+                // ==========================================
+                SectionHeader(
                   title: context.tr('new_requests'),
                   badgeCount: homeViewModel.homeData!.newRequests.length,
                   actionText: context.tr('view_all'),
@@ -385,26 +178,17 @@ class HomeDashboardView extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 if (homeViewModel.homeData!.newRequests.isEmpty)
-                  Center(child: Text(context.tr('no_new_requests'), style: TextStyle(color: context.qsColors.textSub)))
+                  _buildEmptyState(context, context.tr('no_new_requests'))
                 else
                   ...homeViewModel.homeData!.newRequests.map((request) => NewRequestCard(
-                        title: request.title,
-                        location: request.location,
-                        distance: request.distance,
-                        price: request.price,
-                        imageUrl: request.imageUrl.isNotEmpty 
-                            ? request.imageUrl 
-                            : 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=200&auto=format&fit=crop',
+                        title: request.customerName,
+                        location: request.mainService,
+                        distance: request.createdAt, 
+                        price: "${request.totalPrice} ${context.tr('sar')}",
+                        imageUrl: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
                       )),
 
-                const SizedBox(height: 20),
-
-                SectionHeader(title: context.tr('active_services')), // استبدل بـ hederSection
-                const SizedBox(height: 16),
-                
-                const ActiveServiceCard(),
-
-                const SizedBox(height: 40),
+                const SizedBox(height: 100), // مساحة إضافية للناف بار العائم
               ]
             ],
           ),
@@ -412,5 +196,396 @@ class HomeDashboardView extends StatelessWidget {
       ),
     );
   }
-}
 
+  Widget _buildHeader(BuildContext context, ProfileViewModel profileVM, MainViewModel mainVM) {
+    final colors = context.qsColors;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 25,
+                backgroundColor: colors.primary.withOpacity(0.1),
+                backgroundImage: profileVM.profile?.avatarUrl != null && profileVM.profile!.avatarUrl.isNotEmpty
+                    ? NetworkImage(profileVM.profile!.avatarUrl)
+                    : const NetworkImage('https://cdn-icons-png.flaticon.com/512/149/149071.png'),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.tr('welcome_back'),
+                      style: TextStyle(color: colors.textSub, fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      profileVM.profile?.name ?? 'شريكنا العزيز', 
+                      style: TextStyle(color: colors.text, fontSize: 16, fontWeight: FontWeight.bold),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Row(
+          children: [
+            Transform.scale(
+              scale: 0.8,
+              child: CupertinoSwitch(
+                activeColor: colors.primary,
+                value: mainVM.isOnline,
+                onChanged: mainVM.toggleOnlineStatus,
+              ),
+            ),
+            const SizedBox(width: 10),
+            _buildNotificationIcon(context),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNotificationIcon(BuildContext context) {
+    final colors = context.qsColors;
+    return InkWell(
+      onTap: () => Navigator.pushNamed(context, '/notifications'),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: colors.card,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(color: colors.text.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 2)),
+          ],
+        ),
+        child: Consumer<NotificationViewModel>(
+          builder: (context, notificationVM, child) {
+            final unreadCount = notificationVM.unreadCount;
+            return Stack(
+              alignment: Alignment.topRight,
+              children: [
+                Icon(Icons.notifications_none_rounded, color: colors.text),
+                if (unreadCount > 0)
+                  Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: colors.error,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: colors.card, width: 1.5),
+                    ),
+                    constraints: const BoxConstraints(minWidth: 10, minHeight: 10),
+                    child: Text(
+                      unreadCount > 9 ? '+9' : unreadCount.toString(),
+                      style: TextStyle(color: colors.card, fontSize: 8, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 100.0),
+        child: CircularProgressIndicator(color: context.qsColors.primary),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, HomeViewModel vm) {
+    final colors = context.qsColors;
+    return Center(
+      child: Column(
+        children: [
+          const SizedBox(height: 80),
+          Icon(Icons.error_outline, color: colors.error, size: 60),
+          const SizedBox(height: 16),
+          Text(vm.errorMessage!, style: TextStyle(color: colors.error, fontSize: 16)),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () => vm.fetchHomeData(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.primary,
+              foregroundColor: colors.card,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text(context.tr('retry')),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGeneralStats(BuildContext context, HomeDataModel data) {
+    return Row(
+      children: [
+        _buildSmallStatCard(context, context.tr('total_services'), data.totalServices.toString(), Icons.miscellaneous_services_rounded, context.qsColors.primary),
+        const SizedBox(width: 12),
+        _buildSmallStatCard(context, context.tr('total_requests'), data.totalRequests.toString(), Icons.assignment_rounded, context.qsColors.warning),
+        const SizedBox(width: 12),
+        _buildSmallStatCard(context, context.tr('active_requests'), data.activeRequestsCount.toString(), Icons.play_circle_fill_rounded, context.qsColors.success),
+      ],
+    );
+  }
+
+  Widget _buildSmallStatCard(BuildContext context, String title, String value, IconData icon, Color color) {
+    final colors = context.qsColors;
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        decoration: BoxDecoration(
+          color: colors.card,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: colors.text.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 4))],
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(height: 10),
+            Text(value, style: TextStyle(color: colors.text, fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(title, style: TextStyle(color: colors.textSub, fontSize: 10), textAlign: TextAlign.center, maxLines: 1),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVerificationBanner(BuildContext context, VerificationModel verification) {
+    final colors = context.qsColors;
+    final bool isVerified = verification.status == 'verified';
+    
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isVerified 
+            ? [colors.success.withValues(alpha: 0.8), colors.success] 
+            : [colors.error.withValues(alpha: 0.8), colors.error],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: (isVerified ? colors.success : colors.error).withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          )
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
+            child: Icon(
+              isVerified ? Icons.verified_user_rounded : Icons.info_outline_rounded,
+              color: Colors.white,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isVerified ? context.tr('verified') : context.tr('not_verified'),
+                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isVerified 
+                    ? "${context.tr('days_left_label')}: ${verification.daysLeft} ${context.tr('days_label')}"
+                    : context.tr('verify_account_banner_subtitle'),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          if (!isVerified)
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to verification page
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: colors.error,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                elevation: 0,
+              ),
+              child: Text(context.tr('verify_now'), style: const TextStyle(fontWeight: FontWeight.bold)),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIncomeSection(BuildContext context, IncomeModel income) {
+    return Row(
+      children: [
+        _buildIncomeCard(context, context.tr('weekly_earnings'), income.weekly, context.qsColors.primary),
+        const SizedBox(width: 12),
+        _buildIncomeCard(context, context.tr('monthly_earnings'), income.monthly, context.qsColors.success),
+        const SizedBox(width: 12),
+        _buildIncomeCard(context, context.tr('yearly_earnings'), income.yearly, context.qsColors.secondary ?? Colors.blueAccent),
+      ],
+    );
+  }
+
+  Widget _buildIncomeCard(BuildContext context, String title, double value, Color color) {
+    final colors = context.qsColors;
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: colors.card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withOpacity(0.2), width: 1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: TextStyle(color: colors.textSub, fontSize: 11)),
+            const SizedBox(height: 8),
+            Text(
+              value.toStringAsFixed(0),
+              style: TextStyle(color: colors.text, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(context.tr('sar'), style: TextStyle(color: colors.textSub, fontSize: 10)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCommissionsCard(BuildContext context, CommissionsModel commissions) {
+    final colors = context.qsColors;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: colors.error.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colors.error.withOpacity(0.1)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(context.tr('total_owed'), style: TextStyle(color: colors.error, fontSize: 14, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text(
+                      "${commissions.totalOwed.toStringAsFixed(2)} ${context.tr('sar')}",
+                      style: TextStyle(color: colors.text, fontSize: 24, fontWeight: FontWeight.w900),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(color: colors.error.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                child: Text(
+                  "${commissions.unpaidRequestsCount} ${context.tr('unpaid_requests_count')}",
+                  style: TextStyle(color: colors.error, fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          Divider(color: colors.error.withOpacity(0.1)),
+          const SizedBox(height: 10),
+          InkWell(
+            onTap: () => Navigator.pushNamed(context, '/commissions'),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(context.tr('pay_now'), style: TextStyle(color: colors.error, fontWeight: FontWeight.bold)),
+                const SizedBox(width: 8),
+                Icon(Icons.arrow_forward_ios_rounded, color: colors.error, size: 14),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServicesPerformance(BuildContext context, ServicesPerformanceModel performance) {
+    final colors = context.qsColors;
+    if (performance.mostRequested.isEmpty) {
+      return _buildEmptyState(context, context.tr('no_services_currently'));
+    }
+    
+    return Column(
+      children: performance.mostRequested.take(3).map((item) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: colors.card,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(color: colors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                child: Center(child: Text("${performance.mostRequested.indexOf(item) + 1}", style: TextStyle(color: colors.primary, fontWeight: FontWeight.bold))),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(item.name, style: TextStyle(color: colors.text, fontWeight: FontWeight.bold)),
+                    Text("${item.requestsCount} ${context.tr('total_requests')}", style: TextStyle(color: colors.textSub, fontSize: 12)),
+                  ],
+                ),
+              ),
+              if (item.price != null)
+                Text("${item.price} ${context.tr('sar')}", style: TextStyle(color: colors.success, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Text(message, style: TextStyle(color: context.qsColors.textSub)),
+      ),
+    );
+  }
+}

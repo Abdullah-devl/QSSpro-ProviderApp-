@@ -77,6 +77,7 @@ import 'package:service_provider_app/core/storage/token_storage.dart';
 import 'package:service_provider_app/core/network/navigation_service.dart'; // 🌍 استيراد مفتاح التنقل
 import 'dart:developer' as developer;
 import 'api_endpoints.dart';
+import 'package:service_provider_app/features/settings/views/privacy_policy_view.dart';
 
 
 /// 📝 الوصف: المحرك الشامل للاتصال بالإنترنت (HTTP Requests).
@@ -207,14 +208,11 @@ class ApiService {
 
             if (isPolicyError) {
               developer.log(
-                '📜 [403] سياسة الخصوصية غير موافق عليها - تسجيل الخروج تلقائياً...',
+                '📜 [403] سياسة الخصوصية غير موافق عليها - توجيه المستخدم...',
                 name: 'API_ERROR',
               );
 
-              // 🗑️ حذف التوكن فوراً
-              _tokenStorage.deleteToken();
-
-              // 🪟 عرض dialog يشرح السبب قبل التوجيه
+              // 🪟 عرض dialog يشرح السبب
               final ctx = navigatorKey.currentContext;
               if (ctx != null) {
                 showDialog(
@@ -241,7 +239,7 @@ class ApiService {
                       ],
                     ),
                     content: const Text(
-                      'قامت الإدارة بتحديث سياسة الخصوصية.\n\nيرجى تسجيل الدخول مرة أخرى والموافقة على السياسة الجديدة للمتابعة.',
+                      'قامت الإدارة بتحديث سياسة الخصوصية أو يتطلب حسابك الموافقة عليها للمتابعة.\n\nيرجى الانتقال لصفحة السياسة والموافقة عليها.',
                       style: TextStyle(
                           fontFamily: 'Cairo', fontSize: 14, height: 1.6),
                     ),
@@ -254,14 +252,16 @@ class ApiService {
                         ),
                         onPressed: () {
                           Navigator.of(dialogCtx).pop();
-                          // 🚪 التوجيه لشاشة تسجيل الدخول ومسح كل السجلات
-                          navigatorKey.currentState?.pushNamedAndRemoveUntil(
-                            '/login',
-                            (route) => false,
+                          // التوجيه لصفحة السياسة (requiresAcceptance: true)
+                          // ملاحظة: نستخدم المبدل اليدوي لأننا نحتاج تمرير پارامتر
+                          navigatorKey.currentState?.push(
+                            MaterialPageRoute(
+                              builder: (_) => const PrivacyPolicyView(requiresAcceptance: true),
+                            ),
                           );
                         },
                         child: const Text(
-                          'تسجيل الدخول',
+                          'عرض السياسة',
                           style: TextStyle(
                               fontFamily: 'Cairo',
                               color: Colors.white,
@@ -270,12 +270,6 @@ class ApiService {
                       ),
                     ],
                   ),
-                );
-              } else {
-                // إذا لم يكن هناك context، نوجّه مباشرة بدون dialog
-                navigatorKey.currentState?.pushNamedAndRemoveUntil(
-                  '/login',
-                  (route) => false,
                 );
               }
             }

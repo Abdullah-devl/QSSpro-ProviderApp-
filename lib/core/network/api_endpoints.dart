@@ -18,14 +18,11 @@ class ApiEndpoints {
   /// 1. للمحاكي (Android Emulator):
   // static String get domain => "http://10.0.2.2:8000";
 
-  /// 2. للهاتف الحقيقي (تأكد من وضع الـ IP الخاص بجهازك وأنك متصل بنفس الشبكة):
-  // static String get domain => "http://192.168.43.245:8000";
-  static String get domain => "http://127.0.0.1:8000";
-  // static String get domain => "http://11.11.37.9:8000";
-  // static String get domain => "http://192.168.137.59:8000";
+  /// 2. للهاتف الحقيقي:
+  // static String get domain => "http://127.0.0.1:8000";
 
   /// 3. للسيرفر المرفوع على الإنترنت (Live):
-  // static String get domain => "https://your-api-domain.com";
+  static String get domain => "https://qss-back-end.onrender.com";
 
   // ---------------------------------------------------------------------------
 
@@ -59,6 +56,7 @@ class ApiEndpoints {
   static const String popularServices = "popular-services";
   static const String beProvider = "provider-requests";
   static const String providerPolicy = "policies/provider";
+  static const String seekerPolicy = "policies/seeker";
 
   // 📂 الدوال التي تتطلب تمرير متغير (مثل الـ ID الخاص بالتصنيف)
   static String categoryDetails(int id) => "categories/$id";

@@ -4,6 +4,7 @@ import 'package:service_provider_app/features/home/models/home_model.dart';
 import 'package:service_provider_app/features/home/repositories/home_repository.dart' hide debugPrint;
 import 'package:service_provider_app/features/home/models/advertisement_model.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:service_provider_app/core/network/fcm_notification_service.dart';
 
 class MainViewModel extends ChangeNotifier {
   // للتحكم في شريط التنقل السفلي
@@ -33,6 +34,19 @@ class HomeViewModel extends ChangeNotifier {
     // جلب البيانات بمجرد بناء الشاشة
     fetchHomeData();
     fetchAds();
+    fetchFCMToken(); // 🔔 جلب توكن فايربيز
+  }
+
+  String? _fcmToken;
+  String? get fcmToken => _fcmToken;
+
+  Future<void> fetchFCMToken() async {
+    try {
+      _fcmToken = await FCMNotificationService().getToken();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error fetching FCM token in HomeViewModel: $e');
+    }
   }
 
   bool _isLoading = false;

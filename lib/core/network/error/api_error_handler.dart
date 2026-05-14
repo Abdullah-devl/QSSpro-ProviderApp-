@@ -112,11 +112,18 @@ class ApiErrorHandler {
       if (response != null && response.data != null) {
         if (response.data is Map) {
           if (response.data.containsKey('message')) {
-            return response.data['message'];
+            String message = response.data['message'];
+            if (message == 'Unauthenticated.') {
+              return 'الجلسة منتهية أو بيانات الدخول غير صحيحة.';
+            }
+            return message;
           } else if (response.data.containsKey('error')) {
             return response.data['error'];
           }
         } else if (response.data is String && response.data!.isNotEmpty) {
+          if (response.data == 'Unauthenticated.') {
+            return 'الجلسة منتهية أو بيانات الدخول غير صحيحة.';
+          }
           return response.data!;
         }
       }

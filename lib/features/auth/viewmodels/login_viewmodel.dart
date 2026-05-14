@@ -62,16 +62,16 @@ class LoginViewModel extends ChangeNotifier {
 
       // 2. 🛡️ تطبيق شرط التحقق (Middleware / Guard)
       if (user.isVerified) {
-        // ✅ تحديث توكن الإشعارات فور تسجيل الدخول لضمان وصولها
-        _syncFCMToken(context);
-        // 🔔 عرض حالة الـ FCM Token بعد الاستجابة من Firebase (ينتظر حتى يغلق المستخدم النافذة)
-        await _showFCMTokenAlert(context);
-
         // التحقق من الموافقة على السياسة مباشرة من بيانات تسجيل الدخول
         final box = Hive.box(HiveKeys.settingsBox);
         await box.put('provider_policy_agreed', user.providerPolicy);
 
         if (user.providerPolicy) {
+          // ✅ تحديث توكن الإشعارات فور تسجيل الدخول لضمان وصولها
+          _syncFCMToken(context);
+          // 🔔 عرض حالة الـ FCM Token بعد الاستجابة من Firebase (ينتظر حتى يغلق المستخدم النافذة)
+          await _showFCMTokenAlert(context);
+
           // الانتقال للشاشة الرئيسية مع تنظيف مكدس التنقل
           Navigator.pushAndRemoveUntil(
             context,

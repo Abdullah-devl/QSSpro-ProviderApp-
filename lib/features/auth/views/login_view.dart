@@ -439,35 +439,35 @@ class _LoginViewBody extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Divider(
-                          color: context.qsColors.textSub.withValues(alpha: 0.2),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          context.tr('or'),
-                          style: TextStyle(color: context.qsColors.textSub),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          color: context.qsColors.textSub.withValues(alpha: 0.2),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
+                  // Row(
+                  //   children: [
+                  //     Expanded(
+                  //       child: Divider(
+                  //         color: context.qsColors.textSub.withValues(alpha: 0.2),
+                  //       ),
+                  //     ),
+                  //     Padding(
+                  //       padding: const EdgeInsets.symmetric(horizontal: 16),
+                  //       child: Text(
+                  //         context.tr('or'),
+                  //         style: TextStyle(color: context.qsColors.textSub),
+                  //       ),
+                  //     ),
+                  //     Expanded(
+                  //       child: Divider(
+                  //         color: context.qsColors.textSub.withValues(alpha: 0.2),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+                  // const SizedBox(height: 20),
 
-                  CustomButton(
-                    text: context.tr('create_account'),
-                    icon: Icons.person_add_alt_1_outlined,
-                    isPrimary: false,
-                    onPressed: () {},
-                  ),
+                  // CustomButton(
+                  //   text: context.tr('create_account'),
+                  //   icon: Icons.person_add_alt_1_outlined,
+                  //   isPrimary: false,
+                  //   onPressed: () {},
+                  // ),
                   const SizedBox(height: 30),
 
                   // =====================================

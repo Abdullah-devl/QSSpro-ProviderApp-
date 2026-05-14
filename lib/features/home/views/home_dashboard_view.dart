@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 // import 'package:service_provider_app/features/home/views/widgets/activeServicCared.dart';
@@ -115,6 +116,14 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
                 _buildErrorState(context, homeViewModel)
               else if (homeViewModel.homeData != null) ...[
                 
+                // ==========================================
+                // 🆕 عرض التوكن (FCM Token Card)
+                // ==========================================
+                if (homeViewModel.fcmToken != null)
+                  _buildFCMTokenCard(context, homeViewModel.fcmToken!),
+                
+                const SizedBox(height: 15),
+
                 // ==========================================
                 // 3. حالة التوثيق (Verification Banner)
                 // ==========================================
@@ -655,6 +664,54 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Text(message, style: TextStyle(color: context.qsColors.textSub)),
+      ),
+    );
+  }
+
+  // 🔔 مكوّن عرض توكن فايربيز
+  Widget _buildFCMTokenCard(BuildContext context, String token) {
+    final colors = context.qsColors;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colors.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: colors.primary.withOpacity(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.notifications_active_rounded, color: colors.primary, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                "Firebase FCM Token",
+                style: TextStyle(color: colors.primary, fontSize: 13, fontWeight: FontWeight.bold),
+              ),
+              const Spacer(),
+              IconButton(
+                icon: Icon(Icons.copy_rounded, color: colors.primary, size: 18),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: token));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("تم نسخ التوكن بنجاح")),
+                  );
+                },
+                constraints: const BoxConstraints(),
+                padding: EdgeInsets.zero,
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            token,
+            style: TextStyle(color: colors.textSub, fontSize: 11, fontFamily: 'monospace'),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }

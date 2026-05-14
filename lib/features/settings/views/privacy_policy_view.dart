@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/policy_viewmodel.dart';
+import '../../auth/viewmodels/auth_viewmodel.dart';
 import 'package:service_provider_app/features/home/views/main_view.dart' as service_provider_app_main_view;
 class PrivacyPolicyView extends StatefulWidget {
   final bool requiresAcceptance;
@@ -136,6 +137,11 @@ class _PrivacyPolicyViewState extends State<PrivacyPolicyView> {
                             try {
                               await viewModel.agreeToPolicy(context);
                               if (context.mounted) {
+                                // مزامنة الفايربيز بعد الموافقة الناجحة
+                                try {
+                                  context.read<AuthViewModel>().syncFCMToken();
+                                } catch (_) {}
+
                                 Navigator.pushAndRemoveUntil(
                                   context,
                                   MaterialPageRoute(builder: (_) => const service_provider_app_main_view.MainView()),

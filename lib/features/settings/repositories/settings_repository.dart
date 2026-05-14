@@ -30,20 +30,32 @@ class SettingsRepository {
 
   Future<void> acceptProviderPolicy() async {
     try {
-      // نستخدم FormData لضمان وصول البيانات للسيرفر بشكل صحيح
-      // ونرسل الطلب كـ POST مع _method: PATCH كحل تقني متقدم
-      final formData = FormData.fromMap({
+      // 1. الموافقة على سياسة مزود الخدمة
+      final providerFormData = FormData.fromMap({
         '_method': 'PATCH',
         'provider_policy': 1,
         'agreed': 1,
         'status': 1,
       });
 
-      final response = await apiService.post(
-        'policies/provider',
-        data: formData,
+      await apiService.post(
+        ApiEndpoints.providerPolicy,
+        data: providerFormData,
       );
-      ApiErrorHandler.handleResponse(response);
+
+      // 2. الموافقة على سياسة المستخدم (Seeker Policy) 
+      // لأن السيرفر يتطلبها أحياناً لكل أنواع المستخدمين
+      final seekerFormData = FormData.fromMap({
+        '_method': 'PATCH',
+        'seeker_policy': 1,
+        'agreed': 1,
+        'status': 1,
+      });
+
+      await apiService.post(
+        ApiEndpoints.seekerPolicy,
+        data: seekerFormData,
+      );
       
       // ✅ نحفظ الموافقة محلياً في Hive
       var box = Hive.box(HiveKeys.settingsBox);

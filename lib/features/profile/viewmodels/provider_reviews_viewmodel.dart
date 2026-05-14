@@ -23,14 +23,26 @@ class ProviderReviewsViewModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   Future<void> fetchReviews() async {
-    _isLoading = true;
+    // 1. 📥 تحميل التقييمات من الكاش المحلي فوراً
+    final cached = _repository.getCachedProviderFeedback(providerId);
+    if (cached.isNotEmpty) {
+      _reviews = cached;
+      debugPrint('⚡ ProviderReviewsViewModel: Loaded ${_reviews.length} reviews instantly from local Hive cache.');
+      notifyListeners();
+    }
+
+    // 2. 🌐 التحديث في الخلفية
+    _isLoading = _reviews.isEmpty;
     _errorMessage = null;
     notifyListeners();
 
     try {
       _reviews = await _repository.getProviderFeedback(providerId);
+      _errorMessage = null;
     } catch (e) {
-      _errorMessage = ApiErrorHandler.handle(e).message;
+      if (_reviews.isEmpty) {
+        _errorMessage = ApiErrorHandler.handle(e).message;
+      }
     } finally {
       _isLoading = false;
       notifyListeners();

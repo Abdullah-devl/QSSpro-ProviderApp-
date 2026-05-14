@@ -24,8 +24,24 @@ class ContactInfoViewModel extends ChangeNotifier {
   }
 
   Future<void> fetchData() async {
-    _setLoading(true);
+    // 1. 📥 تحميل الهواتف والبنوك من الكاش المحلي فوراً
+    final cachedPhones = _repository.getCachedPhones();
+    final cachedBanks = _repository.getCachedBanks();
+    if (cachedPhones.isNotEmpty) {
+      phones = cachedPhones;
+    }
+    if (cachedBanks.isNotEmpty) {
+      banks = cachedBanks;
+    }
+    if (phones.isNotEmpty || banks.isNotEmpty) {
+      debugPrint('⚡ ContactInfoViewModel: Loaded local phones/banks instantly from local Hive cache.');
+      notifyListeners();
+    }
+
+    // 2. 🌐 التحديث في الخلفية
+    isLoading = phones.isEmpty && banks.isEmpty;
     errorMessage = null;
+    notifyListeners();
     
     try {
       phones = await _repository.getPhones();
@@ -45,7 +61,8 @@ class ContactInfoViewModel extends ChangeNotifier {
       debugPrint('Failed to fetch system banks: $e');
     }
 
-    _setLoading(false);
+    isLoading = false;
+    notifyListeners();
   }
 
   // 📞 Phone Operations...

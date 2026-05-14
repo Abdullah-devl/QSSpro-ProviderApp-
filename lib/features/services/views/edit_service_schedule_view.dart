@@ -1,4 +1,4 @@
-﻿// مسار الملف: lib/features/services/views/edit_service_schedule_view.dart
+// مسار الملف: lib/features/services/views/edit_service_schedule_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -222,7 +222,7 @@ class EditServiceScheduleView extends StatelessWidget {
                         _buildTimePicker(
                           context,
                           context.tr('start_time'),
-                          schedule.startTime,
+                          _formatTo12Hour(context, schedule.startTime),
                           () => viewModel.updateStartTime(context),
                         ),
                         Icon(
@@ -233,7 +233,7 @@ class EditServiceScheduleView extends StatelessWidget {
                         _buildTimePicker(
                           context,
                           context.tr('end_time'),
-                          schedule.endTime,
+                          _formatTo12Hour(context, schedule.endTime),
                           () => viewModel.updateEndTime(context),
                         ),
                       ],
@@ -283,6 +283,28 @@ class EditServiceScheduleView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatTo12Hour(BuildContext context, String timeStr) {
+    if (timeStr.isEmpty) return timeStr;
+    try {
+      final parts = timeStr.split(':');
+      if (parts.length >= 2) {
+        int hour = int.parse(parts[0]);
+        int minute = int.parse(parts[1]);
+
+        final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+        final periodStr = hour >= 12
+            ? (isArabic ? context.tr('auto_tr_79') : 'PM')
+            : (isArabic ? context.tr('auto_tr_92') : 'AM');
+
+        int hour12 = hour % 12;
+        if (hour12 == 0) hour12 = 12;
+        final minuteStr = minute.toString().padLeft(2, '0');
+        return '$hour12:$minuteStr $periodStr';
+      }
+    } catch (_) {}
+    return timeStr;
   }
 }
 

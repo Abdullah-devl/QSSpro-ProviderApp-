@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/phone_model.dart';
 import '../viewmodels/contact_info_viewmodel.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class AddEditPhoneDialog extends StatefulWidget {
   final ContactInfoViewModel vm;
@@ -32,7 +33,7 @@ class _AddEditPhoneDialogState extends State<AddEditPhoneDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.phone == null ? 'إضافة رقم' : 'تعديل الرقم'),
+      title: Text(widget.phone == null ? context.tr('auto_tr_68') : context.tr('auto_tr_33')),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -40,31 +41,31 @@ class _AddEditPhoneDialogState extends State<AddEditPhoneDialog> {
             TextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'رقم الجوال أو التواصل',
+              decoration: InputDecoration(
+                labelText: context.tr('auto_tr_61'),
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _countryCodeController,
-              decoration: const InputDecoration(
-                labelText: 'مفتاح الدولة (مثال: +966)',
+              decoration: InputDecoration(
+                labelText: context.tr('auto_tr_72'),
               ),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _type,
-              items: const [
-                DropdownMenuItem(value: 'mobile', child: Text('جوال')),
-                DropdownMenuItem(value: 'whatsapp', child: Text('واتساب')),
-                DropdownMenuItem(value: 'both', child: Text('جوال وواتساب')),
+              initialValue: _type,
+              items: [
+                DropdownMenuItem(value: 'mobile', child: Text(context.tr('auto_tr_81'))),
+                DropdownMenuItem(value: 'whatsapp', child: Text(context.tr('auto_tr_27'))),
+                DropdownMenuItem(value: 'both', child: Text(context.tr('auto_tr_89'))),
               ],
               onChanged: (val) => setState(() => _type = val ?? 'mobile'),
-              decoration: const InputDecoration(labelText: 'نوع الرقم'),
+              decoration: InputDecoration(labelText: context.tr('auto_tr_56')),
             ),
             const SizedBox(height: 12),
             CheckboxListTile(
-              title: const Text('رقم أساسي'),
+              title: Text(context.tr('auto_tr_8')),
               value: _isPrimary,
               onChanged: (val) => setState(() => _isPrimary = val ?? false),
               controlAffinity: ListTileControlAffinity.leading,
@@ -76,7 +77,7 @@ class _AddEditPhoneDialogState extends State<AddEditPhoneDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('إلغاء'),
+          child: Text(context.tr('auto_tr_51')),
         ),
         ElevatedButton(
           onPressed: () async {
@@ -85,7 +86,7 @@ class _AddEditPhoneDialogState extends State<AddEditPhoneDialog> {
             final country = _countryCodeController.text.trim();
             if (phoneText.isEmpty || country.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('الرجاء إدخال رقم الجوال ومفتاح الدولة')),
+                SnackBar(content: Text(context.tr('auto_tr_20'))),
               );
               return;
             }
@@ -119,11 +120,11 @@ class _AddEditPhoneDialogState extends State<AddEditPhoneDialog> {
               Navigator.pop(context); // Close dialog
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(widget.vm.errorMessage ?? 'حدث خطأ')),
+                SnackBar(content: Text(widget.vm.errorMessage ?? context.tr('auto_tr_64'))),
               );
             }
           },
-          child: const Text('حفظ'),
+          child: Text(context.tr('auto_tr_77')),
         ),
       ],
     );

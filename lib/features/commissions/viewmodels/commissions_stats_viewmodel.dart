@@ -40,10 +40,37 @@ class CommissionsStatsViewModel extends ChangeNotifier {
   bool _isVerified = false;
   bool get isVerified => _isVerified;
 
+  bool _hasFetchedOnce = false;
+
   Future<void> fetchStatsData() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    // 1. 📥 تحميل البيانات المحلية من الكاش فوراً وعرضها للمستخدم
+    final cachedSummary = _repository.getCachedProviderCommissionSummary();
+    final cachedPoints = _pointsRepository.getCachedPointsBalance();
+    final cachedProfile = _profileRepository.getCachedProfile();
+
+    if (cachedSummary != null) {
+      _statsSummary = cachedSummary;
+    }
+    if (cachedPoints != null) {
+      _pointsBalance = cachedPoints;
+    }
+    if (cachedProfile != null) {
+      _calculateVerificationDays(cachedProfile.providerVerifiedUntil);
+      _isVerified = cachedProfile.verificationProvider || _verificationDaysLeft > 0;
+    }
+
+    if (_statsSummary != null || _pointsBalance != null) {
+      debugPrint('⚡ CommissionsStatsViewModel: Loaded local finance stats instantly from local Hive cache.');
+      notifyListeners();
+    }
+
+    // 2. ⚡ تفعيل الشيمر في المرة الأولى فقط خلال جلسة التطبيق الحالية
+    if (!_hasFetchedOnce) {
+      _isLoading = true;
+      _hasFetchedOnce = true;
+      _errorMessage = null;
+      notifyListeners();
+    }
 
     try {
       // 🚀 جلب البيانات بشكل مستقل لضمان استقرار العرض حتى لو فشل أحد الطلبات
@@ -80,7 +107,9 @@ class CommissionsStatsViewModel extends ChangeNotifier {
     } catch (e) {
       debugPrint('❌ CommissionsStatsViewModel: Global Error in fetchStatsData: $e');
       _isLoading = false;
-      _errorMessage = 'error_unexpected_fetch_data';
+      if (_statsSummary == null) {
+        _errorMessage = 'error_unexpected_fetch_data';
+      }
       notifyListeners();
     }
   }

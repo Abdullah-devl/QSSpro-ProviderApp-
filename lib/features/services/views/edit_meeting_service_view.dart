@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/meeting_service_viewmodel.dart';
 import 'package:service_provider_app/core/utils/dialog_helper.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class EditMeetingServiceView extends StatelessWidget {
   const EditMeetingServiceView({super.key});
@@ -14,7 +15,7 @@ class EditMeetingServiceView extends StatelessWidget {
     return Scaffold(
       backgroundColor: context.qsColors.background,
       appBar: AppBar(
-        title: Text('تعديل خدمة الحضور', style: TextStyle(color: context.qsColors.text, fontWeight: FontWeight.bold)),
+        title: Text(context.tr('auto_tr_38'), style: TextStyle(color: context.qsColors.text, fontWeight: FontWeight.bold)),
         backgroundColor: context.qsColors.background,
         elevation: 0,
         centerTitle: true,
@@ -33,7 +34,7 @@ class EditMeetingServiceView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'تنشيط الخدمة',
+                  context.tr('auto_tr_62'),
                   style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 Switch.adaptive(
@@ -46,19 +47,19 @@ class EditMeetingServiceView extends StatelessWidget {
             const SizedBox(height: 20),
 
             // السعر الأساسي
-            Text('سعر الخدمة الأساسي', style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(context.tr('auto_tr_80'), style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 10),
-            _buildAmountField(context, controller: viewModel.priceController, hint: 'مثال: 100'),
+            _buildAmountField(context, controller: viewModel.priceController, hint: context.tr('auto_tr_60')),
             const SizedBox(height: 20),
 
             // سعر الكيلو
-            Text('سعر الكيلومتر الواحد', style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(context.tr('auto_tr_14'), style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 10),
-            _buildAmountField(context, controller: viewModel.pricePerKmController, hint: 'مثال: 2.5'),
+            _buildAmountField(context, controller: viewModel.pricePerKmController, hint: context.tr('auto_tr_9')),
             const SizedBox(height: 20),
 
             // الوصف
-            Text('وصف الخدمة', style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(context.tr('auto_tr_31'), style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 10),
             Container(
               decoration: BoxDecoration(
@@ -70,7 +71,7 @@ class EditMeetingServiceView extends StatelessWidget {
                 controller: viewModel.descriptionController,
                 maxLines: 4,
                 decoration: InputDecoration(
-                  hintText: 'اكتب وصفاً هنا...',
+                  hintText: context.tr('auto_tr_4'),
                   hintStyle: TextStyle(color: context.qsColors.textSub.withOpacity(0.5)),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.all(16),
@@ -94,14 +95,14 @@ class EditMeetingServiceView extends StatelessWidget {
                     : () async {
                         bool success = await viewModel.updateMeetingService(context);
                         if (success && context.mounted) {
-                          await DialogHelper.showSuccessDialog(context, 'تم تعديل الخدمة بنجاح');
+                          await DialogHelper.showSuccessDialog(context, context.tr('auto_tr_74'));
                           Navigator.pop(context, true);
                         }
                       },
                 child: viewModel.isSaving
                     ? CircularProgressIndicator(color: context.qsColors.card)
                     : Text(
-                        'حفظ التعديلات',
+                        context.tr('auto_tr_0'),
                         style: TextStyle(color: context.qsColors.card, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
               ),
@@ -137,7 +138,7 @@ class EditMeetingServiceView extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border(right: BorderSide(color: context.qsColors.textSub.withOpacity(0.1))),
             ),
-            child: Text('ر.س', style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold)),
+            child: Text(context.tr('auto_tr_34'), style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

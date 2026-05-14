@@ -57,7 +57,7 @@ class EditProfileView extends StatelessWidget {
               children: [
                 _buildInputLabel(context.tr('full_name'), const Color(0xFF5CA4B8)),
                 const SizedBox(height: 8),
-                _buildTextField(context, vm.nameController, Icons.person_outline),
+                _buildTextField(context, vm.nameController, Icons.person_outline, readOnly: true),
                 const SizedBox(height: 20),
                 _buildInputLabel(context.tr('profession'), const Color(0xFF5CA4B8)),
                 const SizedBox(height: 8),
@@ -98,7 +98,7 @@ class EditProfileView extends StatelessWidget {
                 children: [
                   CupertinoSwitch(
                     value: vm.isAvailable,
-                    activeColor: const Color(0xFF5CA4B8),
+                    activeTrackColor: const Color(0xFF5CA4B8),
                     onChanged: (val) => vm.toggleAvailability(val),
                   ),
                   const Spacer(),
@@ -187,17 +187,21 @@ class EditProfileView extends StatelessWidget {
     return Text(text, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14));
   }
 
-  Widget _buildTextField(BuildContext context, TextEditingController controller, IconData? icon, {int maxLines = 1}) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      textAlign: TextAlign.right,
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: context.qsColors.background,
-        prefixIcon: icon != null ? Icon(icon, color: context.qsColors.textSub) : null,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+  Widget _buildTextField(BuildContext context, TextEditingController controller, IconData? icon, {int maxLines = 1, bool readOnly = false}) {
+    return Opacity(
+      opacity: readOnly ? 0.7 : 1.0,
+      child: TextField(
+        controller: controller,
+        maxLines: maxLines,
+        readOnly: readOnly,
+        textAlign: TextAlign.right,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: context.qsColors.background,
+          prefixIcon: icon != null ? Icon(icon, color: context.qsColors.textSub) : null,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        ),
       ),
     );
   }

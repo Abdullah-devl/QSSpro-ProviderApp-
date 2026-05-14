@@ -8,6 +8,7 @@ import '../models/bank_model.dart';
 import '../viewmodels/contact_info_viewmodel.dart';
 import '../widgets/add_edit_phone_dialog.dart';
 import '../widgets/add_edit_bank_dialog.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class ContactInfoView extends StatelessWidget {
   final ProfileModel profile;
@@ -29,7 +30,7 @@ class ContactInfoView extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSectionTitle(context, 'أرقام التواصل'),
+            _buildSectionTitle(context, context.tr('auto_tr_69')),
             IconButton(
               icon: const Icon(
                 Icons.add_circle,
@@ -41,7 +42,7 @@ class ContactInfoView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         if (vm.phones.isEmpty)
-          const Center(child: Text('لا توجد أرقام تواصل مضافة'))
+          Center(child: Text(context.tr('auto_tr_18')))
         else
           ...vm.phones.map((phone) => _buildPhoneCard(context, vm, phone)),
 
@@ -51,7 +52,7 @@ class ContactInfoView extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSectionTitle(context, 'الحسابات البنكية'),
+            _buildSectionTitle(context, context.tr('auto_tr_53')),
             IconButton(
               icon: const Icon(Icons.add_circle, color: Color(0xFF5CA4B8)),
               onPressed: () => _showBankDialog(context, vm, null),
@@ -60,7 +61,7 @@ class ContactInfoView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         if (vm.banks.isEmpty)
-          const Center(child: Text('لا توجد حسابات بنكية مضافة'))
+          Center(child: Text(context.tr('auto_tr_76')))
         else
           ...vm.banks.map((bank) => _buildBankCard(context, vm, bank)),
       ],
@@ -86,16 +87,16 @@ class ContactInfoView extends StatelessWidget {
   ) {
     IconData iconData = Icons.phone_android_rounded;
     Color iconColor = const Color.fromARGB(255, 116, 134, 165);
-    String typeText = 'جوال';
+    String typeText = context.tr('auto_tr_81');
 
     if (phone.type == 'whatsapp') {
       iconData = Icons.chat_bubble_outline_rounded;
       iconColor = context.qsColors.success;
-      typeText = 'واتساب';
+      typeText = context.tr('auto_tr_27');
     } else if (phone.type == 'both') {
       iconData = Icons.phone_in_talk_rounded;
       iconColor = Colors.teal;
-      typeText = 'جوال وواتساب';
+      typeText = context.tr('auto_tr_89');
     }
 
     return Card(
@@ -162,7 +163,7 @@ class ContactInfoView extends StatelessWidget {
                       ClipboardData(text: '${phone.countryCode}${phone.phone}'),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('تم نسخ الرقم بنجاح')),
+                      SnackBar(content: Text(context.tr('auto_tr_41'))),
                     );
                   },
                 ),
@@ -252,7 +253,7 @@ class ContactInfoView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        bank.isActive ? 'نشط' : 'غير نشط',
+                        bank.isActive ? context.tr('auto_tr_21') : context.tr('auto_tr_15'),
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -349,12 +350,12 @@ class ContactInfoView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('تأكيد الحذف'),
-        content: const Text('هل أنت متأكد أنك تريد حذف هذا العنصر؟'),
+        title: Text(context.tr('auto_tr_10')),
+        content: Text(context.tr('auto_tr_25')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('إلغاء'),
+            child: Text(context.tr('auto_tr_51')),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: context.qsColors.error),
@@ -369,7 +370,7 @@ class ContactInfoView extends StatelessWidget {
               await onDelete();
               Navigator.pop(context); // Close loading indicator
             },
-            child: Text('حذف', style: TextStyle(color: context.qsColors.card)),
+            child: Text(context.tr('auto_tr_86'), style: TextStyle(color: context.qsColors.card)),
           ),
         ],
       ),

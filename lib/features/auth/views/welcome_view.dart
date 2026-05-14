@@ -77,12 +77,12 @@ class WelcomeView extends StatelessWidget {
                     label: Text(
                       settingsProvider.languageCode == 'ar'
                           ? 'English'
-                          : 'عربي',
+                          : context.tr('auto_tr_22'),
                       style: TextStyle(
                         color: context.qsColors.text,
                         fontWeight: FontWeight.bold,
                         fontFamily:
-                            'Cairo', // لضمان ظهور كلمة "عربي" بخط كايرو دائماً
+                            'Cairo', // لضمان ظهور كلمة context.tr('auto_tr_22') بخط كايرو دائماً
                       ),
                     ),
                     style: TextButton.styleFrom(

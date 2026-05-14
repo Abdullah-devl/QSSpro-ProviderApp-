@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/theme/qs_color_extension.dart';
 import 'package:service_provider_app/features/commissions/models/history_models.dart';
+import '../../../../core/network/api_endpoints.dart';
 
 class HistoryListItem extends StatelessWidget {
   final BaseHistoryItem item;
@@ -41,6 +42,11 @@ class HistoryListItem extends StatelessWidget {
         iconColor = const Color(0xFF7B1FA2);
         iconData = Icons.receipt_long_rounded;
         break;
+      case HistoryType.commission:
+        iconBgColor = const Color(0xFFFFEBEE);
+        iconColor = const Color(0xFFD32F2F);
+        iconData = Icons.payment_rounded;
+        break;
       default:
         iconBgColor = const Color(0xFFF5F5F5);
         iconColor = const Color(0xFF757575);
@@ -74,106 +80,324 @@ class HistoryListItem extends StatelessWidget {
       translatedStatus = context.tr(statusKey).isNotEmpty ? context.tr(statusKey) : item.status;
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: context.qsColors.card,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: context.qsColors.textSub.withValues(alpha: 0.08)),
-        boxShadow: [
-          BoxShadow(
-            color: context.qsColors.text.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+        onTap: () => _showDetailsDialog(context, iconColor, iconBgColor, iconData, translatedStatus, badgeBgColor, badgeTextColor),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: context.qsColors.card,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: context.qsColors.textSub.withValues(alpha: 0.08)),
+            boxShadow: [
+              BoxShadow(
+                color: context.qsColors.text.withValues(alpha: 0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // 1. أيقونة النوع
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: iconBgColor,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(iconData, color: iconColor, size: 22),
-          ),
-          const SizedBox(width: 14),
-
-          // 2. المحتوى النصي
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: context.qsColors.text,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  item.date,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: context.qsColors.textSub,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // 3. المبلغ والحالة (اليسار)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Text(
-                    item.amount > 0 ? item.amount.toStringAsFixed(0) : '0',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: context.qsColors.text,
+              // 1. أيقونة النوع
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(iconData, color: iconColor, size: 22),
+              ),
+              const SizedBox(width: 14),
+
+              // 2. المحتوى النصي
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: context.qsColors.text,
+                      ),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.date,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: context.qsColors.textSub,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 3. المبلغ والحالة (اليسار)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        item.amount.toStringAsFixed(0),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: item.amount < 0 ? Colors.red : context.qsColors.text,
+                        ),
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        item.type == HistoryType.point ? context.tr('points') : context.tr('currency_sar'),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: context.qsColors.textSub,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 3),
-                  Text(
-                    item.type == HistoryType.point ? context.tr('points') : context.tr('currency_sar'),
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: context.qsColors.textSub,
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: badgeBgColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      translatedStatus,
+                      style: TextStyle(
+                        color: badgeTextColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: badgeBgColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  translatedStatus,
-                  style: TextStyle(
-                    color: badgeTextColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
             ],
           ),
-        ],
+        ),
       ),
+    );
+  }
+
+  void _showDetailsDialog(
+    BuildContext context,
+    Color iconColor,
+    Color iconBgColor,
+    IconData iconData,
+    String translatedStatus,
+    Color badgeBgColor,
+    Color badgeTextColor,
+  ) {
+    final colors = context.qsColors;
+    final Map<String, dynamic> raw = item.rawJson;
+
+    // استخراج الحقول المهمة بناءً على نوع العملية
+    String? bondImage;
+    String? bondNumber;
+    String? bankName;
+    String? adminNote;
+    String? packageDetails;
+    String? requestDetails;
+
+    if (item.type == HistoryType.package) {
+      bondImage = raw['bond_image']?.toString();
+      bondNumber = raw['bond_number']?.toString();
+      bankName = raw['bank_name']?.toString();
+      adminNote = raw['admin_note']?.toString();
+      if (raw['package'] is Map) {
+        final p = raw['package'];
+        packageDetails = '${p['name'] ?? ''} (${p['points'] ?? 0} نقطة)';
+      }
+    } else if (item.type == HistoryType.bond) {
+      bondImage = raw['image_path']?.toString();
+      bondNumber = raw['bond_number']?.toString();
+      if (raw['request'] is Map) {
+        final r = raw['request'];
+        requestDetails = 'طلب رقم #${r['id']} | إجمالي: ${r['total_price']} ر.س';
+      }
+    } else if (item.type == HistoryType.withdrawal) {
+      adminNote = raw['admin_note']?.toString();
+    } else {
+      if (raw['request_id'] != null) {
+        requestDetails = 'مرتبط بطلب رقم #${raw['request_id']}';
+      }
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: colors.card,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // الهيدر مع الأيقونة
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: iconBgColor,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(iconData, color: iconColor, size: 28),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.title,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: colors.text,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              item.date,
+                              style: TextStyle(fontSize: 12, color: colors.textSub),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Divider(height: 1, color: colors.textSub.withValues(alpha: 0.1)),
+                  ),
+
+                  // تفاصيل المبلغ والحالة
+                  _buildDetailRow(
+                    context,
+                    context.tr('auto_tr_42'),
+                    '${item.amount.toStringAsFixed(2)} ${item.type == HistoryType.point ? context.tr('points') : context.tr('currency_sar')}',
+                    valueColor: item.amount < 0 ? Colors.red : colors.text,
+                  ),
+                  const SizedBox(height: 10),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(context.tr('auto_tr_44'), style: TextStyle(fontSize: 13, color: colors.textSub)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(color: badgeBgColor, borderRadius: BorderRadius.circular(8)),
+                        child: Text(translatedStatus, style: TextStyle(color: badgeTextColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+
+                  // الحقول الإضافية إن وجدت
+                  if (packageDetails != null) ...[
+                    const SizedBox(height: 10),
+                    _buildDetailRow(context, context.tr('auto_tr_58'), packageDetails),
+                  ],
+                  if (requestDetails != null) ...[
+                    const SizedBox(height: 10),
+                    _buildDetailRow(context, context.tr('auto_tr_78'), requestDetails),
+                  ],
+                  if (bankName != null && bankName.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    _buildDetailRow(context, context.tr('auto_tr_3'), bankName),
+                  ],
+                  if (bondNumber != null && bondNumber.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    _buildDetailRow(context, context.tr('auto_tr_16'), bondNumber),
+                  ],
+                  if (adminNote != null && adminNote.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    _buildDetailRow(context, context.tr('auto_tr_23'), adminNote, valueColor: Colors.orange),
+                  ],
+
+                  // صورة الإيصال إن وجدت
+                  if (bondImage != null && bondImage.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      child: Divider(height: 1, color: colors.textSub.withValues(alpha: 0.1)),
+                    ),
+                    Text(context.tr('auto_tr_50'), style: TextStyle(fontSize: 13, color: colors.textSub, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        constraints: const BoxConstraints(maxHeight: 200),
+                        width: double.infinity,
+                        color: colors.background,
+                        child: InteractiveViewer(
+                          child: Image.network(
+                            bondImage.startsWith('http') ? bondImage : '${ApiEndpoints.storageBaseUrl}$bondImage',
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Icon(Icons.broken_image_rounded, color: colors.textSub.withValues(alpha: 0.5), size: 40),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      context.tr('close') != 'close' ? context.tr('close') : context.tr('auto_tr_85'),
+                      style: TextStyle(color: colors.card, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(BuildContext context, String label, String value, {Color? valueColor}) {
+    final colors = context.qsColors;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 13, color: colors.textSub)),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.left,
+            style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: valueColor ?? colors.text),
+          ),
+        ),
+      ],
     );
   }
 }

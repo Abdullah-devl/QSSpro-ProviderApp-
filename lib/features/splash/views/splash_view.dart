@@ -7,6 +7,9 @@ import 'package:service_provider_app/core/storage/token_storage.dart';
 import 'package:service_provider_app/features/home/views/main_view.dart';
 import 'package:service_provider_app/features/auth/viewmodels/auth_viewmodel.dart';
 import 'package:provider/provider.dart';
+import 'package:service_provider_app/features/profile/repositories/profile_repository.dart';
+import 'package:service_provider_app/features/settings/views/privacy_policy_view.dart';
+import 'package:service_provider_app/features/auth/repositories/auth_repository.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -63,18 +66,44 @@ class _SplashViewState extends State<SplashView>
         context.read<AuthViewModel>().syncFCMToken();
       }
 
-      // ✅ المستخدم لديه حساب ومسجل دخول -> نوجهه للرئيسية
+      bool policyAgreed = true; // نفترض الموافقة افتراضياً لتجنب تعطيل الدخول في حال فشل الاتصال
 
-      // ✅ المستخدم لديه حساب ومسجل دخول -> نوجهه للرئيسية
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainView()),
-      );
+      if (mounted) {
+        try {
+          // جلب بيانات المستخدم (user) من السيرفر مباشرة لاحتوائها على policy
+          final authRepo = context.read<AuthRepository>();
+          final userJson = await authRepo.getUserData();
+          if (userJson != null && userJson['provider_policy'] != null) {
+            policyAgreed = userJson['provider_policy'] == 1 || userJson['provider_policy'] == true || userJson['provider_policy'] == '1';
+          }
+        } catch (e) {
+          debugPrint('SplashView: Error fetching profile for policy check: $e');
+        }
+      }
+
+      if (!mounted) return;
+
+      if (policyAgreed) {
+        // ✅ المستخدم وافق على السياسة -> نوجهه للرئيسية
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const MainView()),
+          (route) => false,
+        );
+      } else {
+        // ❌ المستخدم لم يوافق -> نوجهه لصفحة السياسة للموافقة
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const PrivacyPolicyView(requiresAcceptance: true)),
+          (route) => false,
+        );
+      }
     } else {
       // ❌ المستخدم غير مسجل -> نوجهه لشاشة الترحيب/التسجيل
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const WelcomeView()),
+        (route) => false,
       );
     }
   }
@@ -93,7 +122,7 @@ class _SplashViewState extends State<SplashView>
           opacity: _fadeAnimation,
           child: ScaleTransition(
             scale: _scaleAnimation,
-            child: const AppLogo(size: 120),
+            child: const AppLogo(size: 240),
           ),
         ),
       ),

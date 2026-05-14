@@ -5,6 +5,8 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/settings_provider.dart';
 import '../../complaints/views/complaints_hub_view.dart';
+import 'privacy_policy_view.dart';
+import 'platform_bank_accounts_view.dart';
 
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
@@ -46,7 +48,7 @@ class SettingsView extends StatelessWidget {
                 icon: Icons.dark_mode_outlined,
                 title: context.tr('dark_mode'),
                 trailing: CupertinoSwitch(
-                  activeColor: colors.primary,
+                  activeTrackColor: colors.primary,
                   value: settingsProvider.isDarkMode,
                   onChanged: (value) => settingsProvider.toggleDarkMode(),
                 ),
@@ -96,14 +98,24 @@ class SettingsView extends StatelessWidget {
                 context,
                 icon: Icons.privacy_tip_outlined,
                 title: context.tr('privacy_policy'),
-                onTap: () => _showInfoDialog(context, 'privacy_policy'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PrivacyPolicyView()),
+                  );
+                },
               ),
               const Divider(height: 1),
               _buildSettingTile(
                 context,
-                icon: Icons.description_outlined,
-                title: context.tr('terms_of_service'),
-                onTap: () => _showInfoDialog(context, 'terms_of_service'),
+                icon: Icons.account_balance_outlined,
+                title: context.tr('platform_bank_accounts'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PlatformBankAccountsView()),
+                  );
+                },
               ),
               const Divider(height: 1),
               _buildSettingTile(
@@ -116,6 +128,7 @@ class SettingsView extends StatelessWidget {
                 ),
               ),
             ]),
+
 
             const SizedBox(height: 40),
             Center(
@@ -211,7 +224,7 @@ class SettingsView extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               ListTile(
-                title: const Center(child: Text('العربية', style: TextStyle(fontWeight: FontWeight.bold))),
+                title: Center(child: Text(context.tr('auto_tr_48'), style: TextStyle(fontWeight: FontWeight.bold))),
                 onTap: () {
                   provider.changeLanguage('ar');
                   Navigator.pop(ctx);
@@ -240,7 +253,7 @@ class SettingsView extends StatelessWidget {
         title: Text(context.tr(key)),
         content: SingleChildScrollView(
           child: Text(
-            'هذه مسودة لسياسة الخصوصية وشروط الخدمة. سيتم إدراج المحتوى القانوني الكامل لاحقاً.\n\n'
+            context.tr('auto_tr_55') +
             'This is a placeholder for the privacy policy and terms of service. The full legal content will be included later.',
             style: const TextStyle(height: 1.5),
           ),
@@ -248,7 +261,7 @@ class SettingsView extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('إغلاق / Close'),
+            child: Text(context.tr('auto_tr_88')),
           ),
         ],
       ),

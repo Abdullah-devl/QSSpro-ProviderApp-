@@ -11,14 +11,24 @@ class HiveHelper {
     await Hive.openBox(HiveKeys.servicesBox); // 🛠️ فتح صندوق الخدمات
     await Hive.openBox(HiveKeys.phonesBox); // 📞 صندوق الهواتف
     await Hive.openBox(HiveKeys.banksBox); // 🏦 صندوق البنوك
+    await Hive.openBox(HiveKeys.reviewsBox); // ⭐ صندوق التقييمات
+    await Hive.openBox(HiveKeys.ordersBox); // 📦 صندوق الطلبات
   }
 
   // دالة مساعدة لتنظيف البيانات عند تسجيل الخروج (سنستخدمها لاحقاً)
   static Future<void> clareAllData() async {
-    await Hive.box(HiveKeys.settingsBox).clear();
+    // ⚠️ لا نمسح الـ settingsBox بالكامل لأنه يحتوي على التوكن، اللغة، والسمة (Theme)
+    final settingsBox = Hive.box(HiveKeys.settingsBox);
+    // فقط نحذف المفاتيح المتعلقة بالمستخدم إذا لزم الأمر
+    await settingsBox.delete('my_profile');
+    await settingsBox.delete('provider_policy_agreed');
+    
+    // مسح باقي الصناديق التي تحتوي على بيانات للمستخدم القديم
     await Hive.box(HiveKeys.worksBox).clear();
     await Hive.box(HiveKeys.servicesBox).clear();
     await Hive.box(HiveKeys.phonesBox).clear();
     await Hive.box(HiveKeys.banksBox).clear();
+    await Hive.box(HiveKeys.reviewsBox).clear();
+    await Hive.box(HiveKeys.ordersBox).clear();
   }
 }

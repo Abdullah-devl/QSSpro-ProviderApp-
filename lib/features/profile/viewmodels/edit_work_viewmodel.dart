@@ -1,9 +1,9 @@
-﻿import 'dart:io';
-import 'package:service_provider_app/core/theme/qs_color_extension.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../repositories/profile_repository.dart';
 import '../models/work_model.dart';
+import '../../../../core/utils/dialog_helper.dart';
 import '../../../../core/localization/app_localizations.dart';
 
 class EditWorkViewModel extends ChangeNotifier {
@@ -32,9 +32,17 @@ class EditWorkViewModel extends ChangeNotifier {
 
   Future<void> save(BuildContext context) async {
     if (titleController.text.trim().isEmpty) {
-       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('error_title_required')), backgroundColor: context.qsColors.error));
+       DialogHelper.showErrorDialog(context, context.tr('error_title_required'));
        return;
     }
+
+    final bool confirm = await DialogHelper.showConfirmationDialog(
+      context,
+      title: context.tr('save_changes'),
+      message: 'هل أنت متأكد أنك تريد حفظ التعديلات على هذا العمل؟',
+    );
+
+    if (!confirm) return;
 
     isLoading = true;
     notifyListeners();
@@ -50,6 +58,11 @@ class EditWorkViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
       
+      await DialogHelper.showSuccessDialog(
+        context,
+        'تم حفظ التعديلات بنجاح',
+      );
+
       if (context.mounted) {
         Navigator.pop(context, true);
       }
@@ -58,12 +71,20 @@ class EditWorkViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: context.qsColors.error));
+        DialogHelper.showErrorDialog(context, e.toString());
       }
     }
   }
 
   Future<void> delete(BuildContext context) async {
+    final bool confirm = await DialogHelper.showConfirmationDialog(
+      context,
+      title: context.tr('delete'),
+      message: context.tr('delete_confirm_msg_specific', args: {'title': work.title}),
+    );
+
+    if (!confirm) return;
+
     isLoading = true;
     notifyListeners();
 
@@ -73,6 +94,11 @@ class EditWorkViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
       
+      await DialogHelper.showSuccessDialog(
+        context,
+        context.tr('delete_success'),
+      );
+
       if (context.mounted) {
         Navigator.pop(context, true);
       }
@@ -81,7 +107,7 @@ class EditWorkViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: context.qsColors.error));
+        DialogHelper.showErrorDialog(context, e.toString());
       }
     }
   }

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/localization/app_localizations.dart';
@@ -13,14 +13,15 @@ import '../submit_verification/viewmodels/verification_viewmodel.dart';
 import '../submit_verification/views/new_verification_request_view.dart';
 
 class VerificationOptionsDialog extends StatelessWidget {
-  const VerificationOptionsDialog({super.key});
+  final bool isVerified;
+  const VerificationOptionsDialog({super.key, required this.isVerified});
 
-  static void show(BuildContext context) {
+  static void show(BuildContext context, bool isVerified) {
     showDialog(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return const VerificationOptionsDialog();
+        return VerificationOptionsDialog(isVerified: isVerified);
       },
     );
   }
@@ -44,7 +45,7 @@ class VerificationOptionsDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: colors.primary.withOpacity(0.1),
+                color: colors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -81,96 +82,103 @@ class VerificationOptionsDialog extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // 🔘 4. زر "طلب توثيق جديد" (يفتح شاشة إدخال المحتوى النصي)
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ChangeNotifierProvider(
-                        create: (context) => VerificationViewModel(
-                          VerificationRepository(context.read<ApiService>()),
+            // 🔘 4. زر "طلب توثيق جديد" (يظهر فقط إذا الحساب غير موثق)
+            if (!isVerified) ...[
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChangeNotifierProvider(
+                          create: (context) => VerificationViewModel(
+                            VerificationRepository(context.read<ApiService>()),
+                          ),
+                          child: const NewVerificationRequestView(),
                         ),
-                        child: const NewVerificationRequestView(),
                       ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    elevation: 0,
                   ),
-                  elevation: 0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.post_add_rounded, color: context.qsColors.card, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      context.tr('new_verification_request'),
-                      style: TextStyle(
-                        color: context.qsColors.card,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        fontFamily: 'Cairo',
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.post_add_rounded, color: context.qsColors.card, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        context.tr('new_verification_request'),
+                        style: TextStyle(
+                          color: context.qsColors.card,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          fontFamily: 'Cairo',
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
+            ],
 
-            // 🔘 5. زر "تجديد التوثيق الحالي" (يفتح صفحة الباقات)
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ChangeNotifierProvider(
-                        create: (context) => PackagesViewModel(
-                          PackagesRepository(context.read<ApiService>()),
+            // 🔘 5. زر "تجديد التوثيق الحالي" (يظهر فقط إذا الحساب موثق)
+            if (isVerified) ...[
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChangeNotifierProvider(
+                          create: (context) => PackagesViewModel(
+                            PackagesRepository(context.read<ApiService>()),
+                          ),
+                          child: const VerificationPackagesView(),
                         ),
-                        child: const VerificationPackagesView(),
                       ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  );
-                },
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: colors.primary, width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    elevation: 0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.refresh_rounded, color: colors.card, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        context.tr('renew_current_verification'),
+                        style: TextStyle(
+                          color: colors.card,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          fontFamily: 'Cairo',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.refresh_rounded, color: colors.primary, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      context.tr('renew_current_verification'),
-                      style: TextStyle(
-                        color: colors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        fontFamily: 'Cairo',
-                      ),
-                    ),
-                  ],
-                ),
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 12),
+            ],
+
+            const SizedBox(height: 8),
 
             // ❌ 6. زر "إلغاء الأمر"
             TextButton(

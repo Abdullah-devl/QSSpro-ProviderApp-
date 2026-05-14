@@ -32,13 +32,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/error/api_error_handler.dart';
+import '../../../core/storage/hive_keys.dart';
 import '../Models/order_model.dart';
 
 class OrdersRepository {
   final ApiService _apiService;
-
-  // 🚀 اسم الصندوق الخاص بتخزين الطلبات في هايف
-  static const String _boxName = 'orders_cache_box';
 
   OrdersRepository(this._apiService);
 
@@ -49,6 +47,7 @@ class OrdersRepository {
         ApiEndpoints.getOrderDetail(requestId),
       );
       final data = ApiErrorHandler.handleResponse(response);
+      debugPrint('🔍 [ORDER DETAIL RESPONSE] Raw Data: $data');
 
       // السيرفر قد يرسل الطلب داخل مفتاح 'request' أو 'data' أو مباشرة
       final Map<String, dynamic> orderJson =
@@ -81,29 +80,24 @@ class OrdersRepository {
       }
 
       // 2. 🚀 حفظ البيانات (الكاش) في هايف فور وصولها بنجاح
-      var box = await Hive.openBox(_boxName);
+      var box = Hive.box(HiveKeys.ordersBox);
       await box.put('cached_orders', responseList);
 
       return responseList.map((e) {
         final orderMap = Map<String, dynamic>.from(e);
-        debugPrint(
-          '🔍 [MODEL] Mapping Item ID: ${orderMap['id']} - Data: $orderMap',
-        );
         return OrderModel.fromJson(orderMap);
       }).toList();
     } catch (e) {
       // 3. 🚀 في حال فشل السيرفر (لا يوجد إنترنت أو السيرفر متوقف)، نقرأ من هايف
       try {
-        var box = await Hive.openBox(_boxName);
+        var box = Hive.box(HiveKeys.ordersBox);
         final cachedData = box.get('cached_orders');
 
         if (cachedData != null) {
-          debugPrint(
-            '⚠️ فشل الاتصال بالسيرفر.. تم جلب الطلبات من الكاش (Hive)',
-          );
+          debugPrint('⚠️ فشل الاتصال بالسيرفر.. تم جلب الطلبات من الكاش (Hive)');
           final List mapData = List.from(cachedData);
           return mapData
-              .map((e) => OrderModel.fromJson(Map<String, dynamic>.from(e)))
+              .map((e) => OrderModel.fromJson(Map<String, dynamic>.from(e as Map)))
               .toList();
         }
       } catch (hiveError) {
@@ -113,6 +107,23 @@ class OrdersRepository {
       // إذا فشل السيرفر ولا يوجد كاش مسبق، نعرض رسالة الخطأ للمستخدم
       throw ApiErrorHandler.handle(e);
     }
+  }
+
+  // 📥 جلب النسخة المخزنة محلياً من الطلبات فوراً وبدون انتظار
+  List<OrderModel> getCachedOrders() {
+    try {
+      var box = Hive.box(HiveKeys.ordersBox);
+      final cachedData = box.get('cached_orders');
+      if (cachedData != null) {
+        final List mapData = List.from(cachedData);
+        return mapData
+            .map((e) => OrderModel.fromJson(Map<String, dynamic>.from(e as Map)))
+            .toList();
+      }
+    } catch (e) {
+      // التجاهل الصامت
+    }
+    return [];
   }
 
   // 🚀 تحديث حالة الطلب (PATCH /api/requests/{id}/status)
@@ -155,6 +166,47 @@ class OrdersRepository {
       );
       ApiErrorHandler.handleResponse(response);
     } catch (e) {
+      throw ApiErrorHandler.handle(e);
+    }
+  }
+
+  // 🚀 قبول السند
+  Future<void> approveBond(String bondId) async {
+    try {
+      final response = await _apiService.post(
+        ApiEndpoints.approveBond(bondId),
+      );
+      ApiErrorHandler.handleResponse(response);
+    } catch (e) {
+      throw ApiErrorHandler.handle(e);
+    }
+  }
+
+  // 🚀 رفض السند
+  Future<void> rejectBond(String bondId) async {
+    try {
+      final response = await _apiService.post(
+        ApiEndpoints.rejectBond(bondId),
+      );
+      ApiErrorHandler.handleResponse(response);
+    } catch (e) {
+      throw ApiErrorHandler.handle(e);
+    }
+  }
+
+  // 🚀 جلب بيانات حساب طالب الخدمة
+  Future<Map<String, dynamic>> getUserProfile(String userId) async {
+    try {
+      final response = await _apiService.get(
+        ApiEndpoints.getUserProfile(userId),
+      );
+      final data = ApiErrorHandler.handleResponse(response);
+      debugPrint('🔍 [SEEKER PROFILE RESPONSE] Raw Data: $data');
+      if (data is Map<String, dynamic>) return data;
+      if (data is Map) return Map<String, dynamic>.from(data);
+      return {};
+    } catch (e) {
+      debugPrint('❌ [SEEKER PROFILE ERROR]: $e');
       throw ApiErrorHandler.handle(e);
     }
   }

@@ -1,9 +1,9 @@
-﻿// مسار الملف: lib/features/profile/viewmodels/add_work_viewmodel.dart
+// مسار الملف: lib/features/profile/viewmodels/add_work_viewmodel.dart
 import 'dart:io';
-import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../repositories/profile_repository.dart';
+import '../../../../core/utils/dialog_helper.dart';
 import '../../../../core/localization/app_localizations.dart';
 
 class AddWorkViewModel extends ChangeNotifier {
@@ -28,13 +28,21 @@ class AddWorkViewModel extends ChangeNotifier {
 
   Future<void> save(BuildContext context) async {
     if (image == null) {
-       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('error_image_required')), backgroundColor: context.qsColors.error));
+       DialogHelper.showErrorDialog(context, context.tr('error_image_required'));
        return;
     }
     if (titleController.text.trim().isEmpty) {
-       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('error_title_required')), backgroundColor: context.qsColors.error));
+       DialogHelper.showErrorDialog(context, context.tr('error_title_required'));
        return;
     }
+
+    final bool confirm = await DialogHelper.showConfirmationDialog(
+      context,
+      title: context.tr('save_work'),
+      message: 'هل أنت متأكد أنك تريد إضافة هذا العمل إلى معرض أعمالك؟',
+    );
+
+    if (!confirm) return;
 
     isLoading = true;
     notifyListeners();
@@ -49,6 +57,11 @@ class AddWorkViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
       
+      await DialogHelper.showSuccessDialog(
+        context,
+        'تمت إضافة العمل بنجاح',
+      );
+
       // نعود للصفحة السابقة بنجاح (نرجع true ليتم تحديث البروفايل)
       if (context.mounted) {
         Navigator.pop(context, true);
@@ -58,7 +71,7 @@ class AddWorkViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: context.qsColors.error));
+        DialogHelper.showErrorDialog(context, e.toString());
       }
     }
   }

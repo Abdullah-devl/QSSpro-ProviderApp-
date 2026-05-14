@@ -8,6 +8,7 @@ import 'package:service_provider_app/core/network/error/api_error_handler.dart';
 import 'package:service_provider_app/core/storage/hive_keys.dart';
 import '../models/commission_model.dart';
 import '../models/provider_commission_summary_model.dart';
+import '../../home/models/home_model.dart';
 
 class CommissionsRepository {
   final ApiService _apiService;
@@ -44,6 +45,20 @@ class CommissionsRepository {
       // إذا لم يكن هناك كاش، نرمي الخطأ ليعالجه الـ ViewModel
       throw ApiErrorHandler.handle(e);
     }
+  }
+
+  // 📥 جلب النسخة المخزنة محلياً من بيانات العمولات فوراً وبدون انتظار
+  CommissionDataModel? getCachedCommissionsData() {
+    try {
+      var box = Hive.box(HiveKeys.settingsBox);
+      final cachedData = box.get(_cacheKey);
+      if (cachedData != null) {
+        return CommissionDataModel.fromJson(Map<String, dynamic>.from(cachedData));
+      }
+    } catch (e) {
+      // التجاهل الصامت عند غياب الكاش
+    }
+    return null;
   }
 
   // دالة السداد باستخدام نقاط المكافآت لطلب محدد
@@ -122,12 +137,38 @@ class CommissionsRepository {
     }
   }
 
+  // 📥 جلب النسخة المخزنة محلياً من ملخص العمولات فوراً وبدون انتظار
+  ProviderCommissionSummaryModel? getCachedProviderCommissionSummary() {
+    try {
+      var box = Hive.box(HiveKeys.settingsBox);
+      final cachedData = box.get('cached_provider_commission_summary');
+      if (cachedData != null) {
+        return ProviderCommissionSummaryModel.fromJson(Map<String, dynamic>.from(cachedData));
+      }
+    } catch (e) {
+      // التجاهل الصامت
+    }
+    return null;
+  }
+
   /// 💰 جلب رصيد النقاط فقط (نقطة 5.11)
   Future<Map<String, dynamic>> getPointsBalance(int userId) async {
     try {
       final response = await _apiService.get(ApiEndpoints.pointsBalance);
       final data = ApiErrorHandler.handleResponse(response);
       return data['data'] ?? data;
+    } catch (e) {
+      throw ApiErrorHandler.handle(e);
+    }
+  }
+
+  /// 📥 جلب قائمة الطلبات التي لم تُدفع عمولتها
+  Future<List<UnpaidRequestModel>> getUnpaidCommissions() async {
+    try {
+      final response = await _apiService.get(ApiEndpoints.unpaidCommissions);
+      final data = ApiErrorHandler.handleResponse(response);
+      final List responseList = (data is List) ? data : ((data is Map ? data['data'] as List? : null) ?? []);
+      return responseList.map((e) => UnpaidRequestModel.fromJson(e is Map ? Map<String, dynamic>.from(e) : {})).toList();
     } catch (e) {
       throw ApiErrorHandler.handle(e);
     }

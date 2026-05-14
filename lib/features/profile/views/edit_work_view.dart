@@ -15,7 +15,7 @@ class EditWorkView extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: Text(context.tr('edit_work') != 'edit_work' ? context.tr('edit_work') : 'تعديل العمل', style: TextStyle(color: colors.text, fontWeight: FontWeight.bold)),
+        title: Text(context.tr('edit_work') != 'edit_work' ? context.tr('edit_work') : context.tr('auto_tr_29'), style: TextStyle(color: colors.text, fontWeight: FontWeight.bold)),
         centerTitle: true, 
         backgroundColor: context.qsColors.card, 
         elevation: 0,
@@ -62,7 +62,7 @@ class EditWorkView extends StatelessWidget {
                 ),
                 child: vm.isLoading 
                     ? CircularProgressIndicator(color: context.qsColors.card) 
-                    : Text(context.tr('save_work') != 'save_work' ? context.tr('save_work') : 'حفظ التعديلات', style: TextStyle(color: context.qsColors.card, fontWeight: FontWeight.bold)),
+                    : Text(context.tr('save_work') != 'save_work' ? context.tr('save_work') : context.tr('auto_tr_0'), style: TextStyle(color: context.qsColors.card, fontWeight: FontWeight.bold)),
               ),
             ),
           ],

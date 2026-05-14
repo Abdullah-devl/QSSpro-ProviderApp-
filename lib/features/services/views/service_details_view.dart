@@ -440,10 +440,12 @@ class _ServiceDetailsBody extends StatelessWidget {
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: 8,
             height: 8,
+            margin: const EdgeInsets.only(top: 6),
             decoration: BoxDecoration(
               color: colors.primary,
               shape: BoxShape.circle,
@@ -451,26 +453,55 @@ class _ServiceDetailsBody extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  sub.name,
+                  style: TextStyle(
+                    color: colors.text,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                if (sub.description.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    sub.description,
+                    style: TextStyle(
+                      color: colors.textSub,
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
             child: Text(
-              sub.name,
+              sub.priceText,
               style: TextStyle(
-                color: colors.text,
+                color: colors.primary,
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),
             ),
           ),
-          Text(
-            sub.priceText,
-            style: TextStyle(
-              color: colors.primary,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 4),
           IconButton(
-            icon: Icon(Icons.delete_outline, color: colors.error),
+            icon: Icon(Icons.edit, color: colors.primary, size: 20),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () => _showAddSubServiceDialog(context, viewModel, subToEdit: sub),
+          ),
+          const SizedBox(width: 12),
+          IconButton(
+            icon: Icon(Icons.delete_outline, color: colors.error, size: 20),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
             onPressed: () =>
                 _showDeleteSubServiceDialog(context, sub.id, viewModel),
           ),
@@ -481,9 +512,24 @@ class _ServiceDetailsBody extends StatelessWidget {
 
   void _showAddSubServiceDialog(
     BuildContext context,
-    ServiceDetailsViewModel viewModel,
-  ) {
+    ServiceDetailsViewModel viewModel, {
+    SubServiceDetailModel? subToEdit,
+  }) {
     final colors = context.qsColors;
+    final isEditing = subToEdit != null;
+
+    if (isEditing) {
+      viewModel.subNameController.text = subToEdit.name;
+      viewModel.subPriceController.text = subToEdit.price > 0 
+          ? subToEdit.price.toString() 
+          : subToEdit.priceText.replaceAll(RegExp(r'[^0-9.]'), '');
+      viewModel.subDescriptionController.text = subToEdit.description;
+    } else {
+      viewModel.subNameController.clear();
+      viewModel.subPriceController.clear();
+      viewModel.subDescriptionController.clear();
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -505,7 +551,7 @@ class _ServiceDetailsBody extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        context.tr('add_sub_service'),
+                        isEditing ? context.tr('edit_data') : context.tr('add_sub_service'),
                         style: TextStyle(
                           color: colors.text,
                           fontSize: 20,
@@ -564,6 +610,26 @@ class _ServiceDetailsBody extends StatelessWidget {
                         suffix: context.tr('sar'),
                       ),
 
+                      const SizedBox(height: 16),
+
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          context.tr('service_description'),
+                          style: TextStyle(
+                            color: colors.text,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildDialogTextField(
+                        context,
+                        controller: viewModel.subDescriptionController,
+                        hint: context.tr('service_description'),
+                      ),
+
                       const SizedBox(height: 30),
 
                       ChangeNotifierProvider.value(
@@ -585,8 +651,9 @@ class _ServiceDetailsBody extends StatelessWidget {
                                     onPressed: vm.isAddingSubService
                                         ? null
                                         : () async {
-                                            bool success = await vm
-                                                .addSubService(context);
+                                            bool success = isEditing
+                                                ? await vm.updateSubService(context, subToEdit.id)
+                                                : await vm.addSubService(context);
                                             if (success &&
                                                 dialogContext.mounted) {
                                               Navigator.pop(
@@ -618,6 +685,7 @@ class _ServiceDetailsBody extends StatelessWidget {
                                   onPressed: () {
                                     vm.subNameController.clear();
                                     vm.subPriceController.clear();
+                                    vm.subDescriptionController.clear();
                                     Navigator.pop(dialogContext);
                                   },
                                   child: Text(
@@ -646,7 +714,7 @@ class _ServiceDetailsBody extends StatelessWidget {
                     radius: 25,
                     backgroundColor: colors.primary.withValues(alpha: 0.1),
                     child: Icon(
-                      Icons.add,
+                      isEditing ? Icons.edit : Icons.add,
                       color: colors.primary,
                       size: 28,
                     ),
@@ -942,6 +1010,9 @@ class _ServiceDetailsBody extends StatelessWidget {
             if (sTime.length > 5) sTime = sTime.substring(0, 5);
             if (eTime.length > 5) eTime = eTime.substring(0, 5);
 
+            final formattedSTime = _formatTo12Hour(context, sTime);
+            final formattedETime = _formatTo12Hour(context, eTime);
+
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(16),
@@ -975,7 +1046,9 @@ class _ServiceDetailsBody extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          schedule.label ?? (schedule.isActive ? context.tr('available') : context.tr('not_available')),
+                          (schedule.label != null && (schedule.label!.contains(context.tr('auto_tr_59')) || schedule.label!.contains(context.tr('auto_tr_1'))))
+                              ? context.tr('available')
+                              : (schedule.label ?? (schedule.isActive ? context.tr('available') : context.tr('not_available'))),
                           style: TextStyle(
                             color: schedule.isActive ? colors.text : colors.textSub,
                             fontWeight: FontWeight.bold,
@@ -1028,7 +1101,7 @@ class _ServiceDetailsBody extends StatelessWidget {
                       Icon(Icons.access_time, color: colors.textSub, size: 16),
                       const SizedBox(width: 6),
                       Text(
-                        '$sTime - $eTime',
+                        '$formattedSTime - $formattedETime',
                         style: TextStyle(
                           color: colors.textSub,
                           fontWeight: FontWeight.w500,
@@ -1063,8 +1136,30 @@ class _ServiceDetailsBody extends StatelessWidget {
                 ],
               ),
             );
-          }).toList(),
+          }),
       ],
     );
+  }
+
+  String _formatTo12Hour(BuildContext context, String timeStr) {
+    if (timeStr.isEmpty) return timeStr;
+    try {
+      final parts = timeStr.split(':');
+      if (parts.length >= 2) {
+        int hour = int.parse(parts[0]);
+        int minute = int.parse(parts[1]);
+        
+        final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+        final periodStr = hour >= 12 
+            ? (isArabic ? context.tr('auto_tr_79') : 'PM') 
+            : (isArabic ? context.tr('auto_tr_92') : 'AM');
+            
+        int hour12 = hour % 12;
+        if (hour12 == 0) hour12 = 12;
+        final minuteStr = minute.toString().padLeft(2, '0');
+        return '$hour12:$minuteStr $periodStr';
+      }
+    } catch (_) {}
+    return timeStr;
   }
 }

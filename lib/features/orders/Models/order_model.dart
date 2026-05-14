@@ -1,5 +1,7 @@
 // مسار الملف: lib/features/orders/models/order_model.dart
 
+import '../../../core/network/api_endpoints.dart';
+
 enum OrderStatus { newOrder, inProgress, completed, canceled }
 
 class OrderSubService {
@@ -20,24 +22,44 @@ class OrderBond {
   final String id;
   final String bondNumber;
   final String imagePath;
+  final double amount;
+  final String? description;
+  final String status;
+  final String? createdAt;
 
   OrderBond({
     required this.id,
     required this.bondNumber,
     required this.imagePath,
+    this.amount = 0.0,
+    this.description,
+    this.status = 'pending',
+    this.createdAt,
   });
+
+  String get imageUrl {
+    if (imagePath.isEmpty) return '';
+    return imagePath.startsWith('http')
+        ? imagePath
+        : '${ApiEndpoints.storageBaseUrl}$imagePath';
+  }
 
   factory OrderBond.fromJson(Map<String, dynamic> json) {
     return OrderBond(
       id: json['id']?.toString() ?? '',
-      bondNumber: json['bond_number']?.toString() ?? '---',
-      imagePath: json['image_path'] ?? '',
+      bondNumber: json['bond_number']?.toString() ?? json['number']?.toString() ?? json['amount']?.toString() ?? '---',
+      imagePath: json['image_path'] ?? json['image'] ?? json['file_path'] ?? json['file'] ?? '',
+      amount: double.tryParse(json['amount']?.toString() ?? '0') ?? 0.0,
+      description: json['description']?.toString(),
+      status: json['status']?.toString() ?? 'pending',
+      createdAt: json['created_at']?.toString(),
     );
   }
 }
 
 class OrderModel {
   final String id;
+  final String customerId;
   final String customerName;
   final String serviceName;
   final String customerImage;
@@ -63,6 +85,7 @@ class OrderModel {
 
   OrderModel({
     required this.id,
+    required this.customerId,
     required this.customerName,
     required this.serviceName,
     required this.customerImage,
@@ -86,8 +109,42 @@ class OrderModel {
     this.providerFinished = false,
   });
 
+  // 🏆 هل تم دفع العمولة؟ (يُحسب ديناميكياً لتجنب مشاكل التوافق مع الكاش القديم)
+  bool get isCommissionPaid {
+    if (rawJson == null) return false;
+    return rawJson!['commission_paid'] == 1 || rawJson!['commission_paid'] == true;
+  }
+
+  // 🔍 التحقق إذا كانت commission_paid تساوي 0 بالتحديد
+  bool get isCommissionPaidZero {
+    if (rawJson == null) return false;
+    final val = rawJson!['commission_paid'];
+    return val == 0 || val?.toString() == '0' || val == false;
+  }
+
+  // 💰 جلب قيمة العموله من commission_amount
+  double get commissionAmount {
+    if (rawJson == null) return 0.0;
+    return double.tryParse(rawJson!['commission_amount']?.toString() ?? '0') ?? 0.0;
+  }
+
+  // 💵 جلب المبلغ المدفوع من العموله من commission_amount_paid
+  double get commissionAmountPaid {
+    if (rawJson == null) return 0.0;
+    return double.tryParse(rawJson!['commission_amount_paid']?.toString() ?? '0') ?? 0.0;
+  }
+
   // 🚀 حساب المبلغ المتبقي (محلياً)
   double get remainingAmount => price - paidAmount;
+
+  // 📅 تنسيق التاريخ بشكل منسق (YYYY/MM/DD)
+  String get formattedDate {
+    if (createdAt == null) return timeAgo;
+    final year = createdAt!.year;
+    final month = createdAt!.month.toString().padLeft(2, '0');
+    final day = createdAt!.day.toString().padLeft(2, '0');
+    return '$year/$month/$day';
+  }
 
   // 🚀 دالة تحويل الـ JSON القادم من السيرفر إلى مودل
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -153,6 +210,7 @@ class OrderModel {
 
     return OrderModel(
       id: json['id']?.toString() ?? '',
+      customerId: userData['id']?.toString() ?? '',
       customerName: userData['name'] ?? 'عميل',
       customerImage: userData['avatar'] ?? userData['image_path'] ?? '',
       customerPhone: userData['phone'] ?? userData['mobile'] ?? '',

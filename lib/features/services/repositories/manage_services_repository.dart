@@ -60,6 +60,23 @@ class ManageServicesRepository {
     }
   }
 
+  // 📥 جلب النسخة المخزنة محلياً من قائمة الخدمات فوراً وبدون انتظار
+  List<ServiceModel> getCachedServices() {
+    try {
+      var box = Hive.box(HiveKeys.settingsBox);
+      final cachedData = box.get(_cacheKey);
+      if (cachedData != null) {
+        final List mapData = List.from(cachedData);
+        return mapData
+            .map((e) => ServiceModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+    } catch (e) {
+      // التجاهل الصامت
+    }
+    return [];
+  }
+
   // 🚀 دالة إضافة خدمة جديدة (POST /services)
   Future<ServiceDetailsModel> createService({
     required String name,
@@ -165,6 +182,23 @@ class ManageServicesRepository {
     }
   }
 
+  // 📥 جلب النسخة المخزنة محلياً من الفئات الرئيسية فوراً وبدون انتظار
+  List<CategoryModel> getCachedMainCategories() {
+    try {
+      var box = Hive.box(HiveKeys.settingsBox);
+      final cachedData = box.get(_categoriesCacheKey);
+      if (cachedData != null) {
+        final List mapData = List.from(cachedData);
+        return mapData
+            .map((e) => CategoryModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+    } catch (e) {
+      // التجاهل الصامت
+    }
+    return [];
+  }
+
   // 🚀 دالة جلب الخدمات المخصصة
   Future<List<ServiceModel>> getCustomServices(dynamic userId) async {
     try {
@@ -227,11 +261,12 @@ class ManageServicesRepository {
     }
   }
 
-  // 🚀 دالة إضافة خدمة فرعية (POST /services/child)
+  // 🚀 دالة إضافة خدمة فرعية (POST /services/children)
   Future<void> createSubService({
     required int parentId,
     required String name,
     required double price,
+    required String description,
   }) async {
     try {
       final response = await _apiService.post(
@@ -240,7 +275,29 @@ class ManageServicesRepository {
           "parent_service_id": parentId,
           "name": name,
           "price": price,
-          "description": "", // نتركه فارغاً كما طلب الباك اند (nullable)
+          "description": description,
+        },
+      );
+      ApiErrorHandler.handleResponse(response);
+    } catch (e) {
+      throw ApiErrorHandler.handle(e);
+    }
+  }
+
+  // 🚀 دالة تعديل خدمة فرعية (PUT /services/children/{id})
+  Future<void> updateSubService({
+    required int childId,
+    required String name,
+    required double price,
+    required String description,
+  }) async {
+    try {
+      final response = await _apiService.put(
+        ApiEndpoints.updateChildService(childId),
+        data: {
+          "name": name,
+          "price": price,
+          "description": description,
         },
       );
       ApiErrorHandler.handleResponse(response);
@@ -416,7 +473,9 @@ class ManageServicesRepository {
   Future<void> updateSpecialService({
     required bool isCustom,
     required bool isActive,
+    String? description,
     double? price,
+    double? pricePerKm,
   }) async {
     try {
       final endpoint = isCustom ? ApiEndpoints.updateCustomService : ApiEndpoints.updateMeetingService;
@@ -424,7 +483,9 @@ class ManageServicesRepository {
         endpoint,
         data: {
           "is_active": isActive ? 1 : 0,
+          if (description != null) "description": description,
           if (price != null) "price": price,
+          if (pricePerKm != null) "price_per_km": pricePerKm,
         },
       );
       ApiErrorHandler.handleResponse(response);

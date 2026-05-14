@@ -31,7 +31,7 @@ void main() {
     }
   }
 
-  print('Label: ' + json['label'].toString());
-  print('Parsed Days: ' + parsedDays.toString());
-  print('Active: ' + active.toString());
+  print('Label: ${json['label']}');
+  print('Parsed Days: $parsedDays');
+  print('Active: $active');
 }

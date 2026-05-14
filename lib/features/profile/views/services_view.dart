@@ -1,7 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/services_viewmodel.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class ServicesView extends StatelessWidget {
   const ServicesView({super.key});
@@ -25,7 +26,7 @@ class ServicesView extends StatelessWidget {
             Text(vm.errorMessage!, style: TextStyle(color: context.qsColors.error)),
             ElevatedButton(
               onPressed: vm.fetchServices,
-              child: const Text('إعادة المحاولة'),
+              child: Text(context.tr('auto_tr_19')),
             ),
           ],
         ),
@@ -44,7 +45,7 @@ class ServicesView extends StatelessWidget {
           children: [
             SizedBox(height: MediaQuery.of(context).size.height * 0.3),
             Center(
-              child: Text('لا توجد خدمات حالياً', style: TextStyle(color: context.qsColors.textSub)),
+              child: Text(context.tr('auto_tr_26'), style: TextStyle(color: context.qsColors.textSub)),
             ),
           ],
         ),
@@ -123,11 +124,11 @@ class ServicesView extends StatelessWidget {
                 // زر التبديل (Switch) لتفعيل/إلغاء تفعيل الخدمة على اليسار
                 Switch(
                   value: service.isActive,
-                  activeColor: const Color(0xFF5CA4B8),
+                  activeThumbColor: const Color(0xFF5CA4B8),
                   onChanged: (val) {
                     vm.toggleServiceStatus(service.id, val);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('تمت محاكاة التغيير (تحتاج رابط التعديل من الباك إند)')),
+                      SnackBar(content: Text(context.tr('auto_tr_45'))),
                     );
                   },
                 ),

@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/qs_color_extension.dart';
+import '../localization/app_localizations.dart';
 
 /// 📂 اسم الملف: qs_alerts.dart
 /// 📝 الوصف: كلاس مخصص لعرض التنبيهات (Alerts) بتصميم Glassmorphism (زجاجي) فخم.
@@ -14,7 +15,7 @@ class QSAlerts {
     _showCustomAlert(
       context: context,
       message: message,
-      title: 'نجاح العملية',
+      title: context.tr('auto_tr_12'),
       icon: Icons.check_circle_rounded,
       color: context.qsColors.success,
     );
@@ -25,7 +26,7 @@ class QSAlerts {
     _showCustomAlert(
       context: context,
       message: message,
-      title: 'خطأ',
+      title: context.tr('auto_tr_46'),
       icon: Icons.error_rounded,
       color: context.qsColors.error,
     );
@@ -36,7 +37,7 @@ class QSAlerts {
     _showCustomAlert(
       context: context,
       message: message,
-      title: 'تنبيه',
+      title: context.tr('auto_tr_52'),
       icon: Icons.warning_rounded,
       color: context.qsColors.warning,
     );
@@ -47,7 +48,7 @@ class QSAlerts {
     _showCustomAlert(
       context: context,
       message: message,
-      title: 'معلومات',
+      title: context.tr('auto_tr_66'),
       icon: Icons.info_rounded,
       color: context.qsColors.info,
     );
@@ -136,8 +137,7 @@ class QSAlerts {
                               ),
                             ),
                             onPressed: () => Navigator.pop(ctx),
-                            child: const Text(
-                              'فهمت',
+                            child: Text(context.tr('auto_tr_47'),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

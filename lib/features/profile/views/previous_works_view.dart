@@ -23,7 +23,7 @@ class PreviousWorksView extends StatelessWidget {
         title: Text(
           context.tr('previous_works') != 'previous_works'
               ? context.tr('previous_works')
-              : 'الأعمال السابقة',
+              : context.tr('auto_tr_82'),
           style: TextStyle(
             color: context.qsColors.text,
             fontWeight: FontWeight.bold,
@@ -61,7 +61,7 @@ class PreviousWorksView extends StatelessWidget {
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
                   SizedBox(height: MediaQuery.of(context).size.height * 0.3),
-                  const Center(child: Text('لا توجد أعمال سابقة')),
+                  Center(child: Text(context.tr('auto_tr_63'))),
                 ],
               ),
             )
@@ -230,9 +230,9 @@ class PreviousWorksView extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                _buildTag('#الرياض'),
+                _buildTag(context.tr('auto_tr_73')),
                 const SizedBox(width: 8),
-                _buildTag('#صيانة'),
+                _buildTag(context.tr('auto_tr_24')),
               ],
             ),
           ),

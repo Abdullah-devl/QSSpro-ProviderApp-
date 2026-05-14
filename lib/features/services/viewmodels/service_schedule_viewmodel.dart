@@ -98,6 +98,12 @@ class ServiceScheduleViewModel extends ChangeNotifier {
         hour: int.tryParse(parts[0]) ?? 8,
         minute: int.tryParse(parts[1]) ?? 0,
       ),
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+          child: child!,
+        );
+      },
     );
   }
 

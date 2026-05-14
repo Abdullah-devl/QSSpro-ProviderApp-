@@ -40,8 +40,25 @@ class ProfileRepository {
 
       if (finalMap.isEmpty) throw 'البيانات المستلمة فارغة';
 
+      // 🚨 ترقيع هام (Patch): الباك إند لا يرسل provider_policy في مسار my-profile!
+      // لذلك نعتمد على القيمة المخزنة محلياً إذا لم نجدها في الاستجابة.
+      final box = Hive.box(HiveKeys.settingsBox);
+      bool localPolicyAgreed = box.get('provider_policy_agreed', defaultValue: false);
+      
+      if (!finalMap.containsKey('user')) {
+        finalMap['user'] = {};
+      }
+      // إذا كانت القيمة غير موجودة في الـ API، نستخدم القيمة المحلية
+      if (finalMap['user']['provider_policy'] == null) {
+        finalMap['user']['provider_policy'] = localPolicyAgreed ? 1 : 0;
+      } else {
+        // إذا أرسلها الباك إند فعلاً، نحدث الكاش المحلي
+        bool apiPolicy = finalMap['user']['provider_policy'] == 1 || finalMap['user']['provider_policy'] == true || finalMap['user']['provider_policy'] == '1';
+        await box.put('provider_policy_agreed', apiPolicy);
+      }
+
       debugPrint('🔍 ProfileRepository: finalMap keys: ${finalMap.keys.toList()}');
-      debugPrint('🔍 ProfileRepository: job_title in finalMap: ${finalMap['job_title']}');
+      debugPrint('🔍 ProfileRepository: job_title in finalMap: ${finalMap['profile']?['job_title']}');
 
       // 💾 التخزين في Hive ليعمل التطبيق بدون إنترنت
       await box.put(_profileCacheKey, finalMap);
@@ -64,10 +81,24 @@ class ProfileRepository {
     }
   }
 
+  // 📥 جلب النسخة المخزنة محلياً من البروفايل فوراً وبدون انتظار
+  ProfileModel? getCachedProfile() {
+    try {
+      var box = Hive.box(HiveKeys.settingsBox);
+      final cachedData = box.get(_profileCacheKey);
+      if (cachedData != null) {
+        return ProfileModel.fromJson(Map<String, dynamic>.from(cachedData));
+      }
+    } catch (e) {
+      debugPrint('❌ Error reading cached profile: $e');
+    }
+    return null;
+  }
+
   // 🚀 دالة تحديث الملف الشخصي
   Future<void> updateProfile({
     required int id,
-    required String name,
+    String? name,
     required String jobTitle,
     required String bio,
     required bool isAvailable,
@@ -76,8 +107,9 @@ class ProfileRepository {
     try {
       FormData formData = FormData.fromMap({
         '_method': 'PUT',
-        'name': name,
-        'job-title': jobTitle,
+        if (name != null) 'name': name,
+        'job_title': jobTitle, // Fixed from job-title
+        'job-title': jobTitle, // Added both to be safe
         'bio': bio,
         'is_available': isAvailable ? 1 : 0,
       });
@@ -147,6 +179,22 @@ class ProfileRepository {
     }
   }
 
+  // 📥 جلب النسخة المخزنة محلياً من الأعمال السابقة فوراً وبدون انتظار
+  List<WorkModel> getCachedPreviousWorks() {
+    try {
+      var box = Hive.box(HiveKeys.worksBox);
+      final cached = box.get('cached_works');
+      if (cached != null) {
+        return (cached as List)
+            .map((e) => WorkModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+    } catch (e) {
+      debugPrint('❌ Error reading cached works: $e');
+    }
+    return [];
+  }
+
   // 📥 جلب خدمات المزود الأساسية
   Future<List<ServiceModel>> getServices() async {
     var box = Hive.box(HiveKeys.servicesBox); // 🛠️ صندوق الخدمات
@@ -193,6 +241,22 @@ class ProfileRepository {
 
       throw ApiErrorHandler.handle(e);
     }
+  }
+
+  // 📥 جلب النسخة المخزنة محلياً من الخدمات فوراً وبدون انتظار
+  List<ServiceModel> getCachedServices() {
+    try {
+      var box = Hive.box(HiveKeys.servicesBox);
+      final cached = box.get('cached_services');
+      if (cached != null) {
+        return (cached as List)
+            .map((e) => ServiceModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+    } catch (e) {
+      debugPrint('❌ Error reading cached services: $e');
+    }
+    return [];
   }
 
   // 🚀 رفع عمل جديد
@@ -366,6 +430,22 @@ class ProfileRepository {
     }
   }
 
+  // 📥 جلب النسخة المخزنة محلياً من أرقام التواصل فوراً وبدون انتظار
+  List<PhoneModel> getCachedPhones() {
+    try {
+      var box = Hive.box(HiveKeys.phonesBox);
+      final cached = box.get('cached_phones');
+      if (cached != null) {
+        return (cached as List)
+            .map((e) => PhoneModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+    } catch (e) {
+      debugPrint('❌ Error reading cached phones: $e');
+    }
+    return [];
+  }
+
   // .. (other phone methods are intact)
 
   Future<void> addPhone({
@@ -514,6 +594,22 @@ class ProfileRepository {
 
       throw ApiErrorHandler.handle(e);
     }
+  }
+
+  // 📥 جلب النسخة المخزنة محلياً من الحسابات البنكية فوراً وبدون انتظار
+  List<BankModel> getCachedBanks() {
+    try {
+      var box = Hive.box(HiveKeys.banksBox);
+      final cached = box.get('cached_bank');
+      if (cached != null) {
+        return (cached as List)
+            .map((e) => BankModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+    } catch (e) {
+      debugPrint('❌ Error reading cached banks: $e');
+    }
+    return [];
   }
 
   Future<void> addBank({

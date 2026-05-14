@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/theme/qs_color_extension.dart';
 import '../../viewmodels/commissions_stats_viewmodel.dart';
-
 class CommissionsStatsBanner extends StatelessWidget {
   const CommissionsStatsBanner({super.key});
 
@@ -13,13 +12,6 @@ class CommissionsStatsBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.qsColors;
     final viewModel = context.watch<CommissionsStatsViewModel>();
-
-    if (viewModel.isLoading && viewModel.statsSummary == null) {
-      return SizedBox(
-        height: 180,
-        child: Center(child: CircularProgressIndicator(color: colors.primary)),
-      );
-    }
 
     return LayoutBuilder(
       builder: (context, constraints) {

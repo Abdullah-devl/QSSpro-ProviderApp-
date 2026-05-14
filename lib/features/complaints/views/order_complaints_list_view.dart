@@ -78,7 +78,7 @@ class _OrderComplaintsListViewState extends State<OrderComplaintsListView> {
     if (vm.complaints.isEmpty) {
       return Center(
         child: Text(
-          'لا توجد شكاوي طلبات حالياً.', // يمكن نقلها للترجمة لاحقاً
+          context.tr('auto_tr_28'), // يمكن نقلها للترجمة لاحقاً
           style: TextStyle(color: colors.textSub, fontSize: 16),
         ),
       );
@@ -105,7 +105,7 @@ class _OrderComplaintsListViewState extends State<OrderComplaintsListView> {
     // تحديد لون وحالة الشكوى بناءً على الحالة (مثلاً: pending, resolved)
     final bool isResolved = complaint.status == 'resolved';
     final Color statusColor = isResolved ? colors.success : colors.warning;
-    final String statusText = isResolved ? 'محلولة' : 'قيد المعالجة';
+    final String statusText = isResolved ? context.tr('auto_tr_75') : context.tr('auto_tr_37');
 
     return Container(
       decoration: BoxDecoration(
@@ -186,8 +186,9 @@ class _OrderComplaintsListViewState extends State<OrderComplaintsListView> {
                           child: ReadOnlyOrderDetailView(
                             order: OrderModel(
                               id: complaint.orderId.toString(),
-                              customerName: 'جاري التحميل...',
-                              serviceName: 'جاري التحميل...',
+                              customerId: '',
+                              customerName: context.tr('auto_tr_2'),
+                              serviceName: context.tr('auto_tr_2'),
                               customerImage: '',
                               customerPhone: '',
                               price: 0,
@@ -203,7 +204,7 @@ class _OrderComplaintsListViewState extends State<OrderComplaintsListView> {
                   },
                   icon: Icon(Icons.remove_red_eye_outlined, size: 16, color: colors.primary),
                   label: Text(
-                    'عرض الطلب',
+                    context.tr('auto_tr_91'),
                     style: TextStyle(color: colors.primary, fontWeight: FontWeight.bold),
                   ),
                   style: TextButton.styleFrom(

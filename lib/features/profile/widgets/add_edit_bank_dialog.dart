@@ -1,8 +1,9 @@
-﻿
+
 import 'package:flutter/material.dart';
 import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import '../models/bank_model.dart';
 import '../viewmodels/contact_info_viewmodel.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class AddEditBankDialog extends StatefulWidget {
   final ContactInfoViewModel vm;
@@ -37,7 +38,7 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
     bool hasBanks = widget.vm.systemBanks.isNotEmpty;
 
     return AlertDialog(
-      title: Text(widget.bank == null ? 'إضافة حساب بنكي' : 'تعديل الحساب البنكي'),
+      title: Text(widget.bank == null ? context.tr('auto_tr_49') : context.tr('auto_tr_87')),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -45,12 +46,12 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
             if (!hasBanks)
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
-                child: Text('جاري جلب قائمة البنوك أو لا توجد بنوك متاحة...', style: TextStyle(color: context.qsColors.error, fontSize: 12)),
+                child: Text(context.tr('auto_tr_35'), style: TextStyle(color: context.qsColors.error, fontSize: 12)),
               ),
             DropdownButtonFormField<int>(
-              value: _selectedBankId,
-              decoration: const InputDecoration(
-                labelText: 'البنك',
+              initialValue: _selectedBankId,
+              decoration: InputDecoration(
+                labelText: context.tr('auto_tr_7'),
                 border: OutlineInputBorder(),
               ),
               items: widget.vm.systemBanks.map((bank) {
@@ -67,8 +68,8 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
             TextField(
               controller: _bankAccountController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'رقم الحساب أو الآيبان',
+              decoration: InputDecoration(
+                labelText: context.tr('auto_tr_70'),
                 border: OutlineInputBorder(),
               ),
             ),
@@ -77,7 +78,7 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                'حالة الحساب',
+                context.tr('auto_tr_90'),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
@@ -90,7 +91,7 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
               children: [
                 Expanded(
                   child: RadioListTile<bool>(
-                    title: const Text('نشط', style: TextStyle(fontSize: 14)),
+                    title: Text(context.tr('auto_tr_21'), style: TextStyle(fontSize: 14)),
                     value: true,
                     groupValue: _isActive,
                     activeColor: const Color(0xFF5CA4B8),
@@ -101,7 +102,7 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
                 ),
                 Expanded(
                   child: RadioListTile<bool>(
-                    title: const Text('غير نشط', style: TextStyle(fontSize: 14)),
+                    title: Text(context.tr('auto_tr_15'), style: TextStyle(fontSize: 14)),
                     value: false,
                     groupValue: _isActive,
                     activeColor: context.qsColors.error,
@@ -118,7 +119,7 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('إلغاء'),
+          child: Text(context.tr('auto_tr_51')),
         ),
         ElevatedButton(
           onPressed: () async {
@@ -127,7 +128,7 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
 
             if (_selectedBankId == null || bankAccount.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('الرجاء اختيار البنك وإدخال رقم الحساب')),
+                SnackBar(content: Text(context.tr('auto_tr_5'))),
               );
               return;
             }
@@ -159,11 +160,11 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
               Navigator.pop(context); // Close dialog
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(widget.vm.errorMessage ?? 'حدث خطأ')),
+                SnackBar(content: Text(widget.vm.errorMessage ?? context.tr('auto_tr_64'))),
               );
             }
           },
-          child: const Text('حفظ'),
+          child: Text(context.tr('auto_tr_77')),
         ),
       ],
     );

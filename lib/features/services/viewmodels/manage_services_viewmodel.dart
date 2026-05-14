@@ -118,28 +118,44 @@ class ManageServicesViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _hasFetchedOnce = false;
+
   Future<void> fetchServices() async {
-    _isLoading = true;
-    _errorMessage = null;
-    // إذا أردت ألا تومض الشاشة عند التحديث (Pull to refresh) يمكنك إزالة notifyListeners من هنا مؤقتاً
-    notifyListeners();
+    // 1. 📥 تحميل الخدمات من الكاش المحلي فوراً وعرضها للمستخدم بدون تأخير
+    final cachedServices = _repository.getCachedServices();
+    if (cachedServices.isNotEmpty) {
+      _allServices = cachedServices;
+      debugPrint('⚡ ManageServicesViewModel: Loaded ${_allServices.length} services instantly from local Hive cache.');
+      notifyListeners();
+    }
+
+    // 2. ⚡ تفعيل الشيمر في المرة الأولى فقط خلال جلسة التطبيق الحالية
+    if (!_hasFetchedOnce) {
+      _isLoading = true;
+      _hasFetchedOnce = true;
+      _errorMessage = null;
+      notifyListeners();
+    }
 
     try {
       _allServices = await _repository.getServices();
-      debugPrint(
-        '✅ تم جلب الخدمات بنجاح. عددها: ${_allServices.length}',
-      ); // 👈 أضفنا هذا للتأكد
+      debugPrint('✅ تم جلب الخدمات بنجاح. عددها: ${_allServices.length}');
       _isLoading = false;
       notifyListeners();
     } on Failure catch (failure) {
       _isLoading = false;
-      _errorMessage = failure.message;
+      if (_allServices.isEmpty) {
+        _errorMessage = failure.message;
+      }
       debugPrint('❌ فشل جلب الخدمات: ${failure.message}');
       notifyListeners();
     } catch (e) {
       _isLoading = false;
-      _errorMessage = 'حدث خطأ غير متوقع';
+      if (_allServices.isEmpty) {
+        _errorMessage = 'حدث خطأ غير متوقع';
+      }
       debugPrint('❌ حدث خطأ غير متوقع: $e');
+      notifyListeners();
     }
   }
 

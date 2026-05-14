@@ -1,9 +1,11 @@
 // مسار الملف: lib/features/commissions/views/widgets/verification_banner_widget.dart
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:service_provider_app/features/verification/widgets/verification_options_dialog.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/theme/qs_color_extension.dart';
+import '../../viewmodels/commissions_stats_viewmodel.dart';
 
 class VerificationBannerWidget extends StatelessWidget {
   const VerificationBannerWidget({super.key});
@@ -11,6 +13,7 @@ class VerificationBannerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.qsColors;
+    final isVerified = context.watch<CommissionsStatsViewModel>().isVerified;
 
     return Container(
       width: double.infinity,
@@ -25,7 +28,7 @@ class VerificationBannerWidget extends StatelessWidget {
         children: [
           // زر "وثق الآن" (يسار)
           ElevatedButton(
-            onPressed: () => VerificationOptionsDialog.show(context),
+            onPressed: () => VerificationOptionsDialog.show(context, isVerified),
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.primary,
               foregroundColor: colors.card,

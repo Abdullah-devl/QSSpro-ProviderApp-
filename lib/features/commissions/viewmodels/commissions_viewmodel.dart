@@ -1,7 +1,6 @@
 // مسار الملف: lib/features/commissions/viewmodels/commissions_viewmodel.dart
 
 import 'package:flutter/material.dart';
-import 'package:service_provider_app/core/network/error/failure.dart';
 import '../models/commission_model.dart';
 import '../repositories/commissions_repository.dart';
 
@@ -13,7 +12,7 @@ class CommissionsViewModel extends ChangeNotifier {
     // fetchCommissionsData();
   }
 
-  bool _isLoading = false;
+  final bool _isLoading = false;
   bool get isLoading => _isLoading;
 
   String? _errorMessage;

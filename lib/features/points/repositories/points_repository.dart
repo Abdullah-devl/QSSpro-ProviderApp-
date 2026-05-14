@@ -56,6 +56,23 @@ class PointsRepository {
     }
   }
 
+  // 📥 جلب النسخة المخزنة محلياً من باقات النقاط فوراً وبدون انتظار
+  List<PointsPackageModel> getCachedPointsPackages() {
+    try {
+      var box = Hive.box(HiveKeys.settingsBox);
+      final cachedData = box.get(_packagesCacheKey);
+      if (cachedData != null) {
+        final List list = List.from(cachedData);
+        return list
+            .map((json) => PointsPackageModel.fromJson(Map<String, dynamic>.from(json)))
+            .toList();
+      }
+    } catch (e) {
+      // التجاهل الصامت عند غياب الكاش
+    }
+    return [];
+  }
+
   // 📦 إرسال طلب اشتراك في باقة (سند دفع)
   Future<void> subscribeToPackage({
     required int packageId,
@@ -113,6 +130,20 @@ class PointsRepository {
       }
       throw ApiErrorHandler.handle(e);
     }
+  }
+
+  // 📥 جلب النسخة المخزنة محلياً من رصيد النقاط فوراً وبدون انتظار
+  PointsBalanceModel? getCachedPointsBalance() {
+    try {
+      var box = Hive.box(HiveKeys.settingsBox);
+      final cachedData = box.get(_balanceCacheKey);
+      if (cachedData != null) {
+        return PointsBalanceModel.fromJson(Map<String, dynamic>.from(cachedData));
+      }
+    } catch (e) {
+      // التجاهل الصامت عند غياب الكاش
+    }
+    return null;
   }
 
   /// 🔄 تحويل الأرباح إلى نقاط مكافأة (+1%)

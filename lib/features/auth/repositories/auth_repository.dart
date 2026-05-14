@@ -1,4 +1,4 @@
-
+import 'package:flutter/foundation.dart';
 import 'package:service_provider_app/core/network/api_client.dart';
 import 'package:service_provider_app/core/network/error/api_error_handler.dart';
 
@@ -36,6 +36,17 @@ class AuthRepository {
 
     } catch (e) {
       throw ApiErrorHandler.handle(e);
+    }
+  }
+
+  Future<Map<String, dynamic>?> getUserData() async {
+    try {
+      final response = await _apiService.get('user');
+      final data = ApiErrorHandler.handleResponse(response);
+      return data is Map<String, dynamic> ? data : null;
+    } catch (e) {
+      debugPrint('AuthRepository: getUserData error: $e');
+      return null;
     }
   }
 

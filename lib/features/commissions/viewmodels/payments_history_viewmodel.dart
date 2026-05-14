@@ -40,9 +40,46 @@ class PaymentsHistoryViewModel extends ChangeNotifier {
     'history_tab_bonds',
   ];
 
-  /// 🚀 دالة جلب كافة السجلات بشكل متوازي
+  /// 🚀 دالة جلب كافة السجلات بشكل متوازي (Cache-Then-Network)
   Future<void> fetchAllHistory() async {
-    _isLoading = true;
+    // 1. 📥 تحميل البيانات المحلية من الكاش فوراً وعرضها للمستخدم
+    final cachedPackages = _repository.getCachedList<PointsPackageHistoryModel>(
+      'cached_my_points_packages',
+      (json) => PointsPackageHistoryModel.fromJson(json),
+    );
+    final cachedTransactions = _repository.getCachedList<PointsTransactionModel>(
+      'cached_points_transactions',
+      (json) => PointsTransactionModel.fromJson(json),
+    );
+    final cachedWithdrawals = _repository.getCachedList<WithdrawRequestModel>(
+      'cached_my_withdraw_requests',
+      (json) => WithdrawRequestModel.fromJson(json),
+    );
+    final cachedBonds = _repository.getCachedList<ProviderRequestBondModel>(
+      'cached_provider_request_bonds',
+      (json) => ProviderRequestBondModel.fromJson(json),
+    );
+
+    if (cachedPackages.isNotEmpty || cachedTransactions.isNotEmpty || cachedWithdrawals.isNotEmpty || cachedBonds.isNotEmpty) {
+      _packages = cachedPackages;
+      _transactions = cachedTransactions;
+      _withdrawals = cachedWithdrawals;
+      _bonds = cachedBonds;
+
+      _allHistory = [
+        ..._packages,
+        ..._transactions,
+        ..._withdrawals,
+        ..._bonds,
+      ];
+      _allHistory.sort((a, b) => b.date.compareTo(a.date));
+
+      debugPrint('⚡ PaymentsHistoryViewModel: Loaded local payments history instantly from local Hive cache.');
+      notifyListeners();
+    }
+
+    // 2. 🌐 جلب التحديثات الحية في الخلفية
+    _isLoading = _allHistory.isEmpty;
     _errorMessage = null;
     notifyListeners();
 
@@ -74,11 +111,15 @@ class PaymentsHistoryViewModel extends ChangeNotifier {
       notifyListeners();
     } on Failure catch (failure) {
       _isLoading = false;
-      _errorMessage = failure.message;
+      if (_allHistory.isEmpty) {
+        _errorMessage = failure.message;
+      }
       notifyListeners();
     } catch (e) {
       _isLoading = false;
-      _errorMessage = 'error_unexpected_fetch_data';
+      if (_allHistory.isEmpty) {
+        _errorMessage = 'error_unexpected_fetch_data';
+      }
       notifyListeners();
     }
   }

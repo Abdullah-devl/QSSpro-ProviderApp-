@@ -131,13 +131,13 @@ class _NotificationsViewState extends State<NotificationsView>
             controller: _tabController,
             children: [
               // تبويب: الكل
-              _buildNotificationList(allNotifications, 'لا توجد إشعارات'),
+              _buildNotificationList(allNotifications, context.tr('auto_tr_65')),
               // تبويب: غير مقروءة
               _buildNotificationList(
-                  unreadNotifications, 'لا توجد إشعارات غير مقروءة'),
+                  unreadNotifications, context.tr('auto_tr_67')),
               // تبويب: مقروءة
               _buildNotificationList(
-                  readNotifications, 'لا توجد إشعارات مقروءة'),
+                  readNotifications, context.tr('auto_tr_39')),
             ],
           );
         },

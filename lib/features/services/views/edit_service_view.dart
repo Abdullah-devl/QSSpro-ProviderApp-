@@ -10,7 +10,6 @@ import '../../../core/theme/qs_color_extension.dart';
 import '../../../core/storage/token_storage.dart';
 import '../repositories/manage_services_repository.dart';
 import '../viewmodels/edit_service_viewmodel.dart';
-import 'edit_service_schedule_view.dart';
 
 class EditServiceView extends StatelessWidget {
   final ServiceDetailsModel service;
@@ -202,11 +201,6 @@ class _EditServiceBody extends StatelessWidget {
 
             // 3.2. تسعير المسافة
             _buildDistancePricingSection(context, viewModel),
-            const SizedBox(height: 24),
-
-            // 3.2. جدولة الخدمة (الانتقال لصفحة مستقلة)
-            _buildScheduleConfigButton(context),
-
             const SizedBox(height: 40),
 
             // 4. زر حفظ التعديلات
@@ -485,101 +479,6 @@ class _EditServiceBody extends StatelessWidget {
           _buildLabel(context, context.tr('price_per_km')),
           _buildPriceField(context, viewModel.pricePerKmController),
         ],
-      ],
-    );
-  }
-
-  Widget _buildScheduleConfigButton(BuildContext context) {
-    final colors = context.qsColors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 4,
-              height: 20,
-              decoration: BoxDecoration(
-                color: colors.primary,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              context.tr('service_schedule'),
-              style: TextStyle(
-                color: colors.text,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ChangeNotifierProvider.value(
-                  value: Provider.of<EditServiceViewModel>(context, listen: false),
-                  child: const EditServiceScheduleView(),
-                ),
-              ),
-            );
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: colors.card,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: colors.primary.withValues(alpha: 0.2),
-                width: 1.5,
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: colors.primary.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.calendar_month_outlined,
-                      color: colors.primary, size: 24),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.tr('configure_schedule'),
-                        style: TextStyle(
-                          color: colors.text,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        context.tr('configure_schedule_hint'),
-                        style: TextStyle(
-                          color: colors.textSub,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(Icons.arrow_forward_ios,
-                    color: colors.primary, size: 16),
-              ],
-            ),
-          ),
-        ),
       ],
     );
   }

@@ -10,7 +10,11 @@ class CustomServiceViewModel extends ChangeNotifier {
   ServiceDetailsModel? service;
 
   CustomServiceViewModel(this._repository, this.serviceId) {
-    fetchDetails();
+    if (serviceId != 0) {
+      fetchDetails();
+    } else {
+      _isLoading = false;
+    }
   }
 
   bool _isLoading = true;
@@ -58,8 +62,8 @@ class CustomServiceViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _repository.updateService(
-        serviceId: serviceId,
+      await _repository.updateSpecialService(
+        isCustom: true,
         description: descriptionController.text.trim(),
         isActive: isActive,
       );

@@ -1,12 +1,11 @@
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:service_provider_app/features/home/views/widgets/activeServicCared.dart';
+// import 'package:service_provider_app/features/home/views/widgets/activeServicCared.dart';
 import 'package:service_provider_app/features/home/views/widgets/hederSection.dart';
 import 'package:service_provider_app/features/home/views/widgets/newRequestCard.dart';
-import 'package:service_provider_app/features/home/views/widgets/statCard.dart';
+// import 'package:service_provider_app/features/home/views/widgets/statCard.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
@@ -17,6 +16,8 @@ import 'package:service_provider_app/features/profile/viewmodels/profile_viewmod
 
 import 'package:service_provider_app/features/home/views/widgets/ad_carousel.dart';
 import '../models/advertisement_model.dart';
+import 'package:shimmer/shimmer.dart';
+import '../../commissions/views/unpaid_commissions_view.dart';
 
 class HomeDashboardView extends StatefulWidget {
   const HomeDashboardView({super.key});
@@ -26,11 +27,11 @@ class HomeDashboardView extends StatefulWidget {
 }
 
 class _HomeDashboardViewState extends State<HomeDashboardView> {
-  bool _popupShown = false;
+  static bool _hasShownPopupInSession = false;
 
   void _checkAndShowPopup(HomeViewModel vm) {
-    if (!_popupShown && vm.popupAd != null) {
-      _popupShown = true;
+    if (!_hasShownPopupInSession && vm.popupAd != null) {
+      _hasShownPopupInSession = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showAdPopup(context, vm.popupAd!, vm);
       });
@@ -88,6 +89,7 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
         backgroundColor: colors.background,
         elevation: 0,
         automaticallyImplyLeading: false,
+        toolbarHeight: 80,
         title: _buildHeader(context, profileViewModel, mainViewModel),
       ),
       body: RefreshIndicator(
@@ -97,7 +99,6 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
           await homeViewModel.fetchHomeData();
           await profileViewModel.fetchProfile();
           await homeViewModel.fetchAds();
-          _popupShown = false;
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -224,7 +225,7 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      profileVM.profile?.name ?? 'شريكنا العزيز', 
+                      profileVM.profile?.name ?? context.tr('auto_tr_6'), 
                       style: TextStyle(color: colors.text, fontSize: 16, fontWeight: FontWeight.bold),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -235,20 +236,7 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
             ],
           ),
         ),
-        Row(
-          children: [
-            Transform.scale(
-              scale: 0.8,
-              child: CupertinoSwitch(
-                activeColor: colors.primary,
-                value: mainVM.isOnline,
-                onChanged: mainVM.toggleOnlineStatus,
-              ),
-            ),
-            const SizedBox(width: 10),
-            _buildNotificationIcon(context),
-          ],
-        ),
+        _buildNotificationIcon(context),
       ],
     );
   }
@@ -259,7 +247,7 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
       onTap: () => Navigator.pushNamed(context, '/notifications'),
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: colors.card,
           shape: BoxShape.circle,
@@ -273,19 +261,19 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
             return Stack(
               alignment: Alignment.topRight,
               children: [
-                Icon(Icons.notifications_none_rounded, color: colors.text),
+                Icon(Icons.notifications_none_rounded, color: colors.text, size: 28),
                 if (unreadCount > 0)
                   Container(
-                    padding: const EdgeInsets.all(2),
+                    padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
                       color: colors.error,
                       shape: BoxShape.circle,
                       border: Border.all(color: colors.card, width: 1.5),
                     ),
-                    constraints: const BoxConstraints(minWidth: 10, minHeight: 10),
+                    constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
                     child: Text(
                       unreadCount > 9 ? '+9' : unreadCount.toString(),
-                      style: TextStyle(color: colors.card, fontSize: 8, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: colors.card, fontSize: 10, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -298,10 +286,75 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
   }
 
   Widget _buildLoadingState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 100.0),
-        child: CircularProgressIndicator(color: context.qsColors.primary),
+    final colors = context.qsColors;
+    return Shimmer.fromColors(
+      baseColor: colors.text.withValues(alpha: 0.08),
+      highlightColor: colors.text.withValues(alpha: 0.02),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. Verification Banner Skeleton
+          Container(
+            height: 70,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          const SizedBox(height: 25),
+
+          // 2. 3 Stat Cards Skeleton
+          Row(
+            children: List.generate(3, (index) => Expanded(
+              child: Container(
+                height: 100,
+                margin: EdgeInsets.only(right: index < 2 ? 12 : 0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            )),
+          ),
+          const SizedBox(height: 25),
+
+          // 3. Carousel Banner Skeleton
+          Container(
+            height: 160,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          const SizedBox(height: 25),
+
+          // 4. Section Title Skeleton
+          Container(
+            height: 20,
+            width: 120,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // 5. Income Cards Skeleton
+          Row(
+            children: List.generate(3, (index) => Expanded(
+              child: Container(
+                height: 80,
+                margin: EdgeInsets.only(right: index < 2 ? 12 : 0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            )),
+          ),
+        ],
       ),
     );
   }
@@ -449,7 +502,7 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
         const SizedBox(width: 12),
         _buildIncomeCard(context, context.tr('monthly_earnings'), income.monthly, context.qsColors.success),
         const SizedBox(width: 12),
-        _buildIncomeCard(context, context.tr('yearly_earnings'), income.yearly, context.qsColors.secondary ?? Colors.blueAccent),
+        _buildIncomeCard(context, context.tr('yearly_earnings'), income.yearly, context.qsColors.secondary ),
       ],
     );
   }
@@ -482,58 +535,75 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
 
   Widget _buildCommissionsCard(BuildContext context, CommissionsModel commissions) {
     final colors = context.qsColors;
+    final bool isZero = commissions.totalOwed <= 0 && commissions.unpaidRequestsCount <= 0;
+    final Color statusColor = isZero ? colors.success : colors.error;
+
     return Container(
-      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: colors.error.withOpacity(0.05),
+        color: statusColor.withOpacity(0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colors.error.withOpacity(0.1)),
+        border: Border.all(color: statusColor.withOpacity(0.1)),
       ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const UnpaidCommissionsView()),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(context.tr('total_owed'), style: TextStyle(color: colors.error, fontSize: 14, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text(
-                      "${commissions.totalOwed.toStringAsFixed(2)} ${context.tr('sar')}",
-                      style: TextStyle(color: colors.text, fontSize: 24, fontWeight: FontWeight.w900),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(context.tr('total_owed'), style: TextStyle(color: statusColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 4),
+                          Text(
+                            "${commissions.totalOwed.toStringAsFixed(2)} ${context.tr('sar')}",
+                            style: TextStyle(color: colors.text, fontSize: 24, fontWeight: FontWeight.w900),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                      child: Text(
+                        "${commissions.unpaidRequestsCount} ${context.tr('unpaid_requests_count')}",
+                        style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(color: colors.error.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
-                child: Text(
-                  "${commissions.unpaidRequestsCount} ${context.tr('unpaid_requests_count')}",
-                  style: TextStyle(color: colors.error, fontSize: 12, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 15),
-          Divider(color: colors.error.withOpacity(0.1)),
-          const SizedBox(height: 10),
-          InkWell(
-            onTap: () => Navigator.pushNamed(context, '/commissions'),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(context.tr('pay_now'), style: TextStyle(color: colors.error, fontWeight: FontWeight.bold)),
-                const SizedBox(width: 8),
-                Icon(Icons.arrow_forward_ios_rounded, color: colors.error, size: 14),
+                if (!isZero) ...[
+                  const SizedBox(height: 15),
+                  Divider(color: statusColor.withOpacity(0.1)),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(context.tr('pay_now'), style: TextStyle(color: statusColor, fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 8),
+                      Icon(Icons.arrow_forward_ios_rounded, color: statusColor, size: 14),
+                    ],
+                  ),
+                ]
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

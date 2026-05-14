@@ -28,11 +28,29 @@ class OrdersViewModel extends ChangeNotifier {
     'rejected_orders',
   ];
 
-  // 🚀 دالة جلب الطلبات من المستودع
+  bool _hasFetchedOnce = false;
+
+  // 🚀 دالة جلب الطلبات من المستودع (Cache-Then-Network)
   Future<void> fetchOrders() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    // 1. 📥 تحميل الطلبات من الكاش المحلي فوراً وعرضها للمستخدم بدون تأخير
+    final cachedOrders = _repository.getCachedOrders();
+    if (cachedOrders.isNotEmpty) {
+      cachedOrders.sort((a, b) {
+        if (a.createdAt == null || b.createdAt == null) return 0;
+        return b.createdAt!.compareTo(a.createdAt!);
+      });
+      _allOrders = cachedOrders;
+      debugPrint('⚡ OrdersViewModel: Loaded ${_allOrders.length} orders instantly from local Hive cache.');
+      notifyListeners();
+    }
+
+    // 2. ⚡ تفعيل الشيمر في المرة الأولى فقط خلال جلسة التطبيق الحالية
+    if (!_hasFetchedOnce) {
+      _isLoading = true;
+      _hasFetchedOnce = true;
+      _errorMessage = null;
+      notifyListeners();
+    }
 
     try {
       final fetchedOrders = await _repository.getOrders();
@@ -42,16 +60,17 @@ class OrdersViewModel extends ChangeNotifier {
         return b.createdAt!.compareTo(a.createdAt!);
       });
       _allOrders = fetchedOrders;
-      debugPrint(
-        '📦 ✅ تم جلب ${_allOrders.length} طلبات بنجاح مرتبة من الأحدث للأقدم.',
-      );
+      debugPrint('📦 ✅ تم جلب ${_allOrders.length} طلبات بنجاح مرتبة من الأحدث للأقدم.');
       _isLoading = false;
+      notifyListeners();
     } catch (e) {
       debugPrint('❌ 📦 فشل جلب الطلبات في الـ ViewModel: $e');
       _isLoading = false;
-      _errorMessage = e.toString();
+      if (_allOrders.isEmpty) {
+        _errorMessage = e.toString();
+      }
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   List<OrderModel> get filteredOrders {
@@ -176,6 +195,66 @@ class OrdersViewModel extends ChangeNotifier {
       _errorMessage = e.toString();
       notifyListeners();
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // 🚀 قبول السند
+  Future<bool> approveBond(String orderId, String bondId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.approveBond(bondId);
+      await refreshOrderDetail(orderId);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // 🚀 رفض السند
+  Future<bool> rejectBond(String orderId, String bondId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.rejectBond(bondId);
+      await refreshOrderDetail(orderId);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // 🚀 جلب بيانات حساب طالب الخدمة
+  Future<Map<String, dynamic>?> getUserProfile(String userId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final res = await _repository.getUserProfile(userId);
+      debugPrint('🟢 [ViewModel] Fetched Seeker Profile Successfully: $res');
+      return res;
+    } catch (e) {
+      debugPrint('🔴 [ViewModel] Failed to fetch Seeker Profile: $e');
+      _errorMessage = e.toString();
+      return null;
     } finally {
       _isLoading = false;
       notifyListeners();

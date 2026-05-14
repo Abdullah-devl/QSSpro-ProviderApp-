@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/custom_service_viewmodel.dart';
 import 'package:service_provider_app/core/utils/dialog_helper.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class EditCustomServiceView extends StatelessWidget {
   const EditCustomServiceView({super.key});
@@ -14,7 +15,7 @@ class EditCustomServiceView extends StatelessWidget {
     return Scaffold(
       backgroundColor: context.qsColors.background,
       appBar: AppBar(
-        title: Text('تعديل الخدمة المخصصة', style: TextStyle(color: context.qsColors.text, fontWeight: FontWeight.bold)),
+        title: Text(context.tr('auto_tr_11'), style: TextStyle(color: context.qsColors.text, fontWeight: FontWeight.bold)),
         backgroundColor: context.qsColors.background,
         elevation: 0,
         centerTitle: true,
@@ -33,7 +34,7 @@ class EditCustomServiceView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'تنشيط الخدمة',
+                  context.tr('auto_tr_62'),
                   style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 Switch.adaptive(
@@ -47,7 +48,7 @@ class EditCustomServiceView extends StatelessWidget {
 
             // وصف الخدمة
             Text(
-              'وصف الخدمة',
+              context.tr('auto_tr_31'),
               style: TextStyle(color: context.qsColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 10),
@@ -61,7 +62,7 @@ class EditCustomServiceView extends StatelessWidget {
                 controller: viewModel.descriptionController,
                 maxLines: 5,
                 decoration: InputDecoration(
-                  hintText: 'اكتب وصفاً للخدمة المخصصة...',
+                  hintText: context.tr('auto_tr_83'),
                   hintStyle: TextStyle(color: context.qsColors.textSub.withOpacity(0.5)),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.all(16),
@@ -85,14 +86,14 @@ class EditCustomServiceView extends StatelessWidget {
                     : () async {
                         bool success = await viewModel.updateCustomService(context);
                         if (success && context.mounted) {
-                          await DialogHelper.showSuccessDialog(context, 'تم تعديل الخدمة بنجاح');
+                          await DialogHelper.showSuccessDialog(context, context.tr('auto_tr_74'));
                           Navigator.pop(context, true);
                         }
                       },
                 child: viewModel.isSaving
                     ? CircularProgressIndicator(color: context.qsColors.card)
                     : Text(
-                        'حفظ التعديلات',
+                        context.tr('auto_tr_0'),
                         style: TextStyle(color: context.qsColors.card, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
               ),

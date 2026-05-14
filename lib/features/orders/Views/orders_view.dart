@@ -1,4 +1,4 @@
-﻿// مسار الملف: lib/features/orders/views/orders_view.dart
+// مسار الملف: lib/features/orders/views/orders_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +7,7 @@ import '../../../core/theme/qs_color_extension.dart';
 import '../ViewModels/orders_viewmodel.dart';
 import '../Models/order_model.dart';
 import 'order_detail_view.dart';
+import 'package:shimmer/shimmer.dart';
 
 class OrdersView extends StatefulWidget {
   const OrdersView({super.key});
@@ -64,31 +65,112 @@ class _OrdersBody extends StatelessWidget {
         //   onPressed: () {},
         // ),
       ),
-      body: Column(
+      body: viewModel.isLoading
+          ? _buildLoadingSkeleton(context)
+          : Column(
+              children: [
+                _buildTabs(context, viewModel),
+                Divider(height: 1, thickness: 1, color: context.qsColors.textSub.withValues(alpha: 0.1)),
+                Expanded(
+                  child: viewModel.errorMessage != null
+                      ? _buildErrorWidget(context, viewModel)
+                      : RefreshIndicator(
+                          color: context.qsColors.primary,
+                          backgroundColor: context.qsColors.card,
+                          onRefresh: () => viewModel.fetchOrders(),
+                          child: viewModel.filteredOrders.isEmpty
+                              ? _buildEmptyState(context)
+                              : ListView.builder(
+                                  padding: const EdgeInsets.only(top: 8, bottom: 110),
+                                  itemCount: viewModel.filteredOrders.length,
+                                  itemBuilder: (context, index) {
+                                    return _OrderCardWidget(
+                                      order: viewModel.filteredOrders[index],
+                                    );
+                                  },
+                                ),
+                        ),
+                ),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton(BuildContext context) {
+    final colors = context.qsColors;
+    return Shimmer.fromColors(
+      baseColor: colors.text.withValues(alpha: 0.08),
+      highlightColor: colors.text.withValues(alpha: 0.02),
+      child: Column(
         children: [
-          _buildTabs(context, viewModel),
-          Divider(height: 1, thickness: 1, color: context.qsColors.textSub.withValues(alpha: 0.1)),
+          // Tabs skeleton
+          Container(
+            height: 40,
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          const SizedBox(height: 8),
           Expanded(
-            child: viewModel.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : viewModel.errorMessage != null
-                ? _buildErrorWidget(context, viewModel)
-                : RefreshIndicator(
-                    color: context.qsColors.primary,
-                    backgroundColor: context.qsColors.card,
-                    onRefresh: () => viewModel.fetchOrders(),
-                    child: viewModel.filteredOrders.isEmpty
-                        ? _buildEmptyState(context)
-                        : ListView.builder(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            itemCount: viewModel.filteredOrders.length,
-                            itemBuilder: (context, index) {
-                              return _OrderCardWidget(
-                                order: viewModel.filteredOrders[index],
-                              );
-                            },
-                          ),
+            child: ListView.builder(
+              padding: const EdgeInsets.only(top: 8, bottom: 110),
+              itemCount: 3,
+              itemBuilder: (context, index) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
                   ),
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 45,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Container(width: 64, height: 64, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Container(height: 18, width: 140, color: Colors.white),
+                                      const SizedBox(height: 8),
+                                      Container(height: 14, width: 80, color: Colors.white),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(height: 14, width: 100, color: Colors.white),
+                                Container(height: 24, width: 80, color: Colors.white),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            Container(height: 48, width: double.infinity, color: Colors.white),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -197,9 +279,9 @@ class _OrderCardWidget extends StatelessWidget {
           // 1. Header: Status and Time
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              color: _getStatusColor(context, order.status).withValues(alpha: 0.08),
-              borderRadius: const BorderRadius.vertical(
+            decoration: const BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.vertical(
                 top: Radius.circular(24),
               ),
             ),
@@ -210,18 +292,17 @@ class _OrderCardWidget extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      Icons.watch_later_outlined,
-                      size: 16,
-                      color: _getStatusColor(context, order.status),
+                      Icons.calendar_today_outlined,
+                      size: 14,
+                      color: context.qsColors.textSub,
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      order
-                          .timeAgo, // Displaying only the hour:minute as updated in the model
+                      order.formattedDate,
                       style: TextStyle(
-                        color: _getStatusColor(context, order.status),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                        color: context.qsColors.text,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
                         fontFamily: 'Roboto',
                       ),
                     ),

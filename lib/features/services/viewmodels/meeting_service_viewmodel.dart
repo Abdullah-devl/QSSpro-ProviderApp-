@@ -10,7 +10,11 @@ class MeetingServiceViewModel extends ChangeNotifier {
   ServiceDetailsModel? service;
 
   MeetingServiceViewModel(this._repository, this.serviceId) {
-    fetchDetails();
+    if (serviceId != 0) {
+      fetchDetails();
+    } else {
+      _isLoading = false;
+    }
   }
 
   bool _isLoading = true;
@@ -63,14 +67,12 @@ class MeetingServiceViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _repository.updateService(
-        serviceId: serviceId,
+      await _repository.updateSpecialService(
+        isCustom: false,
         description: descriptionController.text.trim(),
         price: double.tryParse(priceController.text.trim()) ?? 0,
         pricePerKm: double.tryParse(pricePerKmController.text.trim()) ?? 0,
         isActive: isActive,
-        // خدمات الحضور تعتمد على تسعير المسافة افتراضياً
-        distanceBasedPrice: true,
       );
       isSaving = false;
       await fetchDetails();

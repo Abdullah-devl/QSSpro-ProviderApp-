@@ -28,6 +28,7 @@ import '../../auth/viewmodels/auth_viewmodel.dart';
 import '../../complaints/views/complaints_hub_view.dart';
 import '../../settings/views/settings_view.dart';
 import '../../auth/views/login_view.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -43,10 +44,8 @@ class ProfileView extends StatelessWidget {
       appBar: _buildAppBar(context, vm, colors, bgColor),
 
       // 🚀 التعديل 1: لا نظهر دائرة التحميل الكبيرة إلا في المرة الأولى
-      body: vm.isLoading && vm.profile == null
-          ? Center(
-              child: CircularProgressIndicator(color: colors.primary),
-            )
+      body: vm.isLoading
+          ? _buildProfileSkeleton(colors)
           : vm.errorMessage != null && vm.profile == null
           ? Center(
               child: Text(
@@ -224,20 +223,20 @@ class ProfileView extends StatelessWidget {
               ),
               _buildStatItem(
                 context,
-                '${profile.completedJobs}',
-                context.tr('completed_jobs'),
+                '${profile.servicesCount}',
+                context.tr('tab_services'),
+                colors,
+              ),
+              _buildStatItem(
+                context,
+                '${profile.requestsCount}',
+                context.tr('nav_orders'),
                 colors,
               ),
               _buildStatItem(
                 context,
                 '${profile.ratingAvg}',
                 context.tr('rating'),
-                colors,
-              ),
-              _buildStatItem(
-                context,
-                '${profile.yearsExperience}+',
-                context.tr('years_experience'),
                 colors,
               ),
             ],
@@ -301,6 +300,59 @@ class ProfileView extends StatelessWidget {
           style: TextStyle(fontSize: 12, color: colors.primary),
         ),
       ],
+    );
+  }
+
+  Widget _buildProfileSkeleton(dynamic colors) {
+    return Shimmer.fromColors(
+      baseColor: colors.text.withValues(alpha: 0.08),
+      highlightColor: colors.text.withValues(alpha: 0.02),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            // Avatar
+            Container(
+              width: 100,
+              height: 100,
+              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+            ),
+            const SizedBox(height: 16),
+            // Name
+            Container(width: 180, height: 22, color: Colors.white),
+            const SizedBox(height: 8),
+            // Job Title
+            Container(width: 120, height: 16, color: Colors.white),
+            const SizedBox(height: 24),
+            // Stats Grid
+            Row(
+              children: List.generate(3, (index) => Expanded(
+                child: Container(
+                  height: 70,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                ),
+              )),
+            ),
+            const SizedBox(height: 32),
+            // Tabs skeleton
+            Container(
+              height: 40,
+              width: double.infinity,
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+            ),
+            const SizedBox(height: 24),
+            // Body items skeleton
+            Column(
+              children: List.generate(3, (index) => Container(
+                height: 100,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+              )),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -651,7 +703,7 @@ class ProfileView extends StatelessWidget {
                 }
               },
               style: ElevatedButton.styleFrom(backgroundColor: colors.error),
-              child: Text('حذف', style: TextStyle(color: context.qsColors.card)),
+              child: Text(context.tr('auto_tr_86'), style: TextStyle(color: context.qsColors.card)),
             ),
           ],
         );
@@ -692,15 +744,14 @@ class ProfileView extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Text('تسجيل الخروج', textAlign: TextAlign.right),
-          content: const Text(
-            'هل أنت متأكد أنك تريد تسجيل الخروج؟',
+          title: Text(context.tr('auto_tr_43'), textAlign: TextAlign.right),
+          content: Text(context.tr('auto_tr_32'),
             textAlign: TextAlign.right,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text('إلغاء', style: TextStyle(color: colors.textSub)),
+              child: Text(context.tr('auto_tr_51'), style: TextStyle(color: colors.textSub)),
             ),
             ElevatedButton(
               onPressed: () async {

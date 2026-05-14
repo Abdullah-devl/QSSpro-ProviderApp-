@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/qs_color_extension.dart';
 import '../models/manage_services_model.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class SpecialServiceCardWidget extends StatelessWidget {
   final ServiceModel service;
@@ -81,7 +82,7 @@ class SpecialServiceCardWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        isCustomType ? 'خدمة مخصصة' : 'خدمة حضور',
+                        isCustomType ? context.tr('auto_tr_54') : context.tr('auto_tr_71'),
                         style: TextStyle(color: context.qsColors.text, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
@@ -93,14 +94,15 @@ class SpecialServiceCardWidget extends StatelessWidget {
                 const SizedBox(width: 16),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    service.imageUrl.isNotEmpty ? service.imageUrl : 'https://via.placeholder.com/80',
-                    width: 70, height: 70, fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      width: 70, height: 70, color: context.qsColors.textSub.withValues(alpha: 0.1),
-                      child: Icon(isCustomType ? Icons.design_services : Icons.meeting_room, color: context.qsColors.textSub),
-                    ),
-                  ),
+                  child: service.imageUrl.isNotEmpty
+                      ? Image.network(
+                          service.imageUrl,
+                          width: 70,
+                          height: 70,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => _buildPlaceholderIcon(context),
+                        )
+                      : _buildPlaceholderIcon(context),
                 ),
               ],
             ),
@@ -120,13 +122,25 @@ class SpecialServiceCardWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildPlaceholderIcon(BuildContext context) {
+    return Container(
+      width: 70,
+      height: 70,
+      color: context.qsColors.textSub.withValues(alpha: 0.1),
+      child: Icon(
+        isCustomType ? Icons.design_services : Icons.meeting_room,
+        color: context.qsColors.textSub,
+      ),
+    );
+  }
+
   Widget _buildDetailsButton(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(color: context.qsColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
       child: Row(
         children: [
-          Text('عرض التفاصيل', style: TextStyle(color: context.qsColors.primary, fontSize: 13, fontWeight: FontWeight.bold)),
+          Text(context.tr('auto_tr_17'), style: TextStyle(color: context.qsColors.primary, fontSize: 13, fontWeight: FontWeight.bold)),
           const SizedBox(width: 6),
           Icon(Icons.visibility_rounded, color: context.qsColors.primary, size: 16),
         ],

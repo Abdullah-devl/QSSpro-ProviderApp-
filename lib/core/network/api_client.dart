@@ -71,6 +71,7 @@
 
 // مسار الملف: lib/core/network/api_service.dart
 
+import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:service_provider_app/core/storage/token_storage.dart';
 import 'package:service_provider_app/core/network/navigation_service.dart'; // 🌍 استيراد مفتاح التنقل
@@ -90,8 +91,8 @@ class ApiService {
     : _dio = Dio(
         BaseOptions(
           baseUrl: ApiEndpoints.baseUrl,
-          connectTimeout: const Duration(seconds: 15),
-          receiveTimeout: const Duration(seconds: 15),
+          connectTimeout: const Duration(seconds: 20),
+          receiveTimeout: const Duration(seconds: 20),
           headers: {'Accept': 'application/json'},
         ),
       ) {
@@ -194,6 +195,90 @@ class ApiService {
               '⛔ [403] Forbidden - لا تملك صلاحية لهذا الطلب: $errorData',
               name: 'API_ERROR',
             );
+
+            // 🔒 التحقق إذا كان السبب هو سياسة الخصوصية غير الموافق عليها
+            final errorMessage = errorData is Map
+                ? (errorData['message']?.toString() ?? '')
+                : errorData?.toString() ?? '';
+
+            final isPolicyError = errorMessage.contains('سياسة') ||
+                errorMessage.contains('policy') ||
+                errorMessage.contains('الموافقة');
+
+            if (isPolicyError) {
+              developer.log(
+                '📜 [403] سياسة الخصوصية غير موافق عليها - تسجيل الخروج تلقائياً...',
+                name: 'API_ERROR',
+              );
+
+              // 🗑️ حذف التوكن فوراً
+              _tokenStorage.deleteToken();
+
+              // 🪟 عرض dialog يشرح السبب قبل التوجيه
+              final ctx = navigatorKey.currentContext;
+              if (ctx != null) {
+                showDialog(
+                  context: ctx,
+                  barrierDismissible: false,
+                  builder: (dialogCtx) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    title: const Row(
+                      children: [
+                        Icon(Icons.policy_rounded,
+                            color: Colors.orange, size: 28),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'تحديث سياسة الخصوصية',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Cairo',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    content: const Text(
+                      'قامت الإدارة بتحديث سياسة الخصوصية.\n\nيرجى تسجيل الدخول مرة أخرى والموافقة على السياسة الجديدة للمتابعة.',
+                      style: TextStyle(
+                          fontFamily: 'Cairo', fontSize: 14, height: 1.6),
+                    ),
+                    actions: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () {
+                          Navigator.of(dialogCtx).pop();
+                          // 🚪 التوجيه لشاشة تسجيل الدخول ومسح كل السجلات
+                          navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                            '/login',
+                            (route) => false,
+                          );
+                        },
+                        child: const Text(
+                          'تسجيل الدخول',
+                          style: TextStyle(
+                              fontFamily: 'Cairo',
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                // إذا لم يكن هناك context، نوجّه مباشرة بدون dialog
+                navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                  '/login',
+                  (route) => false,
+                );
+              }
+            }
           } else if (statusCode == 500) {
             developer.log(
               '🔥 [500] Server Error - مشكلة في السيرفر نفسه',

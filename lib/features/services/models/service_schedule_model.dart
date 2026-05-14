@@ -95,8 +95,9 @@ class ServiceScheduleModel {
     // 🛡️ إصلاح استخراج الأيام من الـ Nested Objects
     var rawDays = json['days'] as List? ?? [];
     List<String> parsedDays = rawDays.map<String>((d) {
-      if (d is Map)
+      if (d is Map) {
         return (d['day'] ?? '').toString().toLowerCase(); // تحويل لـ lowercase
+      }
       return d.toString().toLowerCase();
     }).toList();
 

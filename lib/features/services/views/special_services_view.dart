@@ -6,10 +6,15 @@ import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/special_services_viewmodel.dart';
 import '../widgets/special_service_card_widget.dart';
 import '../repositories/manage_services_repository.dart';
+import 'package:service_provider_app/features/services/models/manage_services_model.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/token_storage.dart';
 import 'custom_service_details_view.dart';
 import 'meeting_service_details_view.dart';
+import 'edit_custom_service_view.dart';
+import 'edit_meeting_service_view.dart';
+import '../viewmodels/custom_service_viewmodel.dart';
+import '../viewmodels/meeting_service_viewmodel.dart';
 
 class SpecialServicesView extends StatelessWidget {
   const SpecialServicesView({super.key});
@@ -103,7 +108,7 @@ class _SpecialServicesBody extends StatelessWidget {
     BuildContext context, {
     required bool isLoading,
     required String? error,
-    required List services,
+    required List<ServiceModel> services,
     required Future<void> Function() onRefresh,
     required String emptyMessage,
     required bool isCustomType,
@@ -133,58 +138,122 @@ class _SpecialServicesBody extends StatelessWidget {
       );
     }
 
-    if (services.isEmpty) {
-      return RefreshIndicator(
-        color: colors.primary,
-        backgroundColor: colors.card,
-        onRefresh: onRefresh,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            SizedBox(height: MediaQuery.of(context).size.height * 0.3),
-            Center(
-              child: Text(
-                emptyMessage,
-                style: TextStyle(color: colors.textSub, fontSize: 16),
+    return Column(
+      children: [
+        Expanded(
+          child: RefreshIndicator(
+            color: colors.primary,
+            backgroundColor: colors.card,
+            onRefresh: onRefresh,
+            child: services.isEmpty
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                      Center(
+                        child: Text(
+                          emptyMessage,
+                          style: TextStyle(color: colors.textSub, fontSize: 16),
+                        ),
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    itemCount: services.length,
+                    itemBuilder: (context, index) {
+                      final service = services[index];
+                      return SpecialServiceCardWidget(
+                        service: service,
+                        isCustomType: isCustomType,
+                        onToggleStatus: (s) {
+                          final vm = Provider.of<SpecialServicesViewModel>(context, listen: false);
+                          vm.toggleServiceStatus(s);
+                        },
+                        onTapOverride: () async {
+                          if (isCustomType) {
+                            return await Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => CustomServiceDetailsView(serviceId: service.id)),
+                            );
+                          } else {
+                            return await Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => MeetingServiceDetailsView(serviceId: service.id)),
+                            );
+                          }
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: colors.background,
+            boxShadow: [
+              BoxShadow(
+                color: colors.text.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                final api = ApiService(TokenStorage());
+                final repo = ManageServicesRepository(api);
+                final vm = Provider.of<SpecialServicesViewModel>(context, listen: false);
+                // إذا كانت القائمة فارغة، نستخدم 0 كمعرف افتراضي لفتح صفحة الإنشاء/التعديل
+                final serviceId = services.isNotEmpty ? services.first.id : 0;
+
+                if (isCustomType) {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) {
+                      return ChangeNotifierProvider(
+                        create: (_) => CustomServiceViewModel(repo, serviceId),
+                        child: const EditCustomServiceView(),
+                      );
+                    }),
+                  );
+                  if (result == true) {
+                    onRefresh();
+                  }
+                } else {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) {
+                      return ChangeNotifierProvider(
+                        create: (_) => MeetingServiceViewModel(repo, serviceId),
+                        child: const EditMeetingServiceView(),
+                      );
+                    }),
+                  );
+                  if (result == true) {
+                    onRefresh();
+                  }
+                }
+              },
+              icon: const Icon(Icons.edit_rounded),
+              label: Text(
+                isCustomType ? context.tr('auto_tr_11') : context.tr('auto_tr_38'),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.primary,
+                foregroundColor: colors.card,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 0,
               ),
             ),
-          ],
+          ),
         ),
-      );
-    }
-
-    return RefreshIndicator(
-      color: colors.primary,
-      backgroundColor: colors.card,
-      onRefresh: onRefresh,
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        itemCount: services.length,
-        itemBuilder: (context, index) {
-          final service = services[index];
-          return SpecialServiceCardWidget(
-            service: service,
-            isCustomType: isCustomType,
-            onToggleStatus: (s) {
-              final vm = Provider.of<SpecialServicesViewModel>(context, listen: false);
-              vm.toggleServiceStatus(s);
-            },
-            onTapOverride: () async {
-              if (isCustomType) {
-                return await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => CustomServiceDetailsView(serviceId: service.id)),
-                );
-              } else {
-                return await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => MeetingServiceDetailsView(serviceId: service.id)),
-                );
-              }
-            },
-          );
-        },
-      ),
+      ],
     );
   }
 }

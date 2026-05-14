@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../theme/qs_color_extension.dart';
+import '../localization/app_localizations.dart';
 
 class DialogHelper {
   // ❌ دالة عرض رسالة الخطأ (بتصميم عصري)
@@ -28,7 +29,7 @@ class DialogHelper {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'تنبيه',
+                  context.tr('auto_tr_52'),
                   style: TextStyle(
                     color: colors.text,
                     fontWeight: FontWeight.bold,
@@ -58,8 +59,7 @@ class DialogHelper {
                       elevation: 0,
                     ),
                     onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text(
-                      'حسناً',
+                    child: Text(context.tr('auto_tr_40'),
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -113,8 +113,7 @@ class DialogHelper {
                   child: const Icon(Icons.check_rounded, color: Colors.white, size: 50),
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  'عملية ناجحة',
+                Text(context.tr('auto_tr_36'),
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -143,8 +142,7 @@ class DialogHelper {
                       elevation: 0,
                     ),
                     onPressed: () => Navigator.pop(ctx),
-                    child: const Text(
-                      'حسناً',
+                    child: Text(context.tr('auto_tr_40'),
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -225,7 +223,7 @@ class DialogHelper {
                         ),
                         onPressed: () => Navigator.of(ctx).pop(false),
                         child: Text(
-                          cancelText ?? 'إلغاء',
+                          cancelText ?? context.tr('auto_tr_51'),
                           style: TextStyle(
                             color: colors.textSub,
                             fontWeight: FontWeight.bold,
@@ -246,7 +244,7 @@ class DialogHelper {
                         ),
                         onPressed: () => Navigator.of(ctx).pop(true),
                         child: Text(
-                          confirmText ?? 'تأكيد',
+                          confirmText ?? context.tr('auto_tr_13'),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,

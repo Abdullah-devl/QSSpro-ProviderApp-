@@ -113,9 +113,10 @@ class ServiceDetailsViewModel extends ChangeNotifier {
   final ManageServicesRepository _repository;
   final int serviceId;
 
-  // متحكمات حقول إضافة خدمة فرعية
+  // متحكمات حقول إضافة/تعديل خدمة فرعية
   final TextEditingController subNameController = TextEditingController();
   final TextEditingController subPriceController = TextEditingController();
+  final TextEditingController subDescriptionController = TextEditingController();
 
   ServiceDetailsViewModel({
     required this.serviceId,
@@ -175,6 +176,7 @@ class ServiceDetailsViewModel extends ChangeNotifier {
         parentId: serviceId,
         name: subNameController.text.trim(),
         price: double.parse(subPriceController.text.trim()),
+        description: subDescriptionController.text.trim(),
       );
 
       _isAddingSubService = false;
@@ -182,6 +184,7 @@ class ServiceDetailsViewModel extends ChangeNotifier {
       // تفريغ الحقول بعد النجاح
       subNameController.clear();
       subPriceController.clear();
+      subDescriptionController.clear();
 
       // إعادة جلب التفاصيل لتحديث القائمة
       await fetchServiceDetails();
@@ -199,10 +202,56 @@ class ServiceDetailsViewModel extends ChangeNotifier {
     }
   }
 
+  // 🚀 دالة تعديل خدمة فرعية
+  Future<bool> updateSubService(BuildContext context, int childId) async {
+    if (subNameController.text.trim().isEmpty ||
+        subPriceController.text.trim().isEmpty) {
+      DialogHelper.showErrorDialog(
+        context,
+        'يرجى إدخال اسم وسعر الخدمة الفرعية.',
+      );
+      return false;
+    }
+
+    _isAddingSubService = true;
+    notifyListeners();
+
+    try {
+      await _repository.updateSubService(
+        childId: childId,
+        name: subNameController.text.trim(),
+        price: double.parse(subPriceController.text.trim()),
+        description: subDescriptionController.text.trim(),
+      );
+
+      _isAddingSubService = false;
+
+      // تفريغ الحقول بعد النجاح
+      subNameController.clear();
+      subPriceController.clear();
+      subDescriptionController.clear();
+
+      // إعادة جلب التفاصيل لتحديث القائمة
+      await fetchServiceDetails();
+      return true; // نجاح
+    } on Failure catch (failure) {
+      _isAddingSubService = false;
+      notifyListeners();
+      DialogHelper.showErrorDialog(context, failure.message);
+      return false;
+    } catch (e) {
+      _isAddingSubService = false;
+      notifyListeners();
+      DialogHelper.showErrorDialog(context, 'حدث خطأ غير متوقع أثناء التعديل');
+      return false;
+    }
+  }
+
   @override
   void dispose() {
     subNameController.dispose();
     subPriceController.dispose();
+    subDescriptionController.dispose();
     super.dispose();
   }
 

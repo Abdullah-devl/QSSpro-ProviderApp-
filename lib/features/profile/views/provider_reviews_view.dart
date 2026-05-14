@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import '../viewmodels/provider_reviews_viewmodel.dart';
 import '../models/review_model.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class ProviderReviewsView extends StatelessWidget {
   const ProviderReviewsView({super.key});
@@ -27,7 +28,7 @@ class ProviderReviewsView extends StatelessWidget {
     }
 
     if (vm.reviews.isEmpty) {
-      return const Center(child: Text('لا توجد تقييمات حالياً.'));
+      return Center(child: Text(context.tr('auto_tr_57')));
     }
 
     return RefreshIndicator(
@@ -136,7 +137,7 @@ class ProviderReviewsView extends StatelessWidget {
                   color: review.isHidden ? colors.success : colors.error,
                 ),
                 label: Text(
-                  review.isHidden ? 'إظهار التقييم' : 'إخفاء التقييم',
+                  review.isHidden ? context.tr('auto_tr_30') : context.tr('auto_tr_84'),
                   style: TextStyle(
                     color: review.isHidden ? colors.success : colors.error,
                     fontWeight: FontWeight.bold,

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../core/theme/qs_color_extension.dart';
 import '../../../../core/localization/app_localizations.dart';
 // 3. كارت الطلب الجديد
@@ -38,7 +38,7 @@ class NewRequestCard extends StatelessWidget {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        _buildTag(context, Icons.location_on_outlined, distance),
+                        _buildTag(context, Icons.calendar_today_outlined, distance),
                         const SizedBox(width: 8),
                         _buildTag(context, Icons.payments_outlined, price),
                       ],
@@ -84,13 +84,13 @@ class NewRequestCard extends StatelessWidget {
 
   Widget _buildTag(BuildContext context, IconData icon, String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: context.qsColors.success.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+      decoration: const BoxDecoration(color: Colors.transparent),
       child: Row(
         children: [
-          Icon(icon, color: context.qsColors.success, size: 14),
+          Icon(icon, color: context.qsColors.textSub, size: 14),
           const SizedBox(width: 4),
-          Text(text, style: TextStyle(color: context.qsColors.success, fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(text, style: TextStyle(color: context.qsColors.text, fontSize: 12, fontWeight: FontWeight.bold)),
         ],
       ),
     );

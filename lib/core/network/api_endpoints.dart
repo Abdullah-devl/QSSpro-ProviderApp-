@@ -2,6 +2,8 @@
 
 /// 📂 اسم الملف: api_endpoints.dart
 /// 📝 الوصف: يحتوي على جميع الروابط (URLs) الخاصة بالـ API.
+library;
+
 
 class ApiEndpoints {
   // ⛔ منع إنشاء كائن من هذا الكلاس
@@ -19,6 +21,7 @@ class ApiEndpoints {
   /// 2. للهاتف الحقيقي (تأكد من وضع الـ IP الخاص بجهازك وأنك متصل بنفس الشبكة):
   // static String get domain => "http://192.168.43.245:8000";
   static String get domain => "http://127.0.0.1:8000";
+  // static String get domain => "http://11.11.37.9:8000";
   // static String get domain => "http://192.168.137.59:8000";
 
   /// 3. للسيرفر المرفوع على الإنترنت (Live):
@@ -48,9 +51,14 @@ class ApiEndpoints {
   // 🏠 روابط مقدم الخدمة والصفحة الرئيسية
   static const String providerProfile = "provider/profile";
   static const String getHomeData = "home";
+  static const String dashboard = "provider/dashboard";
+  static const String advertisements = "advertisements";
+  static String adView(int id) => "advertisements/$id/view";
+  static String adClick(int id) => "advertisements/$id/click";
   static const String categories = "categories";
   static const String popularServices = "popular-services";
   static const String beProvider = "provider-requests";
+  static const String providerPolicy = "policies/provider";
 
   // 📂 الدوال التي تتطلب تمرير متغير (مثل الـ ID الخاص بالتصنيف)
   static String categoryDetails(int id) => "categories/$id";
@@ -64,15 +72,20 @@ class ApiEndpoints {
   // رابط إضافة خدمة فرعية
   // static const String childServices = "services/child";
   static const String childServices = "services/children";
+  static String updateChildService(int id) => "services/children/$id";
 
   static const String getOrders = "requests/provider"; // مسار جلب الطلبات
   // static const String getOrders = "requests"; // مسار جلب الطلبات
 
   // رابط العمولات
   static const String commissions = "commissions";
+  static const String unpaidCommissions = "requests/unpaid-commissions";
 
   // رابط تقديم سند دفع العمولة عبر إيصال
   static const String requestCommissionBonds = "request-commission-bonds";
+
+  // حسابات المنصة البنكية الرسمية
+  static const String platformBankAccounts = "platform-bank-accounts";
 
   // ===========================================================================
   // 💰 Withdrawals & Points Packages (السحوبات وباقات النقاط)
@@ -105,6 +118,9 @@ class ApiEndpoints {
   static String addAmount(String id) => "requests/$id/addAmountToMoneyPaid";
   static String finishRequest(String id) => "requests/$id/finish";
   static String payCommission(String id) => "requests/$id/pay-commission";
+  static String approveBond(String bondId) => "request-bonds/$bondId/approve";
+  static String rejectBond(String bondId) => "request-bonds/$bondId/reject";
+  static String getUserProfile(String userId) => "user-profile/$userId";
   static const String complaints = "request-complaints";
   static const String systemComplaints = "system-complaints";
 

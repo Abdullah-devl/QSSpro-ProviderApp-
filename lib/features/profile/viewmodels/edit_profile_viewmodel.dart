@@ -1,11 +1,11 @@
-﻿// مسار الملف: lib/features/profile/viewmodels/edit_profile_viewmodel.dart
+// مسار الملف: lib/features/profile/viewmodels/edit_profile_viewmodel.dart
 
 import 'dart:io';
-import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/profile_model.dart';
 import '../repositories/profile_repository.dart';
+import '../../../../core/utils/dialog_helper.dart';
 import '../../../../core/localization/app_localizations.dart';
 
 class EditProfileViewModel extends ChangeNotifier {
@@ -23,7 +23,11 @@ class EditProfileViewModel extends ChangeNotifier {
   EditProfileViewModel(this.repository, this.currentProfile) {
     // 🚀 تعبئة البيانات الحالية في الحقول فور فتح الشاشة
     nameController = TextEditingController(text: currentProfile.name);
-    jobTitleController = TextEditingController(text: currentProfile.jobTitle);
+    jobTitleController = TextEditingController(
+      text: (currentProfile.jobTitle.toLowerCase() == 'null' || currentProfile.jobTitle.isEmpty) 
+          ? '' 
+          : currentProfile.jobTitle
+    );
     bioController = TextEditingController(text: currentProfile.bio);
     isAvailable = currentProfile.isAvailable;
   }
@@ -46,13 +50,21 @@ class EditProfileViewModel extends ChangeNotifier {
 
   // 💾 حفظ التعديلات وإرسالها للباك إند
   Future<void> saveProfile(BuildContext context) async {
+    // عرض رسالة التأكيد أولاً
+    final bool confirm = await DialogHelper.showConfirmationDialog(
+      context,
+      title: context.tr('confirm_save_changes'),
+      message: context.tr('confirm_save_changes_message'),
+    );
+
+    if (!confirm) return;
+
     isLoading = true;
     notifyListeners();
 
     try {
       await repository.updateProfile(
         id: currentProfile.id,
-        name: nameController.text.trim(),
         jobTitle: jobTitleController.text.trim(),
         bio: bioController.text.trim(),
         isAvailable: isAvailable,
@@ -62,19 +74,21 @@ class EditProfileViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.tr('profile_updated_successfully')), backgroundColor: context.qsColors.success),
+      // عرض رسالة النجاح
+      await DialogHelper.showSuccessDialog(
+        context,
+        context.tr('profile_updated_successfully'),
       );
 
       // 🚀 نعود للصفحة السابقة مع إرسال القيمة (true) لكي يتم التحديث فوراً
-      Navigator.pop(context, true);
+      if (context.mounted) {
+        Navigator.pop(context, true);
+      }
 
     } catch (e) {
       isLoading = false;
       notifyListeners();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: context.qsColors.error),
-      );
+      DialogHelper.showErrorDialog(context, e.toString());
     }
   }
 

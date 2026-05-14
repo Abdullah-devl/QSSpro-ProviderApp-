@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:service_provider_app/core/storage/hive_keys.dart';
 import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:service_provider_app/core/network/error/failure.dart';
 import 'package:service_provider_app/features/home/views/main_view.dart';
 import 'package:provider/provider.dart';
+import 'package:service_provider_app/features/profile/repositories/profile_repository.dart';
+import 'package:service_provider_app/features/settings/views/privacy_policy_view.dart';
+import 'package:service_provider_app/core/storage/hive_helper.dart';
+import 'package:service_provider_app/core/network/fcm_notification_service.dart';
 import '../repositories/auth_repository.dart';
 import '../viewmodels/auth_viewmodel.dart';
 
@@ -42,6 +48,9 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // 0. مسح كل البيانات السابقة من الكاش لضمان تحديث كل شيء للمستخدم الجديد
+      await HiveHelper.clareAllData();
+
       // 1. استدعاء الـ Repository واستلام كائن المستخدم
       final user = await _authRepository.login(
         emailController.text.trim(),
@@ -55,12 +64,28 @@ class LoginViewModel extends ChangeNotifier {
       if (user.isVerified) {
         // ✅ تحديث توكن الإشعارات فور تسجيل الدخول لضمان وصولها
         _syncFCMToken(context);
+        // 🔔 عرض حالة الـ FCM Token بعد الاستجابة من Firebase (ينتظر حتى يغلق المستخدم النافذة)
+        await _showFCMTokenAlert(context);
 
-        // إذا كان حسابه موثقاً / موافقاً على الشروط -> يدخل التطبيق
-        _showAlert(context, 'تم تسجيل الدخول بنجاح!', isError: false);
+        // التحقق من الموافقة على السياسة مباشرة من بيانات تسجيل الدخول
+        final box = Hive.box(HiveKeys.settingsBox);
+        await box.put('provider_policy_agreed', user.providerPolicy);
 
-        // الانتقال للشاشة الرئيسية
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainView()));
+        if (user.providerPolicy) {
+          // الانتقال للشاشة الرئيسية مع تنظيف مكدس التنقل
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const MainView()),
+            (route) => false,
+          );
+        } else {
+          // لم يوافق على السياسة -> نقله لصفحة سياسة الخصوصية
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const PrivacyPolicyView(requiresAcceptance: true)),
+            (route) => false,
+          );
+        }
       } else {
         // إذا لم يكن موثقاً -> نمنعه من الدخول للرئيسية وننقله لشاشة التوثيق أو الشروط
         _showAlert(
@@ -90,6 +115,84 @@ class LoginViewModel extends ChangeNotifier {
     } catch (e) {
       // نجهل الخطأ هنا لكي لا يعطل عملية تسجيل الدخول
     }
+  }
+
+  /// 🔔 عرض نتيجة الـ FCM Token بعد تسجيل الدخول
+  Future<void> _showFCMTokenAlert(BuildContext context) async {
+    // الانتظار قليلاً ريثما تستجيب Firebase
+    String? token;
+    try {
+      token = await FCMNotificationService().getToken();
+    } catch (_) {
+      token = null;
+    }
+
+    if (!context.mounted) return;
+
+    final bool tokenReceived = token != null && token.isNotEmpty;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+        title: Row(
+          children: [
+            Icon(
+              tokenReceived ? Icons.check_circle_rounded : Icons.error_rounded,
+              color: tokenReceived ? context.qsColors.success : context.qsColors.error,
+              size: 28,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                tokenReceived
+                    ? 'تم الاتصال بـ Firebase'
+                    : 'فشل الاتصال بـ Firebase',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Cairo',
+                  color: tokenReceived
+                      ? context.qsColors.success
+                      : context.qsColors.error,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          tokenReceived
+              ? 'تم استلام رمز الإشعارات (FCM Token) من Firebase بنجاح.\n\nالرمز:\n${token!.substring(0, 20)}...'
+              : 'لم يتم استلام رمز الإشعارات (FCM Token) من Firebase.\nتحقق من الاتصال بالإنترنت أو إعدادات Firebase.',
+          style: const TextStyle(fontFamily: 'Cairo', fontSize: 14, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: tokenReceived
+                  ? context.qsColors.success.withOpacity(0.1)
+                  : context.qsColors.error.withOpacity(0.1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: Text(
+              'حسناً',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.bold,
+                color: tokenReceived
+                    ? context.qsColors.success
+                    : context.qsColors.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // دالة مساعدة لعرض الرسائل للمستخدم (SnackBar)

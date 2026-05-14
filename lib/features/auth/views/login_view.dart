@@ -1,4 +1,4 @@
-﻿// // مسار الملف: lib/features/auth/views/login_view.dart
+// // مسار الملف: lib/features/auth/views/login_view.dart
 
 // import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
@@ -262,6 +262,7 @@ import '../repositories/auth_repository.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
+import '../../../core/widgets/app_logo.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_textfield.dart';
 import '../viewmodels/login_viewmodel.dart';
@@ -316,26 +317,7 @@ class _LoginViewBody extends StatelessWidget {
                   // =====================================
                   // 1. الشعار والكلمات الترحيبية
                   // =====================================
-                  Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      color: context.qsColors.primary,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: context.qsColors.primary.withValues(alpha: 0.3),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.handshake_rounded,
-                      color: context.qsColors.card,
-                      size: 35,
-                    ),
-                  ),
+                  const AppLogo(size: 160),
                   const SizedBox(height: 16),
 
                   Text(

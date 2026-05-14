@@ -12,6 +12,7 @@ import 'features/commissions/viewmodels/commissions_stats_viewmodel.dart';
 import 'features/commissions/viewmodels/payments_history_viewmodel.dart';
 import 'features/commissions/viewmodels/pay_commissions_viewmodel.dart';
 import 'features/commissions/viewmodels/pay_with_points_viewmodel.dart';
+import 'features/commissions/viewmodels/unpaid_commissions_viewmodel.dart';
 import 'features/profile/repositories/profile_repository.dart';
 import 'features/profile/viewmodels/profile_viewmodel.dart';
 import 'package:service_provider_app/features/withdraw/repositories/withdraw_repository.dart';
@@ -39,6 +40,8 @@ import 'features/orders/ViewModels/orders_viewmodel.dart';
 import 'features/complaints/repositories/complaints_repository.dart';
 import 'features/complaints/viewmodels/submit_complaint_viewmodel.dart';
 import 'features/complaints/viewmodels/system_complaints_viewmodel.dart';
+import 'features/settings/repositories/settings_repository.dart';
+import 'features/settings/viewmodels/policy_viewmodel.dart';
 
 // 3. استدعاء الثيم، الترجمة، وشاشة البداية 🎨
 import 'core/storage/hive_helper.dart';
@@ -46,6 +49,7 @@ import 'core/theme/app_theme.dart';
 // import 'core/theme/qs_color_extension.dart'; // إذا كنت تستخدمها في main
 import 'core/localization/app_localizations.dart';
 import 'features/splash/views/splash_view.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -77,6 +81,7 @@ void main() async {
   final authRepository = AuthRepository(apiService, tokenStorage);
   final complaintsRepository = ComplaintsRepository(apiService);
   final notificationRepository = NotificationRepository(apiService);
+  final settingsRepository = SettingsRepository(apiService);
 
   runApp(
     MultiProvider(
@@ -121,6 +126,7 @@ void main() async {
         ),
         ChangeNotifierProvider(create: (_) => PayCommissionsViewModel(commissionsRepository)),
         ChangeNotifierProvider(create: (_) => PayWithPointsViewModel(commissionsRepository)),
+        ChangeNotifierProvider(create: (_) => UnpaidCommissionsViewModel(commissionsRepository)),
 
         // 🔥 الملف الشخصي
         ChangeNotifierProvider(create: (_) => ProfileViewModel(profileRepository)),
@@ -140,6 +146,9 @@ void main() async {
         // 📝 الشكاوي (Complaints)
         ChangeNotifierProvider(create: (_) => SubmitComplaintViewModel(complaintsRepository)),
         ChangeNotifierProvider(create: (_) => SystemComplaintsViewModel(complaintsRepository)),
+
+        // 📜 سياسة الخصوصية
+        ChangeNotifierProvider(create: (_) => PolicyViewModel(settingsRepository)),
       ],
       child: const MyApp(),
     ),
@@ -155,7 +164,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Provider App',
+      title: 'خبير',
       navigatorKey: navigatorKey, // ✅ ربط مفتاح التنقل بالعالم
 
 

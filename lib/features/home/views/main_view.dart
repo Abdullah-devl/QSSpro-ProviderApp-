@@ -8,6 +8,11 @@ import 'package:service_provider_app/features/home/views/home_dashboard_view.dar
 import 'package:service_provider_app/features/orders/Views/orders_view.dart';
 import 'package:service_provider_app/features/profile/views/profile_view.dart';
 import 'package:service_provider_app/features/services/views/manage_services_view.dart';
+import 'package:service_provider_app/features/profile/viewmodels/profile_viewmodel.dart';
+import 'package:service_provider_app/features/orders/ViewModels/orders_viewmodel.dart';
+import 'package:service_provider_app/features/services/viewmodels/manage_services_viewmodel.dart';
+import 'package:service_provider_app/features/commissions/viewmodels/commissions_stats_viewmodel.dart';
+import 'package:service_provider_app/features/commissions/viewmodels/payments_history_viewmodel.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/main_viewmodel.dart';
@@ -60,7 +65,23 @@ class _MainViewBodyState extends State<_MainViewBody> {
       body: screens[viewModel.currentIndex],
       bottomNavigationBar: _CustomFloatingNavBar(
         currentIndex: viewModel.currentIndex,
-        onTap: viewModel.changeTab,
+        onTap: (index) {
+          viewModel.changeTab(index);
+          // 🚀 تحديث بيانات الشاشة المختارة فوراً عند الضغط على التبويب الخاص بها
+          if (index == 0) {
+            context.read<HomeViewModel>().fetchHomeData();
+            context.read<HomeViewModel>().fetchAds();
+          } else if (index == 1) {
+            context.read<OrdersViewModel>().fetchOrders();
+          } else if (index == 2) {
+            context.read<ManageServicesViewModel>().fetchServices();
+          } else if (index == 3) {
+            context.read<CommissionsStatsViewModel>().fetchStatsData();
+            context.read<PaymentsHistoryViewModel>().fetchAllHistory();
+          } else if (index == 4) {
+            context.read<ProfileViewModel>().fetchProfile();
+          }
+        },
       ),
     );
   }

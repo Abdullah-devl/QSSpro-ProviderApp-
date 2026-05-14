@@ -48,6 +48,20 @@ class PaymentsHistoryRepository {
     );
   }
 
+  // 📥 جلب النسخة المخزنة محلياً فوراً وبدون انتظار
+  List<T> getCachedList<T>(String cacheKey, T Function(Map<String, dynamic>) fromJson) {
+    try {
+      var box = Hive.box(HiveKeys.settingsBox);
+      final cached = box.get(cacheKey);
+      if (cached != null) {
+        return (cached as List).map((e) => fromJson(Map<String, dynamic>.from(e))).toList();
+      }
+    } catch (e) {
+      // التجاهل الصامت عند غياب الكاش
+    }
+    return [];
+  }
+
   /// 🛠️ دالة مساعدة لتوحيد منطق جلب البيانات من السيرفر وفشل الوصول للتخزين المحلي
   Future<List<T>> _fetchDataFromApiOrHive<T>({
     required String endpoint,

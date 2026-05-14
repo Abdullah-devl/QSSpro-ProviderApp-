@@ -92,12 +92,16 @@ class ServiceDetailsModel {
 class SubServiceDetailModel {
   final int id;
   final String name;
+  final String description;
+  final double price;
   final String priceText;
   final int categoryId;
 
   SubServiceDetailModel({
     required this.id,
     required this.name,
+    required this.description,
+    required this.price,
     required this.priceText,
     required this.categoryId,
   });
@@ -106,6 +110,8 @@ class SubServiceDetailModel {
     return SubServiceDetailModel(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
+      description: json['description']?.toString() ?? '',
+      price: json['price'] != null ? double.tryParse(json['price'].toString()) ?? 0.0 : 0.0,
       priceText: '${json['price'] ?? 0} ر.س',
       categoryId: json['category_id'] ?? 0,
     );

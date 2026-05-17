@@ -153,8 +153,8 @@ class OrderModel {
         .toString()
         .toLowerCase();
 
-    // استخراج بيانات المستخدم
-    final userData = json['user'] ?? json['seeker'] ?? json['customer'] ?? {};
+    // استخراج بيانات المستخدم (طالب الخدمة)
+    final userData = json['user'] ?? json['seeker'] ?? json['customer'] ?? json['client'] ?? {};
 
     // استخراج بيانات الخدمات (الرئيسية والفرعية) من مفتاح services أو الحقول القديمة
     final List allServices = json['services'] ?? json['main_service'] ?? [];
@@ -226,8 +226,10 @@ class OrderModel {
       timeAgo: timeOnly,
       subServices: subServices,
       status: currentStatus,
-      isVerified:
-          userData['is_verified'] == 1 || userData['is_verified'] == true,
+      isVerified: userData['is_verified'] == 1 ||
+          userData['is_verified'] == true ||
+          userData['verification_provider'] == 1 ||
+          userData['verification_provider'] == true,
       distance: (json['distance'] ?? '2.5').toString(),
       paidAmount:
           double.tryParse(

@@ -1,4 +1,4 @@
-﻿// مسار الملف: lib/features/commissions/views/pay_with_points_view.dart
+// مسار الملف: lib/features/commissions/views/pay_with_points_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +10,8 @@ import '../viewmodels/pay_commissions_viewmodel.dart';
 class PayWithPointsView extends StatelessWidget {
   final double amount;
   final int userId;
+  final int bonusPoints;
+  final int paidPoints;
   final int availablePoints;
   final int equivalentPoints;
   final String? orderId;
@@ -18,6 +20,8 @@ class PayWithPointsView extends StatelessWidget {
     super.key,
     required this.amount,
     required this.userId,
+    required this.bonusPoints,
+    required this.paidPoints,
     required this.availablePoints,
     required this.equivalentPoints,
     this.orderId,
@@ -64,10 +68,9 @@ class PayWithPointsView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 20),
-                
-                // 1. بطاقة رصيد النقاط (Gradient Card)
+                        // 1. بطاقة رصيد النقاط (Gradient Card)
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFF5CA4B8), Color(0xFF4A8A9E)],
@@ -85,39 +88,74 @@ class PayWithPointsView extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: context.qsColors.card.withOpacity(0.5), width: 1.5),
-                        ),
-                        child: Icon(Icons.stars_rounded, color: context.qsColors.card, size: 32),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.stars_rounded, color: context.qsColors.card, size: 28),
+                          const SizedBox(width: 8),
+                          Text(
+                            context.tr('total_available_points'),
+                            style: TextStyle(
+                              color: context.qsColors.card.withOpacity(0.9),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        context.tr('total_available_points'),
-                        style: TextStyle(
-                          color: context.qsColors.card.withOpacity(0.8),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
                         availablePoints.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},'),
                         style: TextStyle(
                           color: context.qsColors.card,
-                          fontSize: 42,
+                          fontSize: 36,
                           fontWeight: FontWeight.bold,
                           height: 1.2,
                         ),
                       ),
-                      Text(
-                        context.tr('points'),
-                        style: TextStyle(
-                          color: context.qsColors.card,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    context.tr('bonus_points_short'),
+                                    style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    bonusPoints.toString(),
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(width: 1, height: 30, color: Colors.white.withOpacity(0.3)),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    context.tr('withdrawable_points_short'),
+                                    style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    paidPoints.toString(),
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -188,22 +226,31 @@ class PayWithPointsView extends StatelessWidget {
                 const SizedBox(height: 20),
                 
                 // 3. ملاحظة الخصم
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.info_outline_rounded, color: Color(0xFF5CA4B8), size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        context.tr('points_deduction_notice'),
-                        style: const TextStyle(
-                          color: Color(0xFF5CA4B8),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE4F3F8),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFF5CA4B8).withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.info_outline_rounded, color: Color(0xFF5CA4B8), size: 22),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          context.tr('points_usage_notice'),
+                          style: const TextStyle(
+                            color: Color(0xFF2C5E6C),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            height: 1.5,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -220,8 +267,8 @@ class PayWithPointsView extends StatelessWidget {
                 onPressed: viewModel.isLoading 
                   ? null 
                     : () async {
-                        // 1. التحقق من الرصيد
-                        if (availablePoints < equivalentPoints) {
+                        // 1. التحقق من الرصيد (يجب أن يكون أكبر من الصفر)
+                        if (availablePoints <= 0) {
                           DialogHelper.showErrorDialog(
                             context,
                             context.tr('insufficient_points'),

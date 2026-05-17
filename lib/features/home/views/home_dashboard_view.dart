@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +18,9 @@ import 'package:service_provider_app/features/home/views/widgets/ad_carousel.dar
 import '../models/advertisement_model.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../commissions/views/unpaid_commissions_view.dart';
+import '../../verification/widgets/verification_options_dialog.dart';
+import '../../orders/Views/order_detail_view.dart';
+import '../../orders/Models/order_model.dart';
 
 class HomeDashboardView extends StatefulWidget {
   const HomeDashboardView({super.key});
@@ -39,7 +41,11 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
     }
   }
 
-  void _showAdPopup(BuildContext context, AdvertisementModel ad, HomeViewModel vm) {
+  void _showAdPopup(
+    BuildContext context,
+    AdvertisementModel ad,
+    HomeViewModel vm,
+  ) {
     vm.trackAdView(ad.id);
     showDialog(
       context: context,
@@ -115,19 +121,14 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
               else if (homeViewModel.errorMessage != null)
                 _buildErrorState(context, homeViewModel)
               else if (homeViewModel.homeData != null) ...[
-                
-                // ==========================================
-                // 🆕 عرض التوكن (FCM Token Card)
-                // ==========================================
-                if (homeViewModel.fcmToken != null)
-                  _buildFCMTokenCard(context, homeViewModel.fcmToken!),
-                
-                const SizedBox(height: 15),
 
                 // ==========================================
                 // 3. حالة التوثيق (Verification Banner)
                 // ==========================================
-                _buildVerificationBanner(context, homeViewModel.homeData!.verification),
+                _buildVerificationBanner(
+                  context,
+                  homeViewModel.homeData!.verification,
+                ),
 
                 const SizedBox(height: 25),
 
@@ -136,19 +137,19 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
                 // ==========================================
                 _buildGeneralStats(context, homeViewModel.homeData!),
 
-                const SizedBox(height: 20),
-
-                // ==========================================
-                // 5. إعلانات الكاروسيل (Carousel Ads)
-                // ==========================================
-                AdCarousel(ads: homeViewModel.carouselAds),
-
-                const SizedBox(height: 10),
-
+                if (homeViewModel.carouselAds.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  AdCarousel(ads: homeViewModel.carouselAds),
+                  const SizedBox(height: 10),
+                ],
+                const SizedBox(height: 12),
                 // ==========================================
                 // 6. قسم العمولات (Commissions)
                 // ==========================================
-                _buildCommissionsCard(context, homeViewModel.homeData!.commissions),
+                _buildCommissionsCard(
+                  context,
+                  homeViewModel.homeData!.commissions,
+                ),
 
                 const SizedBox(height: 25),
 
@@ -168,11 +169,14 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
                   title: context.tr('services_performance'),
                   actionText: context.tr('view_all'),
                   onActionTap: () {
-                    // Navigate to services details
+                    mainViewModel.changeTab(2); // Navigate to Services tab
                   },
                 ),
                 const SizedBox(height: 12),
-                _buildServicesPerformance(context, homeViewModel.homeData!.servicesPerformance),
+                _buildServicesPerformance(
+                  context,
+                  homeViewModel.homeData!.servicesPerformance,
+                ),
 
                 const SizedBox(height: 25),
 
@@ -183,23 +187,55 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
                   title: context.tr('new_requests'),
                   badgeCount: homeViewModel.homeData!.newRequests.length,
                   actionText: context.tr('view_all'),
-                  onActionTap: () {},
+                  onActionTap: () {
+                    mainViewModel.changeTab(1); // Navigate to Orders tab
+                  },
                 ),
                 const SizedBox(height: 16),
 
                 if (homeViewModel.homeData!.newRequests.isEmpty)
                   _buildEmptyState(context, context.tr('no_new_requests'))
                 else
-                  ...homeViewModel.homeData!.newRequests.map((request) => NewRequestCard(
-                        title: request.customerName,
-                        location: request.mainService,
-                        distance: request.createdAt, 
-                        price: "${request.totalPrice} ${context.tr('sar')}",
-                        imageUrl: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-                      )),
+                  ...homeViewModel.homeData!.newRequests.map(
+                    (request) => NewRequestCard(
+                      title: request.customerName,
+                      location: request.mainService,
+                      distance: request.createdAt,
+                      price: "${request.totalPrice} ${context.tr('sar')}",
+                      imageUrl:
+                          'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+                      onTap: () {
+                        // Construct a minimal OrderModel to pass to OrderDetailView
+                        // It will be automatically refreshed on the details page via refreshOrderDetail
+                        final minimalOrder = OrderModel(
+                          id: request.id.toString(),
+                          customerId: '',
+                          customerName: request.customerName,
+                          serviceName: request.mainService,
+                          customerImage: '',
+                          customerPhone: '',
+                          price:
+                              double.tryParse(request.totalPrice.toString()) ??
+                              0.0,
+                          location: '',
+                          timeAgo: request.createdAt,
+                          subServices: [],
+                          status: 'pending',
+                        );
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                OrderDetailView(order: minimalOrder),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
 
                 const SizedBox(height: 100), // مساحة إضافية للناف بار العائم
-              ]
+              ],
             ],
           ),
         ),
@@ -207,7 +243,11 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, ProfileViewModel profileVM, MainViewModel mainVM) {
+  Widget _buildHeader(
+    BuildContext context,
+    ProfileViewModel profileVM,
+    MainViewModel mainVM,
+  ) {
     final colors = context.qsColors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -218,9 +258,13 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
               CircleAvatar(
                 radius: 25,
                 backgroundColor: colors.primary.withOpacity(0.1),
-                backgroundImage: profileVM.profile?.avatarUrl != null && profileVM.profile!.avatarUrl.isNotEmpty
+                backgroundImage:
+                    profileVM.profile?.avatarUrl != null &&
+                        profileVM.profile!.avatarUrl.isNotEmpty
                     ? NetworkImage(profileVM.profile!.avatarUrl)
-                    : const NetworkImage('https://cdn-icons-png.flaticon.com/512/149/149071.png'),
+                    : const NetworkImage(
+                        'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -234,8 +278,12 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      profileVM.profile?.name ?? context.tr('auto_tr_6'), 
-                      style: TextStyle(color: colors.text, fontSize: 16, fontWeight: FontWeight.bold),
+                      profileVM.profile?.name ?? context.tr('auto_tr_6'),
+                      style: TextStyle(
+                        color: colors.text,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -261,7 +309,11 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
           color: colors.card,
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(color: colors.text.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 2)),
+            BoxShadow(
+              color: colors.text.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
           ],
         ),
         child: Consumer<NotificationViewModel>(
@@ -270,7 +322,11 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
             return Stack(
               alignment: Alignment.topRight,
               children: [
-                Icon(Icons.notifications_none_rounded, color: colors.text, size: 28),
+                Icon(
+                  Icons.notifications_none_rounded,
+                  color: colors.text,
+                  size: 28,
+                ),
                 if (unreadCount > 0)
                   Container(
                     padding: const EdgeInsets.all(3),
@@ -279,10 +335,17 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
                       shape: BoxShape.circle,
                       border: Border.all(color: colors.card, width: 1.5),
                     ),
-                    constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                    constraints: const BoxConstraints(
+                      minWidth: 14,
+                      minHeight: 14,
+                    ),
                     child: Text(
                       unreadCount > 9 ? '+9' : unreadCount.toString(),
-                      style: TextStyle(color: colors.card, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: colors.card,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -315,16 +378,19 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
 
           // 2. 3 Stat Cards Skeleton
           Row(
-            children: List.generate(3, (index) => Expanded(
-              child: Container(
-                height: 100,
-                margin: EdgeInsets.only(right: index < 2 ? 12 : 0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+            children: List.generate(
+              3,
+              (index) => Expanded(
+                child: Container(
+                  height: 100,
+                  margin: EdgeInsets.only(right: index < 2 ? 12 : 0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
               ),
-            )),
+            ),
           ),
           const SizedBox(height: 25),
 
@@ -352,16 +418,19 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
 
           // 5. Income Cards Skeleton
           Row(
-            children: List.generate(3, (index) => Expanded(
-              child: Container(
-                height: 80,
-                margin: EdgeInsets.only(right: index < 2 ? 12 : 0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+            children: List.generate(
+              3,
+              (index) => Expanded(
+                child: Container(
+                  height: 80,
+                  margin: EdgeInsets.only(right: index < 2 ? 12 : 0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
               ),
-            )),
+            ),
           ),
         ],
       ),
@@ -376,17 +445,22 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
           const SizedBox(height: 80),
           Icon(Icons.error_outline, color: colors.error, size: 60),
           const SizedBox(height: 16),
-          Text(vm.errorMessage!, style: TextStyle(color: colors.error, fontSize: 16)),
+          Text(
+            vm.errorMessage!,
+            style: TextStyle(color: colors.error, fontSize: 16),
+          ),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () => vm.fetchHomeData(),
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.primary,
               foregroundColor: colors.card,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: Text(context.tr('retry')),
-          )
+          ),
         ],
       ),
     );
@@ -395,16 +469,40 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
   Widget _buildGeneralStats(BuildContext context, HomeDataModel data) {
     return Row(
       children: [
-        _buildSmallStatCard(context, context.tr('total_services'), data.totalServices.toString(), Icons.miscellaneous_services_rounded, context.qsColors.primary),
+        _buildSmallStatCard(
+          context,
+          context.tr('total_services'),
+          data.totalServices.toString(),
+          Icons.miscellaneous_services_rounded,
+          context.qsColors.primary,
+        ),
         const SizedBox(width: 12),
-        _buildSmallStatCard(context, context.tr('total_requests'), data.totalRequests.toString(), Icons.assignment_rounded, context.qsColors.warning),
+        _buildSmallStatCard(
+          context,
+          context.tr('total_requests'),
+          data.totalRequests.toString(),
+          Icons.assignment_rounded,
+          context.qsColors.warning,
+        ),
         const SizedBox(width: 12),
-        _buildSmallStatCard(context, context.tr('active_requests'), data.activeRequestsCount.toString(), Icons.play_circle_fill_rounded, context.qsColors.success),
+        _buildSmallStatCard(
+          context,
+          context.tr('active_requests'),
+          data.activeRequestsCount.toString(),
+          Icons.play_circle_fill_rounded,
+          context.qsColors.success,
+        ),
       ],
     );
   }
 
-  Widget _buildSmallStatCard(BuildContext context, String title, String value, IconData icon, Color color) {
+  Widget _buildSmallStatCard(
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     final colors = context.qsColors;
     return Expanded(
       child: Container(
@@ -412,56 +510,87 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
         decoration: BoxDecoration(
           color: colors.card,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: colors.text.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(
+              color: colors.text.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
               child: Icon(icon, color: color, size: 20),
             ),
             const SizedBox(height: 10),
-            Text(value, style: TextStyle(color: colors.text, fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              value,
+              style: TextStyle(
+                color: colors.text,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 4),
-            Text(title, style: TextStyle(color: colors.textSub, fontSize: 10), textAlign: TextAlign.center, maxLines: 1),
+            Text(
+              title,
+              style: TextStyle(color: colors.textSub, fontSize: 10),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildVerificationBanner(BuildContext context, VerificationModel verification) {
+  Widget _buildVerificationBanner(
+    BuildContext context,
+    VerificationModel verification,
+  ) {
     final colors = context.qsColors;
     final bool isVerified = verification.status == 'verified';
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isVerified 
-            ? [colors.success.withValues(alpha: 0.8), colors.success] 
-            : [colors.error.withValues(alpha: 0.8), colors.error],
+          colors: isVerified
+              ? [colors.success.withValues(alpha: 0.8), colors.success]
+              : [colors.error.withValues(alpha: 0.8), colors.error],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: (isVerified ? colors.success : colors.error).withValues(alpha: 0.3),
+            color: (isVerified ? colors.success : colors.error).withValues(
+              alpha: 0.3,
+            ),
             blurRadius: 12,
             offset: const Offset(0, 6),
-          )
+          ),
         ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
             child: Icon(
-              isVerified ? Icons.verified_user_rounded : Icons.info_outline_rounded,
+              isVerified
+                  ? Icons.verified_user_rounded
+                  : Icons.info_outline_rounded,
               color: Colors.white,
               size: 28,
             ),
@@ -472,15 +601,24 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isVerified ? context.tr('verified') : context.tr('not_verified'),
-                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  isVerified
+                      ? context.tr('verified')
+                      : context.tr('not_verified'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  isVerified 
-                    ? "${context.tr('days_left_label')}: ${verification.daysLeft} ${context.tr('days_label')}"
-                    : context.tr('verify_account_banner_subtitle'),
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 13),
+                  isVerified
+                      ? "${context.tr('days_left_label')}: ${verification.daysLeft} ${context.tr('days_label')}"
+                      : context.tr('verify_account_banner_subtitle'),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -488,16 +626,21 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
           if (!isVerified)
             ElevatedButton(
               onPressed: () {
-                // Navigate to verification page
+                VerificationOptionsDialog.show(context, isVerified);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: colors.error,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 elevation: 0,
               ),
-              child: Text(context.tr('verify_now'), style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(
+                context.tr('verify_now'),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
         ],
       ),
@@ -507,16 +650,36 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
   Widget _buildIncomeSection(BuildContext context, IncomeModel income) {
     return Row(
       children: [
-        _buildIncomeCard(context, context.tr('weekly_earnings'), income.weekly, context.qsColors.primary),
+        _buildIncomeCard(
+          context,
+          context.tr('weekly_earnings'),
+          income.weekly,
+          context.qsColors.primary,
+        ),
         const SizedBox(width: 12),
-        _buildIncomeCard(context, context.tr('monthly_earnings'), income.monthly, context.qsColors.success),
+        _buildIncomeCard(
+          context,
+          context.tr('monthly_earnings'),
+          income.monthly,
+          context.qsColors.success,
+        ),
         const SizedBox(width: 12),
-        _buildIncomeCard(context, context.tr('yearly_earnings'), income.yearly, context.qsColors.secondary ),
+        _buildIncomeCard(
+          context,
+          context.tr('yearly_earnings'),
+          income.yearly,
+          context.qsColors.secondary,
+        ),
       ],
     );
   }
 
-  Widget _buildIncomeCard(BuildContext context, String title, double value, Color color) {
+  Widget _buildIncomeCard(
+    BuildContext context,
+    String title,
+    double value,
+    Color color,
+  ) {
     final colors = context.qsColors;
     return Expanded(
       child: Container(
@@ -533,18 +696,29 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
             const SizedBox(height: 8),
             Text(
               value.toStringAsFixed(0),
-              style: TextStyle(color: colors.text, fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: colors.text,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            Text(context.tr('sar'), style: TextStyle(color: colors.textSub, fontSize: 10)),
+            Text(
+              context.tr('sar'),
+              style: TextStyle(color: colors.textSub, fontSize: 10),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCommissionsCard(BuildContext context, CommissionsModel commissions) {
+  Widget _buildCommissionsCard(
+    BuildContext context,
+    CommissionsModel commissions,
+  ) {
     final colors = context.qsColors;
-    final bool isZero = commissions.totalOwed <= 0 && commissions.unpaidRequestsCount <= 0;
+    final bool isZero =
+        commissions.totalOwed <= 0 && commissions.unpaidRequestsCount <= 0;
     final Color statusColor = isZero ? colors.success : colors.error;
 
     return Container(
@@ -575,11 +749,22 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(context.tr('total_owed'), style: TextStyle(color: statusColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                          Text(
+                            context.tr('total_owed'),
+                            style: TextStyle(
+                              color: statusColor,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           const SizedBox(height: 4),
                           Text(
                             "${commissions.totalOwed.toStringAsFixed(2)} ${context.tr('sar')}",
-                            style: TextStyle(color: colors.text, fontSize: 24, fontWeight: FontWeight.w900),
+                            style: TextStyle(
+                              color: colors.text,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -587,11 +772,21 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       child: Text(
                         "${commissions.unpaidRequestsCount} ${context.tr('unpaid_requests_count')}",
-                        style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -603,12 +798,22 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(context.tr('pay_now'), style: TextStyle(color: statusColor, fontWeight: FontWeight.bold)),
+                      Text(
+                        context.tr('pay_now'),
+                        style: TextStyle(
+                          color: statusColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Icon(Icons.arrow_forward_ios_rounded, color: statusColor, size: 14),
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: statusColor,
+                        size: 14,
+                      ),
                     ],
                   ),
-                ]
+                ],
               ],
             ),
           ),
@@ -617,12 +822,15 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
     );
   }
 
-  Widget _buildServicesPerformance(BuildContext context, ServicesPerformanceModel performance) {
+  Widget _buildServicesPerformance(
+    BuildContext context,
+    ServicesPerformanceModel performance,
+  ) {
     final colors = context.qsColors;
     if (performance.mostRequested.isEmpty) {
       return _buildEmptyState(context, context.tr('no_services_currently'));
     }
-    
+
     return Column(
       children: performance.mostRequested.take(3).map((item) {
         return Container(
@@ -637,21 +845,47 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
               Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(color: colors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                child: Center(child: Text("${performance.mostRequested.indexOf(item) + 1}", style: TextStyle(color: colors.primary, fontWeight: FontWeight.bold))),
+                decoration: BoxDecoration(
+                  color: colors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    "${performance.mostRequested.indexOf(item) + 1}",
+                    style: TextStyle(
+                      color: colors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(width: 15),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.name, style: TextStyle(color: colors.text, fontWeight: FontWeight.bold)),
-                    Text("${item.requestsCount} ${context.tr('total_requests')}", style: TextStyle(color: colors.textSub, fontSize: 12)),
+                    Text(
+                      item.name,
+                      style: TextStyle(
+                        color: colors.text,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "${item.requestsCount} ${context.tr('total_requests')}",
+                      style: TextStyle(color: colors.textSub, fontSize: 12),
+                    ),
                   ],
                 ),
               ),
               if (item.price != null)
-                Text("${item.price} ${context.tr('sar')}", style: TextStyle(color: colors.success, fontWeight: FontWeight.bold)),
+                Text(
+                  "${item.price} ${context.tr('sar')}",
+                  style: TextStyle(
+                    color: colors.success,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
             ],
           ),
         );
@@ -668,51 +902,4 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
     );
   }
 
-  // 🔔 مكوّن عرض توكن فايربيز
-  Widget _buildFCMTokenCard(BuildContext context, String token) {
-    final colors = context.qsColors;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: colors.primary.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: colors.primary.withOpacity(0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.notifications_active_rounded, color: colors.primary, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                "Firebase FCM Token",
-                style: TextStyle(color: colors.primary, fontSize: 13, fontWeight: FontWeight.bold),
-              ),
-              const Spacer(),
-              IconButton(
-                icon: Icon(Icons.copy_rounded, color: colors.primary, size: 18),
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: token));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("تم نسخ التوكن بنجاح")),
-                  );
-                },
-                constraints: const BoxConstraints(),
-                padding: EdgeInsets.zero,
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            token,
-            style: TextStyle(color: colors.textSub, fontSize: 11, fontFamily: 'monospace'),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
 }

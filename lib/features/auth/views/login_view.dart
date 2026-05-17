@@ -438,36 +438,77 @@ class _LoginViewBody extends StatelessWidget {
                         ),
 
                   const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Divider(
+                          color: context.qsColors.textSub.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          context.tr('or'),
+                          style: TextStyle(color: context.qsColors.textSub),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(
+                          color: context.qsColors.textSub.withValues(alpha: 0.2),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
 
-                  // Row(
-                  //   children: [
-                  //     Expanded(
-                  //       child: Divider(
-                  //         color: context.qsColors.textSub.withValues(alpha: 0.2),
-                  //       ),
-                  //     ),
-                  //     Padding(
-                  //       padding: const EdgeInsets.symmetric(horizontal: 16),
-                  //       child: Text(
-                  //         context.tr('or'),
-                  //         style: TextStyle(color: context.qsColors.textSub),
-                  //       ),
-                  //     ),
-                  //     Expanded(
-                  //       child: Divider(
-                  //         color: context.qsColors.textSub.withValues(alpha: 0.2),
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
-                  // const SizedBox(height: 20),
-
-                  // CustomButton(
-                  //   text: context.tr('create_account'),
-                  //   icon: Icons.person_add_alt_1_outlined,
-                  //   isPrimary: false,
-                  //   onPressed: () {},
-                  // ),
+                  // 🌐 زر الدخول بجوجل
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        side: BorderSide(
+                          color: context.qsColors.textSub.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      onPressed: viewModel.isLoading
+                          ? null
+                          : () => viewModel.loginWithGoogle(context),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // شعار Google G بدون شبكة
+                          Container(
+                            width: 24,
+                            height: 24,
+                            decoration: const BoxDecoration(shape: BoxShape.circle),
+                            child: const Text(
+                              'G',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF4285F4),
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            context.tr('continue_with_google'),
+                            style: TextStyle(
+                              color: context.qsColors.text,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 30),
 
                   // =====================================

@@ -41,13 +41,24 @@ class ServicesViewModel extends ChangeNotifier {
     }
   }
 
-  // TODO: الدالة الخاصة بتفعيل/إلغاء التفعيل للخدمة عند توفر الرابط
+  // 🚀 الدالة الخاصة بتفعيل/إلغاء التفعيل للخدمة
   Future<void> toggleServiceStatus(int id, bool isActive) async {
-    // يمكن استدعاء الـ API هنا، مؤقتاً سيتم التغيير محلياً فقط
+    // 1. تحديث الحالة محلياً فوراً لتجربة مستخدم سريعة (Optimistic Update)
     final index = services.indexWhere((s) => s.id == id);
     if (index != -1) {
+      final oldStatus = services[index].isActive;
       services[index].isActive = isActive;
       notifyListeners();
+
+      try {
+        // 2. إرسال الطلب للباك إند
+        await repository.toggleServiceStatus(id, isActive);
+      } catch (e) {
+        // 3. في حال الفشل، نعيد الحالة السابقة وننبه المستخدم
+        services[index].isActive = oldStatus;
+        notifyListeners();
+        debugPrint('❌ Failed to toggle service status: $e');
+      }
     }
   }
 }

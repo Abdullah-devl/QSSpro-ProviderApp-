@@ -62,6 +62,7 @@ class OrdersViewModel extends ChangeNotifier {
       _allOrders = fetchedOrders;
       debugPrint('📦 ✅ تم جلب ${_allOrders.length} طلبات بنجاح مرتبة من الأحدث للأقدم.');
       _isLoading = false;
+      _errorMessage = null; // ✅ مسح رسالة الخطأ عند النجاح
       notifyListeners();
     } catch (e) {
       debugPrint('❌ 📦 فشل جلب الطلبات في الـ ViewModel: $e');
@@ -125,8 +126,10 @@ class OrdersViewModel extends ChangeNotifier {
       final index = _allOrders.indexWhere((o) => o.id == id);
       if (index != -1) {
         _allOrders[index] = updatedOrder;
-        notifyListeners();
+      } else {
+        _allOrders.add(updatedOrder);
       }
+      notifyListeners();
     } catch (e) {
       debugPrint('❌ فشل تحديث بيانات الطلب الفردي: $e');
     }

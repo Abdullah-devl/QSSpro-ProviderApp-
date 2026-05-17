@@ -126,15 +126,17 @@ class OrdersRepository {
     return [];
   }
 
-  // 🚀 تحديث حالة الطلب (PATCH /api/requests/{id}/status)
   Future<void> updateOrderStatus(String requestId, String status) async {
     try {
+      debugPrint('🚀 [NETWORK] Updating Status to: $status for Request ID: $requestId');
       final response = await _apiService.patch(
         ApiEndpoints.updateStatus(requestId),
         data: {'status': status},
       );
+      debugPrint('🔍 [UPDATE STATUS RESPONSE] Raw Data: ${response.data}');
       ApiErrorHandler.handleResponse(response);
     } catch (e) {
+      debugPrint('❌ [UPDATE STATUS ERROR]: $e');
       throw ApiErrorHandler.handle(e);
     }
   }

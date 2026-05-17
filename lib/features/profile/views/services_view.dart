@@ -127,9 +127,6 @@ class ServicesView extends StatelessWidget {
                   activeThumbColor: const Color(0xFF5CA4B8),
                   onChanged: (val) {
                     vm.toggleServiceStatus(service.id, val);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(context.tr('auto_tr_45'))),
-                    );
                   },
                 ),
               ],

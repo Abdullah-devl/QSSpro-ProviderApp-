@@ -56,7 +56,9 @@ class WelcomeView extends StatelessWidget {
                       color: context.qsColors.text,
                     ),
                     style: IconButton.styleFrom(
-                      backgroundColor: context.qsColors.text.withValues(alpha: 0.05),
+                      backgroundColor: context.qsColors.text.withValues(
+                        alpha: 0.05,
+                      ),
                       padding: const EdgeInsets.all(12),
                     ),
                   ),
@@ -86,7 +88,9 @@ class WelcomeView extends StatelessWidget {
                       ),
                     ),
                     style: TextButton.styleFrom(
-                      backgroundColor: context.qsColors.text.withValues(alpha: 0.05),
+                      backgroundColor: context.qsColors.text.withValues(
+                        alpha: 0.05,
+                      ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,
@@ -134,46 +138,46 @@ class WelcomeView extends StatelessWidget {
               ),
 
               const SizedBox(height: 16),
-              CustomButton(
-                text: context.tr('create_account'),
-                icon: Icons.person_add_alt_1_rounded,
-                isPrimary: false,
-                onPressed: () {
-                  // سينقله لشاشة التسجيل لاحقاً
-                },
-              ),
+              // CustomButton(
+              //   text: context.tr('create_account'),
+              //   icon: Icons.person_add_alt_1_rounded,
+              //   isPrimary: false,
+              //   onPressed: () {
+              //     // سينقله لشاشة التسجيل لاحقاً
+              //   },
+              // ),
 
-              SizedBox(height: 30),
+              // SizedBox(height: 30),
 
               // نص الشروط والسياسات
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: TextStyle(
-                    color: context.qsColors.textSub,
-                    fontSize: 12,
-                    fontFamily: 'Cairo', // تأكيد الخط
-                  ),
-                  children: [
-                    TextSpan(text: context.tr('terms_agreement')),
-                    TextSpan(
-                      text: context.tr('terms_of_service'),
-                      style: TextStyle(
-                        color: context.qsColors.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    TextSpan(text: context.tr('and')),
-                    TextSpan(
-                      text: context.tr('privacy_policy'),
-                      style: TextStyle(
-                        color: context.qsColors.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // RichText(
+              //   textAlign: TextAlign.center,
+              //   text: TextSpan(
+              //     style: TextStyle(
+              //       color: context.qsColors.textSub,
+              //       fontSize: 12,
+              //       fontFamily: 'Cairo', // تأكيد الخط
+              //     ),
+              //     children: [
+              //       TextSpan(text: context.tr('terms_agreement')),
+              //       TextSpan(
+              //         text: context.tr('terms_of_service'),
+              //         style: TextStyle(
+              //           color: context.qsColors.primary,
+              //           fontWeight: FontWeight.bold,
+              //         ),
+              //       ),
+              //       TextSpan(text: context.tr('and')),
+              //       TextSpan(
+              //         text: context.tr('privacy_policy'),
+              //         style: TextStyle(
+              //           color: context.qsColors.primary,
+              //           fontWeight: FontWeight.bold,
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
               const SizedBox(height: 20),
             ],
           ),

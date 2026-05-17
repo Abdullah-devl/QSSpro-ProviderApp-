@@ -39,6 +39,27 @@ class AuthRepository {
     }
   }
 
+  // 🚀 دالة تسجيل الدخول بجوجل
+  Future<UserModel> loginWithGoogle(String googleToken) async {
+    try {
+      final response = await _apiService.post(
+        ApiEndpoints.googleLogin,
+        data: {'access_token': googleToken},
+      );
+
+      final data = ApiErrorHandler.handleResponse(response);
+      final user = UserModel.fromJson(data);
+
+      if (user.token.isNotEmpty) {
+        await _tokenStorage.saveToken(user.token);
+      }
+
+      return user;
+    } catch (e) {
+      throw ApiErrorHandler.handle(e);
+    }
+  }
+
   Future<Map<String, dynamic>?> getUserData() async {
     try {
       final response = await _apiService.get('user');

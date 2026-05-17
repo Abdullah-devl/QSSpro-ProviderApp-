@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:service_provider_app/core/storage/hive_keys.dart';
@@ -9,11 +10,14 @@ import 'package:service_provider_app/features/profile/repositories/profile_repos
 import 'package:service_provider_app/features/settings/views/privacy_policy_view.dart';
 import 'package:service_provider_app/core/storage/hive_helper.dart';
 import 'package:service_provider_app/core/network/fcm_notification_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../repositories/auth_repository.dart';
 import '../viewmodels/auth_viewmodel.dart';
 
 class LoginViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  bool _googleSignInInitialized = false;
 
   LoginViewModel(this._authRepository);
 
@@ -57,6 +61,19 @@ class LoginViewModel extends ChangeNotifier {
         passwordController.text.trim(),
       );
 
+      // 🛑 التحقق من نوع الحساب (يجب أن يكون مزود خدمة)
+      if (user.role.toLowerCase() == 'seeker') {
+        await HiveHelper.clareAllData(); // مسح التوكن الذي تم حفظه في الريبوزيتوري
+        _isLoading = false;
+        notifyListeners();
+        _showAlert(
+          context,
+          'عذراً، هذا التطبيق مخصص لمزودي الخدمة فقط. لا يمكنك الدخول بحساب طالب خدمة، يرجى استخدام تطبيق "خبير - للعملاء".',
+          isError: true,
+        );
+        return;
+      }
+
       _isLoading = false;
       notifyListeners();
 
@@ -69,8 +86,6 @@ class LoginViewModel extends ChangeNotifier {
         if (user.providerPolicy) {
           // ✅ تحديث توكن الإشعارات فور تسجيل الدخول لضمان وصولها
           _syncFCMToken(context);
-          // 🔔 عرض حالة الـ FCM Token بعد الاستجابة من Firebase (ينتظر حتى يغلق المستخدم النافذة)
-          await _showFCMTokenAlert(context);
 
           // الانتقال للشاشة الرئيسية مع تنظيف مكدس التنقل
           Navigator.pushAndRemoveUntil(
@@ -108,6 +123,108 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
+  // 🚀 دالة تسجيل الدخول بجوجل
+  Future<void> loginWithGoogle(BuildContext context) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      // 0. تهيئة GoogleSignIn مع الصلاحيات المطلوبة (مطلوب في v7)
+      if (!_googleSignInInitialized) {
+        const String serverClientId =
+            '507923305565-n1mpoiimku862uvp56fh5smgka9v7te1.apps.googleusercontent.com';
+        
+        await _googleSignIn.initialize(
+          serverClientId: serverClientId,
+        );
+        _googleSignInInitialized = true;
+      }
+
+      // 1. بدء عملية تسجيل الدخول بجوجل مع طلب الصلاحيات المطلوبة
+      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate(
+        scopeHint: [
+          'email',
+          'https://www.googleapis.com/auth/userinfo.profile',
+          'openid',
+        ],
+      );
+
+      // 2. الحصول على التوكن (الطريقة الجديدة في v7 للحصول على Access Token)
+      final List<String> scopes = [
+        'email',
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'openid',
+      ];
+      
+      // طلب الهيدرز التي تحتوي على التوكن
+      final Map<String, String>? authHeaders = await googleUser.authorizationClient.authorizationHeaders(
+        scopes,
+        promptIfNecessary: true,
+      );
+
+      // استخراج الـ Access Token من الهيدر (يكون بعد كلمة Bearer)
+      final String? authHeader = authHeaders?['Authorization'];
+      final String? accessToken = authHeader?.replaceAll('Bearer ', '');
+      
+      developer.log('🎫 Access Token obtained via Client: ${accessToken?.substring(0, 10)}...', name: 'GOOGLE_AUTH');
+
+      if (accessToken == null) {
+        throw Failure('فشل الحصول على Access Token من جوجل.');
+      }
+
+      // 3. إرسال التوكن للسيرفر الخاص بنا
+      await HiveHelper.clareAllData();
+      final user = await _authRepository.loginWithGoogle(accessToken);
+
+      // 🛑 التحقق من نوع الحساب (يجب أن يكون مزود خدمة)
+      if (user.role.toLowerCase() == 'seeker') {
+        await HiveHelper.clareAllData();
+        _isLoading = false;
+        notifyListeners();
+        _showAlert(
+          context,
+          'عذراً، هذا الحساب مسجل كـ "طالب خدمة". لا يمكنك الدخول لتطبيق المزودين بهذا الحساب.',
+          isError: true,
+        );
+        await _googleSignIn.signOut();
+        return;
+      }
+
+      // 4. تطبيق منطق التوجيه (نفس منطق الـ Login العادي)
+      if (user.isVerified) {
+        final box = Hive.box(HiveKeys.settingsBox);
+        await box.put('provider_policy_agreed', user.providerPolicy);
+
+        if (user.providerPolicy) {
+          _syncFCMToken(context);
+          if (!context.mounted) return;
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const MainView()),
+            (route) => false,
+          );
+        } else {
+          if (!context.mounted) return;
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const PrivacyPolicyView(requiresAcceptance: true)),
+            (route) => false,
+          );
+        }
+      } else {
+        _showAlert(context, 'يرجى توثيق حسابك أولاً.', isError: true);
+      }
+    } on Failure catch (failure) {
+      _showAlert(context, failure.message, isError: true);
+    } catch (e) {
+      debugPrint('❌ Google Login Error: $e');
+      _showAlert(context, 'فشل تسجيل الدخول باستخدام جوجل.', isError: true);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // دالة مساعدة لمزامنة التوكن
   void _syncFCMToken(BuildContext context) {
     try {
@@ -117,83 +234,6 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
-  /// 🔔 عرض نتيجة الـ FCM Token بعد تسجيل الدخول
-  Future<void> _showFCMTokenAlert(BuildContext context) async {
-    // الانتظار قليلاً ريثما تستجيب Firebase
-    String? token;
-    try {
-      token = await FCMNotificationService().getToken();
-    } catch (_) {
-      token = null;
-    }
-
-    if (!context.mounted) return;
-
-    final bool tokenReceived = token != null && token.isNotEmpty;
-
-    await showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogCtx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-        title: Row(
-          children: [
-            Icon(
-              tokenReceived ? Icons.check_circle_rounded : Icons.error_rounded,
-              color: tokenReceived ? context.qsColors.success : context.qsColors.error,
-              size: 28,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                tokenReceived
-                    ? 'تم الاتصال بـ Firebase'
-                    : 'فشل الاتصال بـ Firebase',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Cairo',
-                  color: tokenReceived
-                      ? context.qsColors.success
-                      : context.qsColors.error,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          tokenReceived
-              ? 'تم استلام رمز الإشعارات (FCM Token) من Firebase بنجاح.\n\nالرمز:\n${token!.substring(0, 20)}...'
-              : 'لم يتم استلام رمز الإشعارات (FCM Token) من Firebase.\nتحقق من الاتصال بالإنترنت أو إعدادات Firebase.',
-          style: const TextStyle(fontFamily: 'Cairo', fontSize: 14, height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            style: TextButton.styleFrom(
-              backgroundColor: tokenReceived
-                  ? context.qsColors.success.withOpacity(0.1)
-                  : context.qsColors.error.withOpacity(0.1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: () => Navigator.of(dialogCtx).pop(),
-            child: Text(
-              'حسناً',
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.bold,
-                color: tokenReceived
-                    ? context.qsColors.success
-                    : context.qsColors.error,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   // دالة مساعدة لعرض الرسائل للمستخدم (SnackBar)
   // void _showSnackBar(BuildContext context, String message, {required bool isError}) {

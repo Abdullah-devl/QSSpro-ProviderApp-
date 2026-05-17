@@ -20,6 +20,9 @@ class EditProfileViewModel extends ChangeNotifier {
   File? newAvatar;
   bool isLoading = false;
 
+  double? selectedLat;
+  double? selectedLng;
+
   EditProfileViewModel(this.repository, this.currentProfile) {
     // 🚀 تعبئة البيانات الحالية في الحقول فور فتح الشاشة
     nameController = TextEditingController(text: currentProfile.name);
@@ -30,6 +33,8 @@ class EditProfileViewModel extends ChangeNotifier {
     );
     bioController = TextEditingController(text: currentProfile.bio);
     isAvailable = currentProfile.isAvailable;
+    selectedLat = currentProfile.latitude;
+    selectedLng = currentProfile.longitude;
   }
 
   // ⚡ تغيير حالة التوفر
@@ -46,6 +51,13 @@ class EditProfileViewModel extends ChangeNotifier {
       newAvatar = File(pickedFile.path);
       notifyListeners();
     }
+  }
+
+  // 📍 تحديث الموقع
+  void updateLocation(double lat, double lng) {
+    selectedLat = lat;
+    selectedLng = lng;
+    notifyListeners();
   }
 
   // 💾 حفظ التعديلات وإرسالها للباك إند
@@ -69,6 +81,8 @@ class EditProfileViewModel extends ChangeNotifier {
         bio: bioController.text.trim(),
         isAvailable: isAvailable,
         avatar: newAvatar,
+        latitude: selectedLat,
+        longitude: selectedLng,
       );
 
       isLoading = false;

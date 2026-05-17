@@ -91,7 +91,7 @@ class PayCommissionsViewModel extends ChangeNotifier {
         summary: CommissionSummaryModel(
           dueAmount: 0.0, 
           isVerified: true, 
-          availablePoints: bonus,
+          availablePoints: bonus + paid,
           bonusPoints: bonus,
           paidPoints: paid,
           pointsConversionFactor: 1, 

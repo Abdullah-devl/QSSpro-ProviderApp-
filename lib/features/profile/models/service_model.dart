@@ -41,7 +41,7 @@ class ServiceModel {
       title: json['title']?.toString() ?? json['name']?.toString() ?? 'خدمة',
       imageUrl: parsedImageUrl,
       rating: double.tryParse(ratingRaw.toString()) ?? 0.0,
-      isActive: json['is_active'] == 1 || json['is_active'] == true || json['status'] == 'active' || json['status'] == 'available',
+      isActive: (json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1'),
     );
   }
 }

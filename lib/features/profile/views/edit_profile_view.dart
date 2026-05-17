@@ -6,7 +6,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../viewmodels/edit_profile_viewmodel.dart';
+import '../widgets/map_location_picker.dart';
 
 class EditProfileView extends StatelessWidget {
   const EditProfileView({super.key});
@@ -87,37 +89,91 @@ class EditProfileView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // ⚡ البطاقة الثالثة: وضع متاح للعمل
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBF3F6), // أزرق فاتح جداً من التصميم
-                borderRadius: BorderRadius.circular(32),
-              ),
-              child: Row(
-                children: [
-                  CupertinoSwitch(
-                    value: vm.isAvailable,
-                    activeTrackColor: const Color(0xFF5CA4B8),
-                    onChanged: (val) => vm.toggleAvailability(val),
+            // 📍 البطاقة الثالثة: الموقع الجغرافي
+            _buildCardContainer(
+              context,
+              children: [
+                _buildInputLabel(context.tr('work_location'), const Color(0xFF5CA4B8)),
+                const SizedBox(height: 12),
+                InkWell(
+                  onTap: () async {
+                    final LatLng? result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MapLocationPicker(
+                          initialLat: vm.selectedLat,
+                          initialLng: vm.selectedLng,
+                        ),
+                      ),
+                    );
+                    if (result != null) {
+                      vm.updateLocation(result.latitude, result.longitude);
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: context.qsColors.background,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          vm.selectedLat != null ? Icons.check_circle : Icons.add_location_alt_outlined,
+                          color: vm.selectedLat != null ? Colors.green : context.qsColors.textSub,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            vm.selectedLat != null
+                                ? "${vm.selectedLat!.toStringAsFixed(4)}, ${vm.selectedLng!.toStringAsFixed(4)}"
+                                : context.tr('select_location_on_map'),
+                            style: TextStyle(
+                              color: vm.selectedLat != null ? context.qsColors.text : context.qsColors.textSub,
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(context.tr('available_for_work'), style: TextStyle(fontWeight: FontWeight.bold, color: colors.text, fontSize: 15)),
-                      Text(context.tr('available_for_work_desc'), style: TextStyle(color: colors.textSub, fontSize: 11)),
-                    ],
-                  ),
-                  const SizedBox(width: 16),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: const BoxDecoration(color: Color(0xFFD3E3EC), shape: BoxShape.circle),
-                    child: const Icon(Icons.flash_on_rounded, color: Color(0xFF5CA4B8)),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
+            const SizedBox(height: 24),
+
+            // ⚡ البطاقة الرابعة: وضع متاح للعمل
+            // Container(
+            //   padding: const EdgeInsets.all(20),
+            //   decoration: BoxDecoration(
+            //     color: const Color(0xFFEBF3F6), // أزرق فاتح جداً من التصميم
+            //     borderRadius: BorderRadius.circular(32),
+            //   ),
+            //   child: Row(
+            //     children: [
+            //       CupertinoSwitch(
+            //         value: vm.isAvailable,
+            //         activeTrackColor: const Color(0xFF5CA4B8),
+            //         onChanged: (val) => vm.toggleAvailability(val),
+            //       ),
+            //       const Spacer(),
+            //       Column(
+            //         crossAxisAlignment: CrossAxisAlignment.end,
+            //         children: [
+            //           Text(context.tr('available_for_work'), style: TextStyle(fontWeight: FontWeight.bold, color: colors.text, fontSize: 15)),
+            //           Text(context.tr('available_for_work_desc'), style: TextStyle(color: colors.textSub, fontSize: 11)),
+            //         ],
+            //       ),
+            //       const SizedBox(width: 16),
+            //       Container(
+            //         padding: const EdgeInsets.all(10),
+            //         decoration: const BoxDecoration(color: Color(0xFFD3E3EC), shape: BoxShape.circle),
+            //         child: const Icon(Icons.flash_on_rounded, color: Color(0xFF5CA4B8)),
+            //       ),
+            //     ],
+            //   ),
+            // ),
             const SizedBox(height: 40),
           ],
         ),

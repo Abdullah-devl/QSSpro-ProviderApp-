@@ -172,14 +172,30 @@ class _SystemComplaintsListViewState extends State<SystemComplaintsListView> {
     Color color;
     String label;
 
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'resolved':
+      case 'completed':
         color = context.qsColors.success;
         label = context.tr('status_resolved');
         break;
       case 'closed':
         color = context.qsColors.textSub;
         label = context.tr('status_closed');
+        break;
+      case 'answered':
+      case 'replied':
+        color = context.qsColors.primary;
+        label = context.tr('status_answered');
+        break;
+      case 'rejected':
+      case 'canceled':
+        color = context.qsColors.error;
+        label = context.tr('status_rejected');
+        break;
+      case 'in_progress':
+      case 'processing':
+        color = Colors.orange;
+        label = context.tr('status_in_progress');
         break;
       default:
         color = context.qsColors.warning;

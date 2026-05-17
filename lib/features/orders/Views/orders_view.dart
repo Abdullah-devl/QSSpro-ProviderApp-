@@ -465,63 +465,37 @@ class _OrderCardWidget extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // 4. Action Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: context.qsColors.background,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            side: BorderSide(color: context.qsColors.textSub.withValues(alpha: 0.2)),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  OrderDetailView(order: order,),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          context.tr('details'),
-                          style: TextStyle(
-                            color: context.qsColors.text,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                          ),
-                        ),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: context.qsColors.background,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(
+                            color: context.qsColors.textSub.withValues(alpha: 0.2)),
                       ),
                     ),
-                    const SizedBox(width: 14),
-                    const SizedBox(width: 14),
-                    if (order.status != 'canceled' &&
-                        order.status != 'completed')
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: context.qsColors.error,
-                            foregroundColor: context.qsColors.card,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          onPressed: () {},
-                          child: Text(
-                            context.tr('cancel_order'),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 15,
-                            ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => OrderDetailView(
+                            order: order,
                           ),
                         ),
+                      );
+                    },
+                    child: Text(
+                      context.tr('details'),
+                      style: TextStyle(
+                        color: context.qsColors.text,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
                       ),
-                  ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -547,6 +521,7 @@ class _OrderCardWidget extends StatelessWidget {
       case 'finished':
         return context.qsColors.success;
       case 'canceled':
+      case 'cancelled':
       case 'rejected':
         return context.qsColors.error;
       default:
@@ -575,8 +550,11 @@ class _OrderCardWidget extends StatelessWidget {
         textKey = 'status_completed';
         break;
       case 'canceled':
+      case 'cancelled':
+        textKey = 'status_canceled';
+        break;
       case 'rejected':
-        textKey = 'status_$status';
+        textKey = 'status_rejected';
         break;
       default:
         textKey = 'status_$status';

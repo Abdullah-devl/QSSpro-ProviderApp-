@@ -103,6 +103,8 @@ class ProfileRepository {
     required String bio,
     required bool isAvailable,
     File? avatar,
+    double? latitude,
+    double? longitude,
   }) async {
     try {
       FormData formData = FormData.fromMap({
@@ -112,6 +114,8 @@ class ProfileRepository {
         'job-title': jobTitle, // Added both to be safe
         'bio': bio,
         'is_available': isAvailable ? 1 : 0,
+        if (latitude != null) 'latitude': latitude,
+        if (longitude != null) 'longitude': longitude,
       });
 
       if (avatar != null) {
@@ -257,6 +261,23 @@ class ProfileRepository {
       debugPrint('❌ Error reading cached services: $e');
     }
     return [];
+  }
+
+  // 🚀 دالة تفعيل/إلغاء تفعيل الخدمة
+  Future<void> toggleServiceStatus(int serviceId, bool isActive) async {
+    try {
+      // نرسل الطلب للباك إند
+      // ملاحظة: المسار قد يحتاج تعديل بناءً على توثيق الباك إند
+      await _apiService.post('services/$serviceId', data: {
+        '_method': 'PUT',
+        'is_active': isActive ? 1 : 0,
+      });
+      
+      debugPrint('✅ Service $serviceId status updated to: $isActive');
+    } catch (e) {
+      debugPrint('❌ Error toggling service status: $e');
+      throw ApiErrorHandler.handle(e);
+    }
   }
 
   // 🚀 رفع عمل جديد

@@ -40,6 +40,7 @@ class ApiEndpoints {
 
   // 🔐 روابط المصادقة
   static const String login = "login";
+  static const String googleLogin = "auth/google/callback"; // 🚀 رابط تسجيل الدخول بجوجل الحديث
   static const String register = "register";
   static const String logout = "logout";
   static const String verifyEmail = "verify-email-code";

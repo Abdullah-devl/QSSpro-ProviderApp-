@@ -38,6 +38,28 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     super.dispose();
   }
 
+  Color _getStatusColor(String status) {
+    final statusKey = status.toLowerCase().trim();
+    if (statusKey == 'approved' || statusKey == 'accepted' || statusKey == 'completed') {
+      return Colors.green;
+    } else if (statusKey == 'rejected' || statusKey == 'cancelled') {
+      return Colors.red;
+    } else {
+      return Colors.blue;
+    }
+  }
+
+  String _getStatusText(String status) {
+    final statusKey = status.toLowerCase().trim();
+    if (statusKey == 'approved' || statusKey == 'accepted' || statusKey == 'completed') {
+      return 'مقبول';
+    } else if (statusKey == 'rejected' || statusKey == 'cancelled') {
+      return 'مرفوض';
+    } else {
+      return 'قيد الانتظار';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<OrdersViewModel>(context);
@@ -121,8 +143,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                           : const SizedBox.shrink(),
                     ),
 
-                    // 📊 المربعين الخاصين بتفاصيل العموله إذا كانت commission_paid = 0
-                    if (currentOrder.isCommissionPaidZero) ...[
+                    // 📊 المربعين الخاصين بتفاصيل العموله
+                    if ((currentOrder.status == 'completed' ||
+                            currentOrder.status == 'finished') &&
+                        currentOrder.isCommissionPaidZero) ...[
                       _buildCommissionDetailsSquares(context, currentOrder),
                       const SizedBox(height: 24),
                     ],
@@ -274,14 +298,46 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(16),
                       ),
-                      child: bond.imageUrl.isNotEmpty
-                          ? Image.network(
-                              bond.imageUrl,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              errorBuilder: (_, __, ___) => Icon(Icons.broken_image, color: context.qsColors.textSub),
-                            )
-                          : Icon(Icons.receipt_long, color: context.qsColors.textSub, size: 40),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          bond.imageUrl.isNotEmpty
+                              ? Image.network(
+                                  bond.imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Icon(
+                                      Icons.broken_image,
+                                      color: context.qsColors.textSub),
+                                )
+                              : Icon(Icons.receipt_long,
+                                  color: context.qsColors.textSub, size: 40),
+                          // Status Badge Overlay (Ultra Transparent Chip)
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _getStatusColor(bond.status)
+                                    .withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.15),
+                                    width: 1),
+                              ),
+                              child: Text(
+                                _getStatusText(bond.status),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Padding(
@@ -716,68 +772,68 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           ),
           const SizedBox(height: 24),
 
-          if (!isCompleted)
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 56,
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    decoration: BoxDecoration(
-                      color: context.qsColors.card,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: context.qsColors.primary,
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: context.qsColors.primary.withValues(alpha: 0.08),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: TextField(
-                      controller: _amountController,
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: context.qsColors.text,
-                      ),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 2),
-                        hintText: '0.0',
-                        hintStyle: TextStyle(color: context.qsColors.textSub, fontSize: 16),
-                        suffixIconConstraints: const BoxConstraints(minWidth: 22, minHeight: 20),
-                        suffixIcon: Padding(
-                          padding: const EdgeInsets.only(left: 2),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                context.tr('currency_sar'),
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.qsColors.textSub,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                _buildSendButton(context, viewModel, order),
-              ],
-            ),
+          // if (!isCompleted)
+            // Row(
+            //   children: [
+            //     Expanded(
+            //       child: Container(
+            //         height: 56,
+            //         padding: const EdgeInsets.symmetric(horizontal: 6),
+            //         decoration: BoxDecoration(
+            //           color: context.qsColors.card,
+            //           borderRadius: BorderRadius.circular(16),
+            //           border: Border.all(
+            //             color: context.qsColors.primary,
+            //             width: 1.5,
+            //           ),
+            //           boxShadow: [
+            //             BoxShadow(
+            //               color: context.qsColors.primary.withValues(alpha: 0.08),
+            //               blurRadius: 8,
+            //               offset: const Offset(0, 2),
+            //             ),
+            //           ],
+            //         ),
+            //         child: TextField(
+            //           controller: _amountController,
+            //           keyboardType: TextInputType.number,
+            //           textAlign: TextAlign.center,
+            //           style: TextStyle(
+            //             fontSize: 16,
+            //             fontWeight: FontWeight.bold,
+            //             color: context.qsColors.text,
+            //           ),
+            //           decoration: InputDecoration(
+            //             border: InputBorder.none,
+            //             contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 2),
+            //             hintText: '0.0',
+            //             hintStyle: TextStyle(color: context.qsColors.textSub, fontSize: 16),
+            //             suffixIconConstraints: const BoxConstraints(minWidth: 22, minHeight: 20),
+            //             suffixIcon: Padding(
+            //               padding: const EdgeInsets.only(left: 2),
+            //               child: Column(
+            //                 mainAxisAlignment: MainAxisAlignment.center,
+            //                 mainAxisSize: MainAxisSize.min,
+            //                 children: [
+            //                   Text(
+            //                     context.tr('currency_sar'),
+            //                     style: TextStyle(
+            //                       fontSize: 11,
+            //                       fontWeight: FontWeight.bold,
+            //                       color: context.qsColors.textSub,
+            //                     ),
+            //                   ),
+            //                 ],
+            //               ),
+            //             ),
+            //           ),
+            //         ),
+            //       ),
+            //     ),
+            //     const SizedBox(width: 16),
+            //     _buildSendButton(context, viewModel, order),
+            //   ],
+            // ),
         ],
       ),
     );
@@ -1656,6 +1712,12 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     final bool isCompleted = order.status == 'completed';
     final bool isPaidInFull =
         order.paidAmount >= order.price && order.price > 0;
+    final bool isCommissionPaid = order.isCommissionPaid;
+
+    // إذا كان الطلب مكتمل والعمولة مدفوعة، لا داعي لعرض شريط الإجراءات
+    if ((isCompleted || order.status == 'finished') && isCommissionPaid) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
@@ -1740,7 +1802,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         : () async {
                             final success = await viewModel.updateStatus(
                               order.id,
-                              'canceled',
+                              'rejected',
                             );
                             if (success) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -1776,88 +1838,43 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               ],
             )
           : (isCompleted || isPaidInFull)
-          ? Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildCommissionCard(context, order, commissionAmount),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.qsColors.warning,
-                    foregroundColor: context.qsColors.card,
-                    minimumSize: const Size(double.infinity, 60),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    elevation: 0,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PayCommissionsView(
-                          amount: commissionAmount,
-                          orderId: order.id,
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildCommissionCard(context, order, commissionAmount),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.qsColors.warning,
+                        foregroundColor: context.qsColors.card,
+                        minimumSize: const Size(double.infinity, 60),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PayCommissionsView(
+                              amount: commissionAmount,
+                              orderId: order.id,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        context.tr('pay_commission'),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
-                    );
-                  },
-                  child: Text(
-                    context.tr('pay_commission'),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
                     ),
-                  ),
-                ),
-              ],
-            )
-          : (order.status == 'accepted_partial_paid' ||
-                order.status == 'accepted_full_paid' ||
-                order.status == 'in_progress')
-          ? ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: context.qsColors.success,
-                foregroundColor: context.qsColors.card,
-                minimumSize: const Size(double.infinity, 64),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                elevation: 0,
-                shadowColor: context.qsColors.success.withValues(alpha: 0.4),
-              ),
-              onPressed: viewModel.isLoading
-                  ? null
-                    : () async {
-                       await viewModel.updateStatus(order.id, 'completed');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(context.tr('commission_note')),
-                          backgroundColor: context.qsColors.success,
-                        ),
-                      );
-                    },
-              icon: viewModel.isLoading
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: context.qsColors.card,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Icon(Icons.check_circle, size: 24),
-              label: Text(
-                viewModel.isLoading
-                    ? context.tr('loading')
-                    : context.tr('complete_order'),
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          : const SizedBox.shrink(),
+                  ],
+                )
+              : const SizedBox.shrink(),
     );
   }
 

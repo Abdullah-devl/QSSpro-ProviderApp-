@@ -43,15 +43,17 @@ dependencies:
   google_fonts: ^8.0.2
   image_picker: ^1.2.1
   dotted_border: ^3.1.0
-  google_maps_flutter: ^2.10.0
+  google_maps_flutter: ^2.14.2
   url_launcher: ^6.3.1
   firebase_core: ^4.7.0
   firebase_messaging: ^16.2.0
   flutter_local_notifications: ^20.1.0
   carousel_slider: ^5.0.0
   shimmer: ^3.0.0
+  geolocator: ^13.0.1
 
   intl: any
+  google_sign_in: ^7.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

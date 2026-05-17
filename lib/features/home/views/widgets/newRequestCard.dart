@@ -8,9 +8,16 @@ class NewRequestCard extends StatelessWidget {
   final String distance;
   final String price;
   final String imageUrl;
+  final VoidCallback onTap;
 
   const NewRequestCard({
-    super.key, required this.title, required this.location, required this.distance, required this.price, required this.imageUrl,
+    super.key,
+    required this.title,
+    required this.location,
+    required this.distance,
+    required this.price,
+    required this.imageUrl,
+    required this.onTap,
   });
 
   @override
@@ -21,7 +28,13 @@ class NewRequestCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.qsColors.card,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: context.qsColors.text.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: context.qsColors.text.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
       ),
       child: Column(
         children: [
@@ -32,9 +45,15 @@ class NewRequestCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: TextStyle(color: context.qsColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text(title,
+                        style: TextStyle(
+                            color: context.qsColors.text,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text(location, style: TextStyle(color: context.qsColors.textSub, fontSize: 13)),
+                    Text(location,
+                        style: TextStyle(
+                            color: context.qsColors.textSub, fontSize: 13)),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -49,33 +68,28 @@ class NewRequestCard extends StatelessWidget {
               // الصورة
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(imageUrl, width: 80, height: 80, fit: BoxFit.cover),
+                child: Image.network(imageUrl,
+                    width: 80, height: 80, fit: BoxFit.cover),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          // الأزرار
-          Row(
-            children: [
-              Container(
-                decoration: BoxDecoration(border: Border.all(color: context.qsColors.textSub.withValues(alpha: 0.2)), borderRadius: BorderRadius.circular(12)),
-                child: IconButton(icon: Icon(Icons.close, color: context.qsColors.textSub), onPressed: () {}),
+          // زر تفاصيل الخدمة
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: onTap,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.qsColors.primary,
+                foregroundColor: context.qsColors.card,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                elevation: 0,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.qsColors.primary,
-                    foregroundColor: context.qsColors.card,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    elevation: 0,
-                  ),
-                  child: Text(context.tr('accept_request'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ],
+              child: Text(context.tr('service_details'),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ),
           ),
         ],
       ),
@@ -90,7 +104,11 @@ class NewRequestCard extends StatelessWidget {
         children: [
           Icon(icon, color: context.qsColors.textSub, size: 14),
           const SizedBox(width: 4),
-          Text(text, style: TextStyle(color: context.qsColors.text, fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(text,
+              style: TextStyle(
+                  color: context.qsColors.text,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold)),
         ],
       ),
     );

@@ -18,6 +18,8 @@ class ProfileModel {
   final DateTime? providerVerifiedUntil;
   final double bonusPoints;
   final double paidPoints;
+  final double? latitude;
+  final double? longitude;
 
   // 🎨 حقول جدول profiles
   final String jobTitle;
@@ -48,6 +50,8 @@ class ProfileModel {
     this.providerVerifiedUntil,
     required this.bonusPoints,
     required this.paidPoints,
+    this.latitude,
+    this.longitude,
     this.jobTitle = '',
     this.bio = '',
     this.avatarUrl = '',
@@ -129,6 +133,12 @@ class ProfileModel {
 
     final paidVal = findKey(['paid_points']);
     final paidPoints = double.tryParse(paidVal?.toString() ?? '0') ?? 0.0;
+
+    final latVal = findKey(['latitude', 'lat']);
+    final latitude = double.tryParse(latVal?.toString() ?? '');
+
+    final lngVal = findKey(['longitude', 'lng', 'long']);
+    final longitude = double.tryParse(lngVal?.toString() ?? '');
 
     // المسمى الوظيفي
     final jobTitle = findKey(['job-title', 'job_title', 'position'])?.toString() ?? '';
@@ -215,6 +225,8 @@ class ProfileModel {
       providerVerifiedUntil: providerVerifiedUntil,
       bonusPoints: bonusPoints,
       paidPoints: paidPoints,
+      latitude: latitude,
+      longitude: longitude,
       jobTitle: jobTitle,
       bio: bio,
       avatarUrl: avatarUrl,

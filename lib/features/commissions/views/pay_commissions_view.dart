@@ -151,7 +151,9 @@ class _PayCommissionsViewState extends State<PayCommissionsView> {
                               builder: (_) => PayWithPointsView(
                                 amount: widget.amount,
                                 userId: context.read<ProfileViewModel>().profile?.id ?? 0,
-                                availablePoints: summary?.bonusPoints ?? 0,
+                                bonusPoints: summary?.bonusPoints ?? 0,
+                                paidPoints: summary?.paidPoints ?? 0,
+                                availablePoints: (summary?.bonusPoints ?? 0) + (summary?.paidPoints ?? 0),
                                 equivalentPoints: widget.amount.toInt(),
                                 orderId: widget.orderId,
                               ),

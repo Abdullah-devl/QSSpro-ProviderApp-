@@ -18,14 +18,24 @@
 class CategoryModel {
   final int id;
   final String name;
+  final List<CategoryModel> children;
 
-  CategoryModel({required this.id, required this.name});
+  CategoryModel({
+    required this.id,
+    required this.name,
+    this.children = const [],
+  });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
       // معالجة الـ ID سواء أرسله السيرفر كـ int أو String
       id: json['id'] != null ? int.tryParse(json['id'].toString()) ?? 0 : 0,
       name: json['name'] ?? json['title'] ?? 'بدون اسم',
+      children: json['children'] != null
+          ? (json['children'] as List)
+              .map((e) => CategoryModel.fromJson(e as Map<String, dynamic>))
+              .toList()
+          : [],
     );
   }
 }

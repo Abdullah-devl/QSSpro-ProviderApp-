@@ -125,6 +125,61 @@ class EditServiceScheduleView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
+            // 📝 اسم الفترة (label)
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: context.qsColors.card,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: context.qsColors.textSub.withOpacity(0.1),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: context.qsColors.text.withOpacity(0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.tr('period_name'),
+                    style: TextStyle(
+                      color: context.qsColors.text,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: viewModel.labelController,
+                    style: TextStyle(color: context.qsColors.text),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: context.qsColors.background,
+                      hintText: context.tr('period_name_hint'),
+                      hintStyle: TextStyle(
+                        color: context.qsColors.textSub.withOpacity(0.6),
+                        fontSize: 13,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Container(
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(16),

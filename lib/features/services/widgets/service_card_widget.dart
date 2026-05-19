@@ -7,6 +7,8 @@ import 'package:service_provider_app/features/services/viewmodels/manage_service
 import 'package:service_provider_app/features/services/views/service_details_view.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/theme/qs_color_extension.dart';
+import 'package:service_provider_app/features/profile/viewmodels/profile_viewmodel.dart';
+import 'package:service_provider_app/core/utils/dialog_helper.dart';
 
 class ServiceCardWidget extends StatelessWidget {
   final ServiceModel service;
@@ -85,7 +87,16 @@ class ServiceCardWidget extends StatelessWidget {
                             scale: 0.8,
                               child: Switch.adaptive(
                                 value: service.isActive,
-                                onChanged: (_) {
+                                 onChanged: (_) {
+                                  final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+                                  if (profileVM.profile?.isSuspendedForCommissions == true) {
+                                    DialogHelper.showErrorDialog(
+                                      context,
+                                      profileVM.profile?.suspendedMessage ??
+                                          context.tr('suspended_commissions_default_msg'),
+                                    );
+                                    return;
+                                  }
                                   if (onToggleStatus != null) {
                                     onToggleStatus!(service);
                                   } else {

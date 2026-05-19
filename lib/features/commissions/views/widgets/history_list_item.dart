@@ -58,7 +58,7 @@ class HistoryListItem extends StatelessWidget {
     Color badgeTextColor;
     String statusKey = item.status.toLowerCase().trim();
 
-    if (statusKey == 'completed' || statusKey == 'success' || statusKey == 'active') {
+    if (statusKey == 'completed' || statusKey == 'success' || statusKey == 'active' || statusKey == 'approved') {
       badgeBgColor = const Color(0xFFE8F5E9);
       badgeTextColor = const Color(0xFF388E3C);
     } else if (statusKey == 'accepted_partial_paid' || statusKey == 'accepted_full_paid' || statusKey == 'processing') {
@@ -119,7 +119,7 @@ class HistoryListItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.title,
+                      _getLocalizedTitle(context, item.title),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -202,35 +202,27 @@ class HistoryListItem extends StatelessWidget {
     final colors = context.qsColors;
     final Map<String, dynamic> raw = item.rawJson;
 
-    // استخراج الحقول المهمة بناءً على نوع العملية
-    String? bondImage;
-    String? bondNumber;
-    String? bankName;
-    String? adminNote;
+    // استخراج الحقول المهمة بشكل عام من البيانات
+    String? bondImage = raw['bond_image']?.toString() ?? raw['image_path']?.toString();
+    String? bondNumber = raw['bond_number']?.toString();
+    String? bankName = raw['bank_name']?.toString();
+    String? adminNote = raw['admin_note']?.toString();
     String? packageDetails;
     String? requestDetails;
 
     if (item.type == HistoryType.package) {
-      bondImage = raw['bond_image']?.toString();
-      bondNumber = raw['bond_number']?.toString();
-      bankName = raw['bank_name']?.toString();
-      adminNote = raw['admin_note']?.toString();
       if (raw['package'] is Map) {
         final p = raw['package'];
-        packageDetails = '${p['name'] ?? ''} (${p['points'] ?? 0} نقطة)';
+        packageDetails = '${p['name'] ?? ''} (${p['points'] ?? 0} ${context.tr('points')})';
       }
     } else if (item.type == HistoryType.bond) {
-      bondImage = raw['image_path']?.toString();
-      bondNumber = raw['bond_number']?.toString();
       if (raw['request'] is Map) {
         final r = raw['request'];
-        requestDetails = 'طلب رقم #${r['id']} | إجمالي: ${r['total_price']} ر.س';
+        requestDetails = '${context.tr('request_number_label')} #${r['id']} | ${context.tr('total_amount_label')}: ${r['total_price']} ${context.tr('currency_sar')}';
       }
-    } else if (item.type == HistoryType.withdrawal) {
-      adminNote = raw['admin_note']?.toString();
     } else {
       if (raw['request_id'] != null) {
-        requestDetails = 'مرتبط بطلب رقم #${raw['request_id']}';
+        requestDetails = '${context.tr('linked_to_request')} #${raw['request_id']}';
       }
     }
 
@@ -264,7 +256,7 @@ class HistoryListItem extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              item.title,
+                              _getLocalizedTitle(context, item.title),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -337,24 +329,57 @@ class HistoryListItem extends StatelessWidget {
                     ),
                     Text(context.tr('auto_tr_50'), style: TextStyle(fontSize: 13, color: colors.textSub, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        constraints: const BoxConstraints(maxHeight: 200),
-                        width: double.infinity,
-                        color: colors.background,
-                        child: InteractiveViewer(
-                          child: Image.network(
-                            bondImage.startsWith('http') ? bondImage : '${ApiEndpoints.storageBaseUrl}$bondImage',
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(20),
-                                child: Icon(Icons.broken_image_rounded, color: colors.textSub.withValues(alpha: 0.5), size: 40),
+                    GestureDetector(
+                      onTap: () {
+                        final fullUrl = bondImage.startsWith('http')
+                            ? bondImage
+                            : '${ApiEndpoints.storageBaseUrl}$bondImage';
+                        _showFullScreenImage(context, fullUrl);
+                      },
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              constraints: const BoxConstraints(maxHeight: 200),
+                              width: double.infinity,
+                              color: colors.background,
+                              child: Image.network(
+                                bondImage.startsWith('http') ? bondImage : '${ApiEndpoints.storageBaseUrl}$bondImage',
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Icon(Icons.broken_image_rounded, color: colors.textSub.withValues(alpha: 0.5), size: 40),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                          Positioned(
+                            bottom: 8,
+                            right: 8,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.zoom_in_rounded, color: Colors.white, size: 16),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    context.tr('tap_to_zoom'),
+                                    style: const TextStyle(color: Colors.white, fontSize: 10, fontFamily: 'Cairo'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -398,6 +423,75 @@ class HistoryListItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  String _getLocalizedTitle(BuildContext context, String title) {
+    String displayTitle = title;
+    if (displayTitle == 'باقة نقاط') {
+      displayTitle = context.tr('points_package');
+    } else if (displayTitle.startsWith('باقة ')) {
+      final pkgName = displayTitle.substring(5).trim();
+      displayTitle = '${context.tr('points_package')}: $pkgName';
+    } else if (displayTitle == 'عملية نقاط') {
+      displayTitle = context.tr('points_transaction');
+    } else if (displayTitle == 'نقاط مكافأة من النظام') {
+      displayTitle = context.tr('bonus_points_system');
+    } else if (displayTitle == 'استلام دفعة من عميل') {
+      displayTitle = context.tr('payment_received_client');
+    } else if (displayTitle == 'عملية سحب أموال (خصم)') {
+      displayTitle = context.tr('withdrawal_deduction');
+    } else if (displayTitle == 'سداد عمولة') {
+      displayTitle = context.tr('pay_commission');
+    } else if (displayTitle == 'تحويل أرباح إلى نقاط') {
+      displayTitle = context.tr('convert_earnings_points');
+    } else if (displayTitle == 'شراء باقة نقاط') {
+      displayTitle = context.tr('buy_points_package');
+    } else if (displayTitle == 'طلب سحب أرباح') {
+      displayTitle = context.tr('withdraw_request');
+    } else if (displayTitle.startsWith('سند دفع عمولة')) {
+      final bondNumPart = displayTitle.replaceAll('سند دفع عمولة', '').trim();
+      displayTitle = '${context.tr('commission_payment_receipt')} $bondNumPart';
+    }
+    return displayTitle;
+  }
+
+  void _showFullScreenImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black,
+      builder: (context) {
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.close_rounded, color: Colors.white, size: 28),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 5.0,
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  );
+                },
+                errorBuilder: (_, __, ___) => const Center(
+                  child: Icon(Icons.broken_image_rounded, color: Colors.white54, size: 64),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -8,6 +8,8 @@ class PlatformBankAccountModel {
   final String accountNumber;
   final String bankName;
   final String bankLogo;
+  final bool isActive;
+  final String note;
 
   PlatformBankAccountModel({
     required this.id,
@@ -15,6 +17,8 @@ class PlatformBankAccountModel {
     required this.accountNumber,
     required this.bankName,
     required this.bankLogo,
+    required this.isActive,
+    required this.note,
   });
 
   String get logoUrl {
@@ -30,7 +34,9 @@ class PlatformBankAccountModel {
       accountName: json['account_name']?.toString() ?? '',
       accountNumber: json['account_number']?.toString() ?? '',
       bankName: json['bank_name']?.toString() ?? '',
-      bankLogo: json['bank_logo']?.toString() ?? '',
+      bankLogo: json['image_path']?.toString() ?? json['bank_logo']?.toString() ?? '',
+      isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1' || json['is_active'] == 'true',
+      note: json['note']?.toString() ?? '',
     );
   }
 }

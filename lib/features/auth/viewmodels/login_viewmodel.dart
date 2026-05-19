@@ -11,8 +11,10 @@ import 'package:service_provider_app/features/settings/views/privacy_policy_view
 import 'package:service_provider_app/core/storage/hive_helper.dart';
 import 'package:service_provider_app/core/network/fcm_notification_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:service_provider_app/core/localization/app_localizations.dart';
 import '../repositories/auth_repository.dart';
 import '../viewmodels/auth_viewmodel.dart';
+import 'package:service_provider_app/core/utils/dialog_helper.dart';
 
 class LoginViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
@@ -42,7 +44,7 @@ class LoginViewModel extends ChangeNotifier {
         passwordController.text.trim().isEmpty) {
       _showAlert(
         context,
-        'يرجى إدخال البريد الإلكتروني وكلمة المرور.',
+        context.tr('error_enter_email_password'),
         isError: true,
       );
       return;
@@ -68,7 +70,7 @@ class LoginViewModel extends ChangeNotifier {
         notifyListeners();
         _showAlert(
           context,
-          'عذراً، هذا التطبيق مخصص لمزودي الخدمة فقط. لا يمكنك الدخول بحساب طالب خدمة، يرجى استخدام تطبيق "خبير - للعملاء".',
+          context.tr('error_provider_app_only'),
           isError: true,
         );
         return;
@@ -105,7 +107,7 @@ class LoginViewModel extends ChangeNotifier {
         // إذا لم يكن موثقاً -> نمنعه من الدخول للرئيسية وننقله لشاشة التوثيق أو الشروط
         _showAlert(
           context,
-          'يرجى توثيق حسابك أو الموافقة على الشروط أولاً.',
+          context.tr('error_verify_or_agree_first'),
           isError: true,
         );
 
@@ -119,7 +121,7 @@ class LoginViewModel extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      _showAlert(context, 'حدث خطأ غير متوقع.', isError: true);
+      _showAlert(context, context.tr('error_unexpected'), isError: true);
     }
   }
 
@@ -169,7 +171,7 @@ class LoginViewModel extends ChangeNotifier {
       developer.log('🎫 Access Token obtained via Client: ${accessToken?.substring(0, 10)}...', name: 'GOOGLE_AUTH');
 
       if (accessToken == null) {
-        throw Failure('فشل الحصول على Access Token من جوجل.');
+        throw Failure(context.tr('error_google_token_failed'));
       }
 
       // 3. إرسال التوكن للسيرفر الخاص بنا
@@ -183,7 +185,7 @@ class LoginViewModel extends ChangeNotifier {
         notifyListeners();
         _showAlert(
           context,
-          'عذراً، هذا الحساب مسجل كـ "طالب خدمة". لا يمكنك الدخول لتطبيق المزودين بهذا الحساب.',
+          context.tr('error_google_seeker_account'),
           isError: true,
         );
         await _googleSignIn.signOut();
@@ -212,13 +214,13 @@ class LoginViewModel extends ChangeNotifier {
           );
         }
       } else {
-        _showAlert(context, 'يرجى توثيق حسابك أولاً.', isError: true);
+        _showAlert(context, context.tr('error_verify_first'), isError: true);
       }
     } on Failure catch (failure) {
       _showAlert(context, failure.message, isError: true);
     } catch (e) {
       debugPrint('❌ Google Login Error: $e');
-      _showAlert(context, 'فشل تسجيل الدخول باستخدام جوجل.', isError: true);
+      _showAlert(context, context.tr('error_google_login_failed'), isError: true);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -244,78 +246,17 @@ class LoginViewModel extends ChangeNotifier {
   //       behavior: SnackBarBehavior.floating,
   //     ),
   //   );
-  // دالة مساعدة لعرض نافذة منبثقة (Alert Dialog) بدلاً من الـ SnackBar
+  // دالة مساعدة لعرض نافذة منبثقة (Alert Dialog) عبر DialogHelper بدلاً من الـ SnackBar
   void _showAlert(
     BuildContext context,
     String message, {
     required bool isError,
   }) {
-    showDialog(
-      context: context,
-      barrierDismissible:
-          false, // يمنع إغلاق النافذة عند الضغط خارجها (يجب الضغط على حسناً)
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // حواف دائرية أنيقة
-          ),
-          title: Row(
-            children: [
-              Icon(
-                isError
-                    ? Icons.error_outline_rounded
-                    : Icons.check_circle_outline_rounded,
-                color: isError ? context.qsColors.error : context.qsColors.success,
-                size: 28,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                isError ? 'تنبيه' : 'نجاح',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.bold,
-                  color: isError ? context.qsColors.error : context.qsColors.success,
-                  fontSize: 20,
-                ),
-              ),
-            ],
-          ),
-          content: Text(
-            message,
-            style: const TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 15,
-              height: 1.5,
-            ),
-          ),
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                backgroundColor: isError
-                    ? context.qsColors.error.withOpacity(0.1)
-                    : context.qsColors.success.withOpacity(0.1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () => Navigator.of(context).pop(), // إغلاق النافذة
-              child: Text(
-                'حسناً',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.bold,
-                  color: isError ? context.qsColors.error : context.qsColors.success,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+    if (isError) {
+      DialogHelper.showErrorDialog(context, message);
+    } else {
+      DialogHelper.showSuccessDialog(context, message);
+    }
   }
 
   @override

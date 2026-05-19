@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:service_provider_app/core/network/api_client.dart';
 import 'package:service_provider_app/core/network/api_endpoints.dart';
 import 'package:service_provider_app/core/network/error/api_error_handler.dart';
+import 'package:service_provider_app/features/home/repositories/home_repository.dart';
 import 'package:service_provider_app/features/services/models/category_model.dart';
 import 'package:service_provider_app/features/services/models/service_details_model.dart';
 // import 'package:service_provider_app/features/services/models/service_list_model.dart';
@@ -202,9 +203,11 @@ class ManageServicesRepository {
   // 🚀 دالة جلب الخدمات المخصصة
   Future<List<ServiceModel>> getCustomServices(dynamic userId) async {
     try {
-      final response = await _apiService.get(ApiEndpoints.getCustomService(userId));
+      final response = await _apiService.get(
+        ApiEndpoints.getCustomService(userId),
+      );
       final data = ApiErrorHandler.handleResponse(response);
-      
+
       if (data is Map) {
         return [ServiceModel.fromJson(Map<String, dynamic>.from(data))];
       } else if (data is List) {
@@ -219,9 +222,11 @@ class ManageServicesRepository {
   // 🚀 دالة جلب خدمات الحضور
   Future<List<ServiceModel>> getMeetingServices(dynamic userId) async {
     try {
-      final response = await _apiService.get(ApiEndpoints.getMeetingService(userId));
+      final response = await _apiService.get(
+        ApiEndpoints.getMeetingService(userId),
+      );
       final data = ApiErrorHandler.handleResponse(response);
-      
+
       if (data is Map) {
         return [ServiceModel.fromJson(Map<String, dynamic>.from(data))];
       } else if (data is List) {
@@ -294,11 +299,7 @@ class ManageServicesRepository {
     try {
       final response = await _apiService.put(
         ApiEndpoints.updateChildService(childId),
-        data: {
-          "name": name,
-          "price": price,
-          "description": description,
-        },
+        data: {"name": name, "price": price, "description": description},
       );
       ApiErrorHandler.handleResponse(response);
     } catch (e) {
@@ -398,6 +399,13 @@ class ManageServicesRepository {
         );
       }
 
+      // 🔍 طباعة الحقول للتأكد مما يرسله التطبيق
+      debugPrint('=== البيانات المرسلة للسيرفر (FormData) ===');
+      for (var field in formData.fields) {
+        debugPrint('${field.key}: ${field.value}');
+      }
+      debugPrint('=======================================');
+
       final response = await _apiService.post(
         '${ApiEndpoints.myServices}/$serviceId',
         data: formData,
@@ -418,6 +426,7 @@ class ManageServicesRepository {
     required String startTime,
     required String endTime,
     required List<String> days,
+    String? label,
   }) async {
     try {
       final response = await _apiService.post(
@@ -427,6 +436,7 @@ class ManageServicesRepository {
           "start_time": startTime,
           "end_time": endTime,
           "days": days.map((d) => d.toLowerCase()).toList(),
+          if (label != null) "label": label,
         },
       );
       ApiErrorHandler.handleResponse(response);
@@ -441,6 +451,7 @@ class ManageServicesRepository {
     required String startTime,
     required String endTime,
     required List<String> days,
+    String? label,
   }) async {
     try {
       final response = await _apiService.put(
@@ -449,6 +460,7 @@ class ManageServicesRepository {
           "start_time": startTime,
           "end_time": endTime,
           "days": days.map((d) => d.toLowerCase()).toList(),
+          if (label != null) "label": label,
         },
       );
       ApiErrorHandler.handleResponse(response);
@@ -478,7 +490,9 @@ class ManageServicesRepository {
     double? pricePerKm,
   }) async {
     try {
-      final endpoint = isCustom ? ApiEndpoints.updateCustomService : ApiEndpoints.updateMeetingService;
+      final endpoint = isCustom
+          ? ApiEndpoints.updateCustomService
+          : ApiEndpoints.updateMeetingService;
       final response = await _apiService.put(
         endpoint,
         data: {

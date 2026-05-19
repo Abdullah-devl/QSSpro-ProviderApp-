@@ -13,6 +13,8 @@ import '../../../core/storage/token_storage.dart';
 import '../repositories/manage_services_repository.dart';
 import '../models/service_details_model.dart';
 import 'edit_service_schedule_view.dart';
+import 'package:service_provider_app/features/profile/viewmodels/profile_viewmodel.dart';
+import 'package:service_provider_app/core/utils/dialog_helper.dart';
 
 class ServiceDetailsView extends StatelessWidget {
   final int serviceId;
@@ -242,8 +244,18 @@ class _ServiceDetailsBody extends StatelessWidget {
                       fontSize: 13,
                     ),
                   ),
-                  onPressed: () =>
-                      _showDeleteConfirmationDialog(context, viewModel),
+                  onPressed: () {
+                    final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+                    if (profileVM.profile?.isSuspendedForCommissions == true) {
+                      DialogHelper.showErrorDialog(
+                        context,
+                        profileVM.profile?.suspendedMessage ??
+                            context.tr('suspended_commissions_default_msg'),
+                      );
+                      return;
+                    }
+                    _showDeleteConfirmationDialog(context, viewModel);
+                  },
                 ),
               ),
               const SizedBox(width: 12),
@@ -268,6 +280,15 @@ class _ServiceDetailsBody extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
+                    final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+                    if (profileVM.profile?.isSuspendedForCommissions == true) {
+                      DialogHelper.showErrorDialog(
+                        context,
+                        profileVM.profile?.suspendedMessage ??
+                            context.tr('suspended_commissions_default_msg'),
+                      );
+                      return;
+                    }
                     final shouldRefresh = await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -381,7 +402,18 @@ class _ServiceDetailsBody extends StatelessWidget {
         const SizedBox(height: 8),
 
         GestureDetector(
-          onTap: () => _showAddSubServiceDialog(context, viewModel),
+          onTap: () {
+            final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+            if (profileVM.profile?.isSuspendedForCommissions == true) {
+              DialogHelper.showErrorDialog(
+                context,
+                profileVM.profile?.suspendedMessage ??
+                    context.tr('suspended_commissions_default_msg'),
+              );
+              return;
+            }
+            _showAddSubServiceDialog(context, viewModel);
+          },
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 18),
@@ -491,19 +523,40 @@ class _ServiceDetailsBody extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 4),
-          IconButton(
+           IconButton(
             icon: Icon(Icons.edit, color: colors.primary, size: 20),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            onPressed: () => _showAddSubServiceDialog(context, viewModel, subToEdit: sub),
+            onPressed: () {
+              final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+              if (profileVM.profile?.isSuspendedForCommissions == true) {
+                DialogHelper.showErrorDialog(
+                  context,
+                  profileVM.profile?.suspendedMessage ??
+                      context.tr('suspended_commissions_default_msg'),
+                );
+                return;
+              }
+              _showAddSubServiceDialog(context, viewModel, subToEdit: sub);
+            },
           ),
           const SizedBox(width: 12),
           IconButton(
             icon: Icon(Icons.delete_outline, color: colors.error, size: 20),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            onPressed: () =>
-                _showDeleteSubServiceDialog(context, sub.id, viewModel),
+            onPressed: () {
+              final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+              if (profileVM.profile?.isSuspendedForCommissions == true) {
+                DialogHelper.showErrorDialog(
+                  context,
+                  profileVM.profile?.suspendedMessage ??
+                      context.tr('suspended_commissions_default_msg'),
+                );
+                return;
+              }
+              _showDeleteSubServiceDialog(context, sub.id, viewModel);
+            },
           ),
         ],
       ),
@@ -920,6 +973,15 @@ class _ServiceDetailsBody extends StatelessWidget {
     ServiceDetailsViewModel viewModel, {
     ServiceScheduleModel? scheduleToEdit,
   }) async {
+    final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+    if (profileVM.profile?.isSuspendedForCommissions == true) {
+      DialogHelper.showErrorDialog(
+        context,
+        profileVM.profile?.suspendedMessage ??
+            context.tr('suspended_commissions_default_msg'),
+      );
+      return;
+    }
     final tokenStorage = TokenStorage();
     final apiService = ApiService(tokenStorage);
     final repository = ManageServicesRepository(apiService);
@@ -1067,6 +1129,15 @@ class _ServiceDetailsBody extends StatelessWidget {
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                         onPressed: () {
+                          final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+                          if (profileVM.profile?.isSuspendedForCommissions == true) {
+                            DialogHelper.showErrorDialog(
+                              context,
+                              profileVM.profile?.suspendedMessage ??
+                                  context.tr('suspended_commissions_default_msg'),
+                            );
+                            return;
+                          }
                           if (schedule.id != null) {
                             showDialog(
                               context: context,

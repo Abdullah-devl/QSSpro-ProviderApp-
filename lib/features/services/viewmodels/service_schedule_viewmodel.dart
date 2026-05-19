@@ -8,6 +8,7 @@ class ServiceScheduleViewModel extends ChangeNotifier {
   final ManageServicesRepository _repository;
   final int serviceId;
   final ServiceScheduleModel? initialSchedule;
+  final TextEditingController labelController = TextEditingController();
 
   ServiceScheduleViewModel(
     this._repository,
@@ -39,6 +40,7 @@ class ServiceScheduleViewModel extends ChangeNotifier {
       final lowerDays = initialSchedule!.days.map((d) => d.toLowerCase()).toList();
       lowerDays.sort((a, b) => _weekOrder.indexOf(a).compareTo(_weekOrder.indexOf(b)));
       _schedule = initialSchedule!.copyWith(days: lowerDays);
+      labelController.text = initialSchedule!.label ?? '';
     } else {
       // الحالة الافتراضية للفترة الجديدة
       _schedule = ServiceScheduleModel(
@@ -122,6 +124,8 @@ class ServiceScheduleViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final String? labelText = labelController.text.trim().isNotEmpty ? labelController.text.trim() : null;
+
       if (initialSchedule != null && initialSchedule!.id != null) {
         // تعديل موعد موجود
         await _repository.updateServiceSchedule(
@@ -129,6 +133,7 @@ class ServiceScheduleViewModel extends ChangeNotifier {
           startTime: _schedule.startTime,
           endTime: _schedule.endTime,
           days: _schedule.days,
+          label: labelText,
         );
       } else {
         // إضافة موعد جديد
@@ -137,6 +142,7 @@ class ServiceScheduleViewModel extends ChangeNotifier {
           startTime: _schedule.startTime,
           endTime: _schedule.endTime,
           days: _schedule.days,
+          label: labelText,
         );
       }
       
@@ -154,5 +160,11 @@ class ServiceScheduleViewModel extends ChangeNotifier {
       DialogHelper.showErrorDialog(context, 'حدث خطأ غير متوقع');
       return false;
     }
+  }
+
+  @override
+  void dispose() {
+    labelController.dispose();
+    super.dispose();
   }
 }

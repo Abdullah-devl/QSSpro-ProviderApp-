@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/utils/dialog_helper.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/policy_viewmodel.dart';
@@ -150,11 +151,9 @@ class _PrivacyPolicyViewState extends State<PrivacyPolicyView> {
                               }
                             } catch (e) {
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('حدث خطأ: $e'),
-                                    backgroundColor: colors.error,
-                                  ),
+                                DialogHelper.showErrorDialog(
+                                  context,
+                                  context.tr(e.toString()),
                                 );
                               }
                             }

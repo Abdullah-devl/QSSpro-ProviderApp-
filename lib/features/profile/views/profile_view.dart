@@ -24,6 +24,7 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../viewmodels/profile_viewmodel.dart';
 import '../../auth/viewmodels/auth_viewmodel.dart';
+import '../../../core/utils/dialog_helper.dart';
 
 import '../../complaints/views/complaints_hub_view.dart';
 import '../../settings/views/settings_view.dart';
@@ -609,8 +610,9 @@ class ProfileView extends StatelessWidget {
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(context.tr('link_copied_soon'))),
+                  DialogHelper.showSuccessDialog(
+                    context,
+                    context.tr('link_copied_soon'),
                   );
                 },
               ),
@@ -686,19 +688,15 @@ class ProfileView extends StatelessWidget {
                   ).deleteWork(work.id);
                   Navigator.pop(context); // إغلاق الديالوج حق التحميل
                   vm.fetchProfile(); // تحديث القائمة الواجهة
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(context.tr('delete_success')),
-                      backgroundColor: colors.success,
-                    ),
+                  DialogHelper.showSuccessDialog(
+                    context,
+                    context.tr('delete_success'),
                   );
                 } catch (e) {
                   Navigator.pop(context); // إغلاق الديالوج التحميل
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(e.toString()),
-                      backgroundColor: colors.error,
-                    ),
+                  DialogHelper.showErrorDialog(
+                    context,
+                    context.tr(e.toString()),
                   );
                 }
               },
@@ -780,11 +778,9 @@ class ProfileView extends StatelessWidget {
                       (route) => false,
                     );
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(context.tr('logout_failed')),
-                        backgroundColor: colors.error,
-                      ),
+                    DialogHelper.showErrorDialog(
+                      context,
+                      context.tr('logout_failed'),
                     );
                   }
                 }

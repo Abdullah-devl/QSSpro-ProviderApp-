@@ -164,7 +164,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'خبير',
+      title: 'QSS Pro',
       navigatorKey: navigatorKey, // ✅ ربط مفتاح التنقل بالعالم
 
 

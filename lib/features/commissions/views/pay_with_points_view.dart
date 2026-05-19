@@ -309,7 +309,9 @@ class PayWithPointsView extends StatelessWidget {
                           } else {
                             DialogHelper.showErrorDialog(
                               context,
-                              viewModel.errorMessage ?? context.tr('payment_failed_msg'),
+                              viewModel.errorMessage != null
+                                  ? context.tr(viewModel.errorMessage!)
+                                  : context.tr('payment_failed_msg'),
                             );
                           }
                         }

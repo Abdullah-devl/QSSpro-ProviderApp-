@@ -55,21 +55,30 @@ class NewRequestCard extends StatelessWidget {
                         style: TextStyle(
                             color: context.qsColors.textSub, fontSize: 13)),
                     const SizedBox(height: 12),
-                    Row(
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
                         _buildTag(context, Icons.calendar_today_outlined, distance),
-                        const SizedBox(width: 8),
                         _buildTag(context, Icons.payments_outlined, price),
                       ],
                     ),
                   ],
                 ),
               ),
-              // الصورة
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(imageUrl,
-                    width: 80, height: 80, fit: BoxFit.cover),
+              // الأيقونة بدلاً من الصورة
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: context.qsColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.person_outline, // أيقونة المستخدم لتمثيل العميل صاحب الطلب
+                  size: 40,
+                  color: context.qsColors.primary,
+                ),
               ),
             ],
           ),
@@ -101,14 +110,18 @@ class NewRequestCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
       decoration: const BoxDecoration(color: Colors.transparent),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: context.qsColors.textSub, size: 14),
           const SizedBox(width: 4),
-          Text(text,
-              style: TextStyle(
-                  color: context.qsColors.text,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold)),
+          Flexible(
+            child: Text(text,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    color: context.qsColors.text,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold)),
+          ),
         ],
       ),
     );

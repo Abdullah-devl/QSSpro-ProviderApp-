@@ -34,9 +34,13 @@ class PointsPackageHistoryModel extends BaseHistoryItem {
   }) : super(type: HistoryType.package);
 
   factory PointsPackageHistoryModel.fromJson(Map<String, dynamic> json) {
+    String? packageName = json['package_name'] ?? json['title'];
+    if (packageName == null && json['package'] is Map) {
+      packageName = json['package']['name']?.toString();
+    }
     return PointsPackageHistoryModel(
       id: json['id']?.toString() ?? '',
-      title: json['package_name'] ?? json['title'] ?? 'باقة نقاط',
+      title: packageName ?? 'باقة نقاط',
       date: json['created_at'] ?? '',
       amount: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
       status: json['status'] ?? 'completed',
@@ -136,7 +140,7 @@ class ProviderRequestBondModel extends BaseHistoryItem {
   factory ProviderRequestBondModel.fromJson(Map<String, dynamic> json) {
     return ProviderRequestBondModel(
       id: json['id']?.toString() ?? '',
-      title: 'سند دفع عمولة (${json['number_bond'] ?? ''})',
+      title: 'سند دفع عمولة (${json['bond_number'] ?? json['number_bond'] ?? ''})',
       date: json['created_at'] ?? '',
       amount: double.tryParse(json['amount']?.toString() ?? '0') ?? 0.0,
       status: json['status'] ?? 'pending',

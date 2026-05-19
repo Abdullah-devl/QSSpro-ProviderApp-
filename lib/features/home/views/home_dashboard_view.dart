@@ -121,6 +121,14 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
               else if (homeViewModel.errorMessage != null)
                 _buildErrorState(context, homeViewModel)
               else if (homeViewModel.homeData != null) ...[
+                if (profileViewModel.profile?.isSuspendedForCommissions == true) ...[
+                  _buildSuspensionBanner(
+                    context,
+                    profileViewModel.profile?.suspendedMessage ??
+                        context.tr('suspended_commissions_default_msg'),
+                  ),
+                  const SizedBox(height: 20),
+                ],
 
                 // ==========================================
                 // 3. حالة التوثيق (Verification Banner)
@@ -642,6 +650,102 @@ class _HomeDashboardViewState extends State<HomeDashboardView> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuspensionBanner(BuildContext context, String message) {
+    final colors = context.qsColors;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            colors.error.withValues(alpha: 0.12),
+            colors.error.withValues(alpha: 0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colors.error.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: colors.error.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.gavel_rounded,
+                  color: colors.error,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.tr('account_suspended_title'),
+                      style: TextStyle(
+                        color: colors.error,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      message,
+                      style: TextStyle(
+                        color: colors.text,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const UnpaidCommissionsView(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.payment_rounded, size: 18),
+            label: Text(
+              context.tr('pay_now_btn'),
+              style: const TextStyle(fontWeight: FontWeight.w900),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.error,
+              foregroundColor: colors.card,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
         ],
       ),
     );

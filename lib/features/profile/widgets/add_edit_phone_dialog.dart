@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/phone_model.dart';
 import '../viewmodels/contact_info_viewmodel.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/utils/dialog_helper.dart';
 
 class AddEditPhoneDialog extends StatefulWidget {
   final ContactInfoViewModel vm;
@@ -85,8 +86,9 @@ class _AddEditPhoneDialogState extends State<AddEditPhoneDialog> {
             final phoneText = _phoneController.text.trim();
             final country = _countryCodeController.text.trim();
             if (phoneText.isEmpty || country.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(context.tr('auto_tr_20'))),
+              DialogHelper.showErrorDialog(
+                context,
+                context.tr('auto_tr_20'),
               );
               return;
             }
@@ -119,8 +121,11 @@ class _AddEditPhoneDialogState extends State<AddEditPhoneDialog> {
             if (success) {
               Navigator.pop(context); // Close dialog
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(widget.vm.errorMessage ?? context.tr('auto_tr_64'))),
+              DialogHelper.showErrorDialog(
+                context,
+                widget.vm.errorMessage != null
+                    ? context.tr(widget.vm.errorMessage!)
+                    : context.tr('auto_tr_64'),
               );
             }
           },

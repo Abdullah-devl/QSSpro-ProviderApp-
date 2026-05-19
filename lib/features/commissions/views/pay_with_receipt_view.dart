@@ -1,4 +1,4 @@
-﻿// مسار الملف: lib/features/commissions/views/pay_with_receipt_view.dart
+// مسار الملف: lib/features/commissions/views/pay_with_receipt_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -237,7 +237,9 @@ class _PayWithReceiptViewState extends State<PayWithReceiptView> {
                           } else {
                             DialogHelper.showErrorDialog(
                               context,
-                              viewModel.errorMessage ?? context.tr('error_occurred'),
+                              viewModel.errorMessage != null
+                                  ? context.tr(viewModel.errorMessage!)
+                                  : context.tr('error_occurred'),
                             );
                           }
                         }

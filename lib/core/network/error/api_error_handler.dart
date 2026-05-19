@@ -62,10 +62,10 @@ class ApiErrorHandler {
       return Failure('حدث خطأ في تنسيق البيانات.');
     } else {
       if (kDebugMode) {
-        return Failure('حدث خطأ غير متوقع: $error');
-      } else {
-        return Failure('حدث خطأ غير متوقع. يرجى المحاولة لاحقاً.');
+        // طباعة تفصيلية للمطور في الكونسول دون إزعاج المستخدم بها في الواجهة
+        debugPrint('❌ Unexpected Error details: $error');
       }
+      return Failure('حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى لاحقاً.');
     }
   }
 

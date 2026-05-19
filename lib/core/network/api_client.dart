@@ -78,6 +78,7 @@ import 'package:service_provider_app/core/network/navigation_service.dart'; // �
 import 'dart:developer' as developer;
 import 'api_endpoints.dart';
 import 'package:service_provider_app/features/settings/views/privacy_policy_view.dart';
+import 'package:service_provider_app/features/commissions/views/unpaid_commissions_view.dart';
 
 
 /// 📝 الوصف: المحرك الشامل للاتصال بالإنترنت (HTTP Requests).
@@ -191,6 +192,95 @@ class ApiService {
               '⚠️ [422] Validation Error - البيانات المرسلة غير صحيحة: $errorData',
               name: 'API_ERROR',
             );
+
+            final errorMessage = errorData is Map
+                ? (errorData['message']?.toString() ?? '')
+                : errorData?.toString() ?? '';
+
+            final isCommissionSuspended = errorMessage.contains('عمول') || 
+                errorMessage.contains('commission') || 
+                errorMessage.contains('unpaid') ||
+                errorMessage.contains('سداد');
+
+            if (isCommissionSuspended) {
+              developer.log(
+                '⚠️ [422] الحساب موقوف بسبب العمولات المتأخرة - عرض تنبيه للمستخدم...',
+                name: 'API_ERROR',
+              );
+
+              final ctx = navigatorKey.currentContext;
+              if (ctx != null) {
+                showDialog(
+                  context: ctx,
+                  barrierDismissible: false,
+                  builder: (dialogCtx) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24)),
+                    backgroundColor: Colors.white,
+                    title: Row(
+                      children: [
+                        const Icon(Icons.gavel_rounded,
+                            color: Colors.red, size: 28),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'الحساب موقوف مؤقتاً',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red.shade900,
+                              fontFamily: 'Cairo',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    content: Text(
+                      errorMessage.isNotEmpty 
+                          ? errorMessage 
+                          : 'عذراً، تم إيقاف حسابك مؤقتاً لعدم سداد العمولات المستحقة للمنصة. يرجى سداد العمولات المتأخرة لتتمكن من استخدام كافة ميزات التطبيق.',
+                      style: const TextStyle(
+                          fontFamily: 'Cairo', fontSize: 14, height: 1.6, color: Colors.black87),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogCtx).pop(),
+                        child: const Text(
+                          'إغلاق',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: () {
+                          Navigator.of(dialogCtx).pop();
+                          navigatorKey.currentState?.push(
+                            MaterialPageRoute(
+                              builder: (_) => const UnpaidCommissionsView(),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'سداد العمولات الآن',
+                          style: TextStyle(
+                              fontFamily: 'Cairo',
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            }
           } else if (statusCode == 403) {
             developer.log(
               '⛔ [403] Forbidden - لا تملك صلاحية لهذا الطلب: $errorData',
@@ -201,6 +291,91 @@ class ApiService {
             final errorMessage = errorData is Map
                 ? (errorData['message']?.toString() ?? '')
                 : errorData?.toString() ?? '';
+
+            final isCommissionSuspended = errorMessage.contains('عمول') || 
+                errorMessage.contains('commission') || 
+                errorMessage.contains('unpaid') ||
+                errorMessage.contains('سداد');
+
+            if (isCommissionSuspended) {
+              developer.log(
+                '⚠️ [403] الحساب موقوف بسبب العمولات المتأخرة - عرض تنبيه للمستخدم...',
+                name: 'API_ERROR',
+              );
+
+              final ctx = navigatorKey.currentContext;
+              if (ctx != null) {
+                showDialog(
+                  context: ctx,
+                  barrierDismissible: false,
+                  builder: (dialogCtx) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24)),
+                    backgroundColor: Colors.white,
+                    title: Row(
+                      children: [
+                        const Icon(Icons.gavel_rounded,
+                            color: Colors.red, size: 28),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'الحساب موقوف مؤقتاً',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red.shade900,
+                              fontFamily: 'Cairo',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    content: Text(
+                      errorMessage.isNotEmpty 
+                          ? errorMessage 
+                          : 'عذراً، تم إيقاف حسابك مؤقتاً لعدم سداد العمولات المستحقة للمنصة. يرجى سداد العمولات المتأخرة لتتمكن من استخدام كافة ميزات التطبيق.',
+                      style: const TextStyle(
+                          fontFamily: 'Cairo', fontSize: 14, height: 1.6, color: Colors.black87),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogCtx).pop(),
+                        child: const Text(
+                          'إغلاق',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: () {
+                          Navigator.of(dialogCtx).pop();
+                          navigatorKey.currentState?.push(
+                            MaterialPageRoute(
+                              builder: (_) => const UnpaidCommissionsView(),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'سداد العمولات الآن',
+                          style: TextStyle(
+                              fontFamily: 'Cairo',
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            }
 
             final isPolicyError = errorMessage.contains('سياسة') ||
                 errorMessage.contains('policy') ||

@@ -32,6 +32,9 @@ class ProfileModel {
   final int servicesCount;
   final int requestsCount;
 
+  final bool? isSuspendedForCommissions;
+  final String? suspendedMessage;
+
   // 📞 بيانات التواصل الإضافية والحسابات البنكية من الباك إند
   final List<PhoneModel> phones;
   final List<BankModel> banks;
@@ -61,6 +64,8 @@ class ProfileModel {
     this.isAvailable = true,
     this.servicesCount = 0,
     this.requestsCount = 0,
+    this.isSuspendedForCommissions = false,
+    this.suspendedMessage,
     this.phones = const [],
     this.banks = const [],
   });
@@ -211,6 +216,12 @@ class ProfileModel {
       }).whereType<BankModel>().toList();
     }
 
+    // الإيقاف بسبب العمولات المتأخرة
+    final isSuspVal = findKey(['is_suspended_for_commissions']);
+    final isSuspendedForCommissions = isSuspVal == 1 || isSuspVal == true || isSuspVal == '1' || isSuspVal == 'true';
+
+    final suspendedMessage = findKey(['suspended_message'])?.toString();
+
     return ProfileModel(
       id: id,
       name: name,
@@ -238,6 +249,8 @@ class ProfileModel {
       requestsCount: requestsCount,
       phones: phones,
       banks: banks,
+      isSuspendedForCommissions: isSuspendedForCommissions,
+      suspendedMessage: suspendedMessage,
     );
   }
 }

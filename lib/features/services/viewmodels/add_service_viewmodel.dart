@@ -1,4 +1,4 @@
-﻿// // مسار الملف: lib/features/services/viewmodels/add_service_viewmodel.dart
+// // مسار الملف: lib/features/services/viewmodels/add_service_viewmodel.dart
 
 // import 'dart:io';
 // import 'package:flutter/material.dart';
@@ -261,6 +261,10 @@ class AddServiceViewModel extends ChangeNotifier {
   List<CategoryModel> _categories = [];
   List<CategoryModel> get categories => _categories;
 
+  // قائمة مسطحة لعرض الفئات الرئيسية والفرعية معاً في القائمة المنسدلة
+  List<CategoryModel> _flattenedCategories = [];
+  List<CategoryModel> get flattenedCategories => _flattenedCategories;
+
   bool _isLoadingCategories = false;
   bool get isLoadingCategories => _isLoadingCategories;
 
@@ -305,7 +309,21 @@ class AddServiceViewModel extends ChangeNotifier {
 
     try {
       _categories = await _repository.getMainCategories();
+      _flattenedCategories.clear();
+      
       debugPrint('✅ تم جلب الفئات بنجاح: عددها ${_categories.length}');
+      for (var cat in _categories) {
+        _flattenedCategories.add(cat);
+        debugPrint(' - فئة رئيسية: ${cat.name} (عدد الفرعية: ${cat.children.length})');
+        for (var sub in cat.children) {
+          // إضافة شرطة لتمييز الفئة الفرعية شكلياً في القائمة المنسدلة
+          _flattenedCategories.add(CategoryModel(
+            id: sub.id,
+            name: '   — ${sub.name}',
+          ));
+          debugPrint('   * فرعية: ${sub.name}');
+        }
+      }
     } catch (e) {
       // 🚨 الآن سنطبع الخطأ لكي نعرف المشكلة من السيرفر!
       debugPrint('❌ حدث خطأ أثناء جلب الفئات: $e');

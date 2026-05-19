@@ -8,6 +8,7 @@ import '../models/bank_model.dart';
 import '../viewmodels/contact_info_viewmodel.dart';
 import '../widgets/add_edit_phone_dialog.dart';
 import '../widgets/add_edit_bank_dialog.dart';
+import '../../../core/utils/dialog_helper.dart';
 import '../../../core/localization/app_localizations.dart';
 
 class ContactInfoView extends StatelessWidget {
@@ -162,8 +163,9 @@ class ContactInfoView extends StatelessWidget {
                     Clipboard.setData(
                       ClipboardData(text: '${phone.countryCode}${phone.phone}'),
                     );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(context.tr('auto_tr_41'))),
+                    DialogHelper.showSuccessDialog(
+                      context,
+                      context.tr('auto_tr_41'),
                     );
                   },
                 ),

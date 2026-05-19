@@ -24,7 +24,8 @@ class PlatformBankAccountsViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _accounts = await repository.getPlatformBankAccounts();
+      final allAccounts = await repository.getPlatformBankAccounts();
+      _accounts = allAccounts.where((account) => account.isActive).toList();
     } catch (e) {
       _errorMessage = e.toString();
     } finally {

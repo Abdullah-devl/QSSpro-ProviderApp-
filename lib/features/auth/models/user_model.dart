@@ -36,8 +36,12 @@ class UserModel {
       role: userJson['role'] ?? '',
       phone: userJson['phone'],
       address: userJson['address'],
-      token: json['token'] ?? '',
-      isVerified: json['email_verified'] ?? false,
+      token: json['token'] ?? json['access_token'] ?? '',
+      isVerified: json['email_verified'] == true || 
+                  json['email_verified'] == 1 || 
+                  json['is_verified'] == true || 
+                  json['is_verified'] == 1 ||
+                  userJson['email_verified_at'] != null,
       providerPolicy: providerPolicy,
     );
   }

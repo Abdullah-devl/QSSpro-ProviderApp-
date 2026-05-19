@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:service_provider_app/features/complaints/views/submit_complaint_view.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../Models/order_model.dart';
@@ -7,7 +8,7 @@ import '../ViewModels/orders_viewmodel.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/dialog_helper.dart';
 import '../../commissions/views/pay_commissions_view.dart';
-import '../../complaints/views/submit_complaint_view.dart';
+import '../../profile/viewmodels/profile_viewmodel.dart';
 
 class OrderDetailView extends StatefulWidget {
   final OrderModel order;
@@ -649,7 +650,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       if (context.mounted) {
         DialogHelper.showErrorDialog(
           context,
-          viewModel.errorMessage ?? 'تعذر إتمام الإجراء، يرجى المحاولة لاحقاً',
+          viewModel.errorMessage != null
+              ? context.tr(viewModel.errorMessage!)
+              : context.tr('error_occurred'),
         );
       }
     }
@@ -994,18 +997,18 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           : () async {
               final amount = double.tryParse(_amountController.text);
               if (amount == null || amount <= 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(context.tr('enter_valid_amount'))),
+                DialogHelper.showErrorDialog(
+                  context,
+                  context.tr('enter_valid_amount'),
                 );
                 return;
               }
               final success = await viewModel.addPaidAmount(order.id, amount);
               if (success) {
                 _amountController.clear();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(context.tr('amount_updated_successfully')),
-                  ),
+                DialogHelper.showSuccessDialog(
+                  context,
+                  context.tr('amount_updated_successfully'),
                 );
               }
             },
@@ -1620,12 +1623,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     : () async {
                         final success = await viewModel.finishOrder(order.id);
                         if (success && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                context.tr('work_completed_successfully'),
-                              ),
-                            ),
+                          DialogHelper.showSuccessDialog(
+                            context,
+                            context.tr('work_completed_successfully'),
                           );
                         }
                       },
@@ -1709,13 +1709,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     double commissionAmount,
   ) {
     final bool isPending = order.status == 'pending' || order.status == 'new';
-    final bool isCompleted = order.status == 'completed';
-    final bool isPaidInFull =
-        order.paidAmount >= order.price && order.price > 0;
-    final bool isCommissionPaid = order.isCommissionPaid;
 
-    // إذا كان الطلب مكتمل والعمولة مدفوعة، لا داعي لعرض شريط الإجراءات
-    if ((isCompleted || order.status == 'finished') && isCommissionPaid) {
+    if (!isPending) {
       return const SizedBox.shrink();
     }
 
@@ -1732,150 +1727,115 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           ),
         ],
       ),
-      child: isPending
-          ? Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: context.qsColors.primary,
-                      foregroundColor: context.qsColors.card,
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      elevation: 0,
-                    ),
-                    onPressed: viewModel.isLoading
-                        ? null
-                        : () async {
-                            final success = await viewModel.updateStatus(
-                              order.id,
-                              'accepted_initial',
-                            );
-                            if (success) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    context.tr('order_accepted_success'),
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                    icon: viewModel.isLoading
-                        ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: context.qsColors.card,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Icon(Icons.check_circle_outline, size: 24),
-                    label: Text(
-                      viewModel.isLoading
-                          ? context.tr('loading')
-                          : context.tr('accept_order'),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.qsColors.primary,
+                foregroundColor: context.qsColors.card,
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: context.qsColors.background,
-                      foregroundColor: context.qsColors.textSub,
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      elevation: 0,
-                    ),
-                    onPressed: viewModel.isLoading
-                        ? null
-                        : () async {
-                            final success = await viewModel.updateStatus(
-                              order.id,
-                              'rejected',
-                            );
-                            if (success) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    context.tr('order_canceled_success'),
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                    icon: viewModel.isLoading
-                        ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: context.qsColors.textSub,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Icon(Icons.cancel_outlined, size: 24),
-                    label: Text(
-                      viewModel.isLoading
-                          ? context.tr('loading')
-                          : context.tr('reject'),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            )
-          : (isCompleted || isPaidInFull)
-              ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildCommissionCard(context, order, commissionAmount),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: context.qsColors.warning,
-                        foregroundColor: context.qsColors.card,
-                        minimumSize: const Size(double.infinity, 60),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        elevation: 0,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
+                elevation: 0,
+              ),
+              onPressed: viewModel.isLoading
+                  ? null
+                  : () async {
+                      final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+                      if (profileVM.profile?.isSuspendedForCommissions == true) {
+                        DialogHelper.showErrorDialog(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => PayCommissionsView(
-                              amount: commissionAmount,
-                              orderId: order.id,
-                            ),
-                          ),
+                          profileVM.profile?.suspendedMessage ??
+                              context.tr('suspended_commissions_default_msg'),
                         );
-                      },
-                      child: Text(
-                        context.tr('pay_commission'),
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                        ),
+                        return;
+                      }
+                      final success = await viewModel.updateStatus(
+                        order.id,
+                        'accepted_initial',
+                      );
+                      if (success) {
+                        DialogHelper.showSuccessDialog(
+                          context,
+                          context.tr('order_accepted_success'),
+                        );
+                      }
+                    },
+              icon: viewModel.isLoading
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: context.qsColors.card,
+                        strokeWidth: 2,
                       ),
-                    ),
-                  ],
-                )
-              : const SizedBox.shrink(),
+                    )
+                  : const Icon(Icons.check_circle_outline, size: 24),
+              label: Text(
+                viewModel.isLoading
+                    ? context.tr('loading')
+                    : context.tr('accept_order'),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.qsColors.background,
+                foregroundColor: context.qsColors.textSub,
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                elevation: 0,
+              ),
+              onPressed: viewModel.isLoading
+                  ? null
+                  : () async {
+                      final success = await viewModel.updateStatus(
+                        order.id,
+                        'rejected',
+                      );
+                      if (success) {
+                        DialogHelper.showSuccessDialog(
+                          context,
+                          context.tr('order_canceled_success'),
+                        );
+                      }
+                    },
+              icon: viewModel.isLoading
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: context.qsColors.textSub,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Icon(Icons.cancel_outlined, size: 24),
+              label: Text(
+                viewModel.isLoading
+                    ? context.tr('loading')
+                    : context.tr('reject'),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
+  }
   }
 
   Widget _buildCommissionCard(
@@ -2111,4 +2071,4 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       ],
     );
   }
-}
+

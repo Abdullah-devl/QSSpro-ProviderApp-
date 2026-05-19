@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/theme/qs_color_extension.dart';
+import '../../../../core/utils/dialog_helper.dart';
 import '../viewmodels/submit_complaint_viewmodel.dart';
 
 class SubmitComplaintView extends StatefulWidget {
@@ -24,27 +25,15 @@ class _SubmitComplaintViewState extends State<SubmitComplaintView> {
     super.dispose();
   }
 
-  void _showConfirmDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.tr('confirm_submit_complaint')),
-        content: Text(context.tr('confirm_submit_complaint_msg')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(context.tr('cancel')),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _submit();
-            },
-            child: Text(context.tr('confirm')),
-          ),
-        ],
-      ),
+  void _showConfirmDialog() async {
+    final confirmed = await DialogHelper.showConfirmationDialog(
+      context,
+      title: context.tr('confirm_submit_complaint'),
+      message: context.tr('confirm_submit_complaint_msg'),
     );
+    if (confirmed) {
+      _submit();
+    }
   }
 
   Future<void> _submit() async {
@@ -58,40 +47,18 @@ class _SubmitComplaintViewState extends State<SubmitComplaintView> {
     if (!mounted) return;
 
     if (success) {
-      _showResultDialog(
-        context.tr('success'),
+      await DialogHelper.showSuccessDialog(
+        context,
         context.tr('complaint_sent_success'),
-        true,
       );
+      if (mounted) Navigator.pop(context); // العودة لتفاصيل الطلب
     } else if (viewModel.errorMessage != null) {
-      _showResultDialog(
-        context.tr('error'),
+      DialogHelper.showErrorDialog(
+        context,
         context.tr(viewModel.errorMessage!),
-        false,
       );
+      viewModel.resetState();
     }
-  }
-
-  void _showResultDialog(String title, String message, bool isSuccess) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              if (isSuccess) {
-                Navigator.pop(context); // Go back to Order Details
-              }
-            },
-            child: Text(context.tr('confirm')),
-          ),
-        ],
-      ),
-    );
   }
 
   @override

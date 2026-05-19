@@ -4,6 +4,7 @@ import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import '../models/bank_model.dart';
 import '../viewmodels/contact_info_viewmodel.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/utils/dialog_helper.dart';
 
 class AddEditBankDialog extends StatefulWidget {
   final ContactInfoViewModel vm;
@@ -127,8 +128,9 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
             final bankAccount = _bankAccountController.text.trim();
 
             if (_selectedBankId == null || bankAccount.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(context.tr('auto_tr_5'))),
+              DialogHelper.showErrorDialog(
+                context,
+                context.tr('auto_tr_5'),
               );
               return;
             }
@@ -159,8 +161,11 @@ class _AddEditBankDialogState extends State<AddEditBankDialog> {
             if (success) {
               Navigator.pop(context); // Close dialog
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(widget.vm.errorMessage ?? context.tr('auto_tr_64'))),
+              DialogHelper.showErrorDialog(
+                context,
+                widget.vm.errorMessage != null
+                    ? context.tr(widget.vm.errorMessage!)
+                    : context.tr('auto_tr_64'),
               );
             }
           },

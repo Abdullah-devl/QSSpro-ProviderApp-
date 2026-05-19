@@ -340,7 +340,7 @@ class _EditServiceBody extends StatelessWidget {
                   Icons.keyboard_arrow_down,
                   color: colors.textSub,
                 ),
-                items: viewModel.categories.map((category) {
+                items: viewModel.flattenedCategories.map((category) {
                   return DropdownMenuItem<int>(
                     value: category.id,
                     child: Text(

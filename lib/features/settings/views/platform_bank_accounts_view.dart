@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../../core/utils/dialog_helper.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../../../core/network/api_client.dart';
@@ -254,12 +255,9 @@ class _PlatformBankAccountsViewContentState extends State<_PlatformBankAccountsV
                                 InkWell(
                                   onTap: () {
                                     Clipboard.setData(ClipboardData(text: account.accountNumber));
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(context.tr('copy_success')),
-                                        behavior: SnackBarBehavior.floating,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                      ),
+                                    DialogHelper.showSuccessDialog(
+                                      context,
+                                      context.tr('copy_success'),
                                     );
                                   },
                                   borderRadius: BorderRadius.circular(12),
@@ -288,6 +286,29 @@ class _PlatformBankAccountsViewContentState extends State<_PlatformBankAccountsV
                                 ),
                               ],
                             ),
+                            if (account.note.isNotEmpty) ...[
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                child: Divider(height: 1),
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.info_outline, size: 18, color: colors.textSub),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      account.note,
+                                      style: TextStyle(
+                                        color: colors.textSub,
+                                        fontSize: 13,
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ],
                         ),
                       ),

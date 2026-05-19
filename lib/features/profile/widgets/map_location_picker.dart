@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../../core/utils/dialog_helper.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 
@@ -40,8 +41,9 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('خدمات الموقع غير مفعلة')),
+        DialogHelper.showErrorDialog(
+          context,
+          context.tr('location_services_disabled'),
         );
       }
       return;

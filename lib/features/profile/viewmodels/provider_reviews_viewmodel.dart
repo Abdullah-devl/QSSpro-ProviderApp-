@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../repositories/review_repository.dart';
 import '../models/review_model.dart';
 import '../../../core/network/error/api_error_handler.dart';
+import '../../../core/utils/dialog_helper.dart';
 
 class ProviderReviewsViewModel extends ChangeNotifier {
   final ReviewRepository _repository;
@@ -75,9 +76,7 @@ class ProviderReviewsViewModel extends ChangeNotifier {
     } catch (e) {
       final errorMsg = ApiErrorHandler.handle(e).message;
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMsg)),
-        );
+        DialogHelper.showErrorDialog(context, errorMsg);
       }
       return false;
     }

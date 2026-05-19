@@ -31,6 +31,11 @@ class EditServiceViewModel extends ChangeNotifier {
 
   List<CategoryModel> _categories = [];
   List<CategoryModel> get categories => _categories;
+
+  // قائمة مسطحة لعرض الفئات الرئيسية والفرعية معاً في القائمة المنسدلة
+  List<CategoryModel> _flattenedCategories = [];
+  List<CategoryModel> get flattenedCategories => _flattenedCategories;
+
   bool _isLoadingCategories = false;
   bool get isLoadingCategories => _isLoadingCategories;
 
@@ -105,9 +110,21 @@ class EditServiceViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       _categories = await _repository.getMainCategories();
+      _flattenedCategories.clear();
+      
+      for (var cat in _categories) {
+        _flattenedCategories.add(cat);
+        for (var sub in cat.children) {
+          _flattenedCategories.add(CategoryModel(
+            id: sub.id,
+            name: '   — ${sub.name}',
+          ));
+        }
+      }
+      
       // تحقق: في حالة تعديل خدمة ليس لها تصنيف ضمن القائمة (مثلاً 0 للخدمات المخصصة)
       if (_selectedCategoryId != null && 
-          !_categories.any((c) => c.id == _selectedCategoryId)) {
+          !_flattenedCategories.any((c) => c.id == _selectedCategoryId)) {
         _selectedCategoryId = null;
       }
     } catch (e) {

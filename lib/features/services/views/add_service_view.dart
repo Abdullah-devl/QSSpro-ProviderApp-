@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:service_provider_app/core/network/api_client.dart';
+import '../../../core/utils/dialog_helper.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../../../core/storage/token_storage.dart';
@@ -192,12 +193,10 @@ class _AddServiceBody extends StatelessWidget {
                     : () async {
                         int? serviceId = await viewModel.submitService(context);
                         if (serviceId != null && context.mounted) {
-                           ScaffoldMessenger.of(context).showSnackBar(
-                             SnackBar(
-                              content: Text(context.tr('service_published_success')),
-                              backgroundColor: colors.success,
-                            ),
-                          );
+                           DialogHelper.showSuccessDialog(
+                             context,
+                             context.tr('service_published_success'),
+                           );
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -318,7 +317,7 @@ class _AddServiceBody extends StatelessWidget {
                   Icons.keyboard_arrow_down,
                   color: colors.textSub,
                 ),
-                items: viewModel.categories.map((category) {
+                items: viewModel.flattenedCategories.map((category) {
                   return DropdownMenuItem<int>(
                     value: category.id,
                     child: Text(

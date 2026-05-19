@@ -6,10 +6,11 @@ import 'package:service_provider_app/features/services/views/add_service_view.da
 import 'package:service_provider_app/features/services/widgets/service_card_widget.dart';
 import '../../../core/theme/qs_color_extension.dart';
 import '../../../core/localization/app_localizations.dart';
-// import '../../home/viewmodels/main_viewmodel.dart';
 import '../viewmodels/manage_services_viewmodel.dart';
 import 'special_services_view.dart' as service_views;
 import 'package:shimmer/shimmer.dart';
+import 'package:service_provider_app/features/profile/viewmodels/profile_viewmodel.dart';
+import 'package:service_provider_app/core/utils/dialog_helper.dart';
 
 class ManageServicesView extends StatelessWidget {
   const ManageServicesView({super.key});
@@ -94,6 +95,15 @@ class ManageServicesView extends StatelessWidget {
                           flex: 1,
                           child: InkWell(
                             onTap: () {
+                              final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+                              if (profileVM.profile?.isSuspendedForCommissions == true) {
+                                DialogHelper.showErrorDialog(
+                                  context,
+                                  profileVM.profile?.suspendedMessage ??
+                                      context.tr('suspended_commissions_default_msg'),
+                                );
+                                return;
+                              }
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (_) => AddServiceView()),
@@ -136,6 +146,15 @@ class ManageServicesView extends StatelessWidget {
                           flex: 2,
                           child: InkWell(
                             onTap: () {
+                              final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+                              if (profileVM.profile?.isSuspendedForCommissions == true) {
+                                DialogHelper.showErrorDialog(
+                                  context,
+                                  profileVM.profile?.suspendedMessage ??
+                                      context.tr('suspended_commissions_default_msg'),
+                                );
+                                return;
+                              }
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (_) => const service_views.SpecialServicesView()),

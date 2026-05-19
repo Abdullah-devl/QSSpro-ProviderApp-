@@ -459,7 +459,9 @@ class _ReadOnlyOrderDetailViewState extends State<ReadOnlyOrderDetailView> {
       if (context.mounted) {
         DialogHelper.showErrorDialog(
           context,
-          viewModel.errorMessage ?? 'تعذر إتمام الإجراء، يرجى المحاولة لاحقاً',
+          viewModel.errorMessage != null
+              ? context.tr(viewModel.errorMessage!)
+              : context.tr('error_occurred'),
         );
       }
     }

@@ -102,10 +102,40 @@ class _OrderComplaintsListViewState extends State<OrderComplaintsListView> {
 
   Widget _buildComplaintCard(
       BuildContext context, RequestComplaintModel complaint, dynamic colors) {
-    // تحديد لون وحالة الشكوى بناءً على الحالة (مثلاً: pending, resolved)
-    final bool isResolved = complaint.status == 'resolved';
-    final Color statusColor = isResolved ? colors.success : colors.warning;
-    final String statusText = isResolved ? context.tr('auto_tr_75') : context.tr('auto_tr_37');
+    Color statusColor;
+    String statusText;
+
+    switch (complaint.status.toLowerCase().trim()) {
+      case 'resolved':
+      case 'completed':
+        statusColor = colors.success;
+        statusText = context.tr('status_resolved');
+        break;
+      case 'closed':
+        statusColor = colors.textSub;
+        statusText = context.tr('status_closed');
+        break;
+      case 'answered':
+      case 'replied':
+        statusColor = colors.primary;
+        statusText = context.tr('status_answered');
+        break;
+      case 'rejected':
+      case 'canceled':
+      case 'cancelled':
+        statusColor = colors.error;
+        statusText = context.tr('status_rejected');
+        break;
+      case 'in_progress':
+      case 'processing':
+        statusColor = Colors.orange;
+        statusText = context.tr('status_in_progress');
+        break;
+      case 'pending':
+      default:
+        statusColor = colors.warning;
+        statusText = context.tr('status_pending');
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -131,7 +161,7 @@ class _OrderComplaintsListViewState extends State<OrderComplaintsListView> {
                   Icon(Icons.assignment_late_outlined, color: colors.primary, size: 20),
                   const SizedBox(width: 8),
                   Text(
-                    'رقم الطلب #${complaint.orderId ?? "غير متوفر"}',
+                    '${context.tr('order_number_label')} #${complaint.orderId ?? context.tr('not_available_label')}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: colors.text,
@@ -187,8 +217,8 @@ class _OrderComplaintsListViewState extends State<OrderComplaintsListView> {
                             order: OrderModel(
                               id: complaint.orderId.toString(),
                               customerId: '',
-                              customerName: context.tr('auto_tr_2'),
-                              serviceName: context.tr('auto_tr_2'),
+                              customerName: context.tr('loading'),
+                              serviceName: context.tr('loading'),
                               customerImage: '',
                               customerPhone: '',
                               price: 0,
@@ -204,7 +234,7 @@ class _OrderComplaintsListViewState extends State<OrderComplaintsListView> {
                   },
                   icon: Icon(Icons.remove_red_eye_outlined, size: 16, color: colors.primary),
                   label: Text(
-                    context.tr('auto_tr_91'),
+                    context.tr('view_order'),
                     style: TextStyle(color: colors.primary, fontWeight: FontWeight.bold),
                   ),
                   style: TextButton.styleFrom(

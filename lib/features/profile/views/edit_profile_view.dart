@@ -17,7 +17,7 @@ class EditProfileView extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.qsColors;
     final vm = context.watch<EditProfileViewModel>();
-    final bgColor = const Color(0xFFF8F9FA);
+    final bgColor = colors.background;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -30,17 +30,27 @@ class EditProfileView extends StatelessWidget {
           style: TextStyle(color: colors.text, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_forward, color: const Color(0xFF0F4A8A)),
+          icon: Icon(Icons.arrow_forward, color: colors.primary),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           vm.isLoading
-              ? const Padding(padding: EdgeInsets.all(16.0), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
+              ? Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                    ),
+                  ),
+                )
               : TextButton(
                   onPressed: () => vm.saveProfile(context),
                   child: Text(
                     context.tr('save'),
-                    style: const TextStyle(color: Color(0xFF5CA4B8), fontWeight: FontWeight.bold, fontSize: 16),
+                    style: TextStyle(color: colors.primary, fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
         ],
@@ -57,11 +67,11 @@ class EditProfileView extends StatelessWidget {
             _buildCardContainer(
               context,
               children: [
-                _buildInputLabel(context.tr('full_name'), const Color(0xFF5CA4B8)),
+                _buildInputLabel(context.tr('full_name'), colors.primary),
                 const SizedBox(height: 8),
                 _buildTextField(context, vm.nameController, Icons.person_outline, readOnly: true),
                 const SizedBox(height: 20),
-                _buildInputLabel(context.tr('profession'), const Color(0xFF5CA4B8)),
+                _buildInputLabel(context.tr('profession'), colors.primary),
                 const SizedBox(height: 8),
                 _buildTextField(context, vm.jobTitleController, Icons.build_outlined),
               ],
@@ -77,10 +87,16 @@ class EditProfileView extends StatelessWidget {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(color: const Color(0xFFD3E3EC), borderRadius: BorderRadius.circular(12)),
-                      child: Text(context.tr('professional_badge'), style: const TextStyle(fontSize: 10, color: Color(0xFF0F4A8A))),
+                      decoration: BoxDecoration(
+                        color: colors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        context.tr('professional_badge'),
+                        style: TextStyle(fontSize: 10, color: colors.primary),
+                      ),
                     ),
-                    _buildInputLabel(context.tr('personal_bio'), const Color(0xFF5CA4B8)),
+                    _buildInputLabel(context.tr('personal_bio'), colors.primary),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -93,7 +109,7 @@ class EditProfileView extends StatelessWidget {
             _buildCardContainer(
               context,
               children: [
-                _buildInputLabel(context.tr('work_location'), const Color(0xFF5CA4B8)),
+                _buildInputLabel(context.tr('work_location'), colors.primary),
                 const SizedBox(height: 12),
                 InkWell(
                   onTap: () async {
@@ -113,14 +129,14 @@ class EditProfileView extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: context.qsColors.background,
+                      color: colors.background,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           vm.selectedLat != null ? Icons.check_circle : Icons.add_location_alt_outlined,
-                          color: vm.selectedLat != null ? Colors.green : context.qsColors.textSub,
+                          color: vm.selectedLat != null ? colors.success : colors.textSub,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -129,7 +145,7 @@ class EditProfileView extends StatelessWidget {
                                 ? "${vm.selectedLat!.toStringAsFixed(4)}, ${vm.selectedLng!.toStringAsFixed(4)}"
                                 : context.tr('select_location_on_map'),
                             style: TextStyle(
-                              color: vm.selectedLat != null ? context.qsColors.text : context.qsColors.textSub,
+                              color: vm.selectedLat != null ? colors.text : colors.textSub,
                               fontSize: 14,
                             ),
                             textAlign: TextAlign.right,
@@ -141,39 +157,6 @@ class EditProfileView extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-
-            // ⚡ البطاقة الرابعة: وضع متاح للعمل
-            // Container(
-            //   padding: const EdgeInsets.all(20),
-            //   decoration: BoxDecoration(
-            //     color: const Color(0xFFEBF3F6), // أزرق فاتح جداً من التصميم
-            //     borderRadius: BorderRadius.circular(32),
-            //   ),
-            //   child: Row(
-            //     children: [
-            //       CupertinoSwitch(
-            //         value: vm.isAvailable,
-            //         activeTrackColor: const Color(0xFF5CA4B8),
-            //         onChanged: (val) => vm.toggleAvailability(val),
-            //       ),
-            //       const Spacer(),
-            //       Column(
-            //         crossAxisAlignment: CrossAxisAlignment.end,
-            //         children: [
-            //           Text(context.tr('available_for_work'), style: TextStyle(fontWeight: FontWeight.bold, color: colors.text, fontSize: 15)),
-            //           Text(context.tr('available_for_work_desc'), style: TextStyle(color: colors.textSub, fontSize: 11)),
-            //         ],
-            //       ),
-            //       const SizedBox(width: 16),
-            //       Container(
-            //         padding: const EdgeInsets.all(10),
-            //         decoration: const BoxDecoration(color: Color(0xFFD3E3EC), shape: BoxShape.circle),
-            //         child: const Icon(Icons.flash_on_rounded, color: Color(0xFF5CA4B8)),
-            //       ),
-            //     ],
-            //   ),
-            // ),
             const SizedBox(height: 40),
           ],
         ),
@@ -186,6 +169,7 @@ class EditProfileView extends StatelessWidget {
   // ==========================================
 
   Widget _buildAvatarSection(BuildContext context, EditProfileViewModel vm) {
+    final colors = context.qsColors;
     return Column(
       children: [
         GestureDetector(
@@ -198,8 +182,8 @@ class EditProfileView extends StatelessWidget {
                 height: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: context.qsColors.card, width: 4),
-                  boxShadow: [BoxShadow(color: context.qsColors.text.withOpacity(0.1), blurRadius: 10)],
+                  border: Border.all(color: colors.card, width: 4),
+                  boxShadow: [BoxShadow(color: colors.text.withOpacity(0.1), blurRadius: 10)],
                   image: vm.newAvatar != null
                       ? DecorationImage(image: FileImage(vm.newAvatar!), fit: BoxFit.cover)
                       : DecorationImage(
@@ -212,8 +196,12 @@ class EditProfileView extends StatelessWidget {
               ),
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: const Color(0xFF5CA4B8), shape: BoxShape.circle, border: Border.all(color: context.qsColors.card, width: 2)),
-                child: Icon(Icons.camera_alt_rounded, color: context.qsColors.card, size: 20),
+                decoration: BoxDecoration(
+                  color: colors.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: colors.card, width: 2),
+                ),
+                child: Icon(Icons.camera_alt_rounded, color: colors.card, size: 20),
               ),
             ],
           ),
@@ -221,19 +209,23 @@ class EditProfileView extends StatelessWidget {
         const SizedBox(height: 12),
         TextButton(
           onPressed: () => vm.pickImage(),
-          child: Text(context.tr('change_profile_picture'), style: const TextStyle(color: Color(0xFF5CA4B8), fontSize: 13, fontWeight: FontWeight.bold)),
+          child: Text(
+            context.tr('change_profile_picture'),
+            style: TextStyle(color: colors.primary, fontSize: 13, fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );
   }
 
   Widget _buildCardContainer(BuildContext context, {required List<Widget> children}) {
+    final colors = context.qsColors;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: context.qsColors.card,
+        color: colors.card,
         borderRadius: BorderRadius.circular(32),
-        boxShadow: [BoxShadow(color: context.qsColors.text.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 5))],
+        boxShadow: [BoxShadow(color: colors.text.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 5))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: children),
     );
@@ -244,6 +236,7 @@ class EditProfileView extends StatelessWidget {
   }
 
   Widget _buildTextField(BuildContext context, TextEditingController controller, IconData? icon, {int maxLines = 1, bool readOnly = false}) {
+    final colors = context.qsColors;
     return Opacity(
       opacity: readOnly ? 0.7 : 1.0,
       child: TextField(
@@ -251,10 +244,11 @@ class EditProfileView extends StatelessWidget {
         maxLines: maxLines,
         readOnly: readOnly,
         textAlign: TextAlign.right,
+        style: TextStyle(color: colors.text),
         decoration: InputDecoration(
           filled: true,
-          fillColor: context.qsColors.background,
-          prefixIcon: icon != null ? Icon(icon, color: context.qsColors.textSub) : null,
+          fillColor: colors.background,
+          prefixIcon: icon != null ? Icon(icon, color: colors.textSub) : null,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
@@ -262,5 +256,3 @@ class EditProfileView extends StatelessWidget {
     );
   }
 }
-
-

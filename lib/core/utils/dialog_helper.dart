@@ -78,7 +78,7 @@ class DialogHelper {
   }
 
   // 🏆 دالة عرض رسالة النجاح (بتصميم جذاب جداً Premium)
-  static Future<void> showSuccessDialog(BuildContext context, String message) {
+  static Future<void> showSuccessDialog(BuildContext context, String message, {VoidCallback? onPressed}) {
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -141,7 +141,10 @@ class DialogHelper {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       elevation: 0,
                     ),
-                    onPressed: () => Navigator.pop(ctx),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      onPressed?.call();
+                    },
                     child: Text(context.tr('auto_tr_40'),
                       style: TextStyle(
                         color: Colors.white,

@@ -4,7 +4,6 @@
 /// 📝 الوصف: يحتوي على جميع الروابط (URLs) الخاصة بالـ API.
 library;
 
-
 class ApiEndpoints {
   // ⛔ منع إنشاء كائن من هذا الكلاس
   ApiEndpoints._();
@@ -16,13 +15,13 @@ class ApiEndpoints {
   // 🎯 قم بتفعيل السطر المناسب لبيئة العمل الخاصة بك (وعطّل الباقي):
 
   /// 1. للمحاكي (Android Emulator):
-  // static String get domain => "http://10.0.2.2:8000";
+  static String get domain => "http://127.0.0.1:8000";
 
   /// 2. للهاتف الحقيقي:
   // static String get domain => "http://127.0.0.1:8000";
 
   /// 3. للسيرفر المرفوع على الإنترنت (Live):
-  static String get domain => "https://qss-back-end.onrender.com";
+  // static String get domain => "https://qss-back-end.onrender.com";
 
   // ---------------------------------------------------------------------------
 
@@ -40,8 +39,10 @@ class ApiEndpoints {
 
   // 🔐 روابط المصادقة
   static const String login = "login";
-  static const String googleLogin = "auth/google/callback"; // 🚀 رابط تسجيل الدخول بجوجل الحديث
+  static const String googleLogin =
+      "auth/google/callback"; // 🚀 رابط تسجيل الدخول بجوجل الحديث
   static const String register = "register";
+  static const String registerProvider = "register-provider";
   static const String logout = "logout";
   static const String verifyEmail = "verify-email-code";
   static const String resendVerificationCode = "resend-verification-code";
@@ -56,6 +57,8 @@ class ApiEndpoints {
   static const String categories = "categories";
   static const String popularServices = "popular-services";
   static const String beProvider = "provider-requests";
+  static const String providerCategoryRequests = "provider-category-requests";
+  static const String myAuthorizedCategories = "my-authorized-categories";
   static const String providerPolicy = "policies/provider";
   static const String seekerPolicy = "policies/seeker";
 

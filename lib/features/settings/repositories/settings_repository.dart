@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
 import '../../../core/storage/hive_keys.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/error/api_error_handler.dart';
+import '../../services/models/category_model.dart';
 import '../models/platform_bank_account_model.dart';
 
 class SettingsRepository {
@@ -71,6 +73,62 @@ class SettingsRepository {
       final data = ApiErrorHandler.handleResponse(response);
       final List rawList = data is List ? data : (data['data'] ?? []);
       return rawList.map((e) => PlatformBankAccountModel.fromJson(e)).toList();
+    } catch (e) {
+      throw ApiErrorHandler.handle(e);
+    }
+  }
+
+  // 🚀 دالة جلب الأقسام المصرحة للمزود
+  Future<List<CategoryModel>> getMyAuthorizedCategories() async {
+    try {
+      final response = await apiService.get(ApiEndpoints.myAuthorizedCategories);
+      final data = ApiErrorHandler.handleResponse(response);
+      final List responseList = data is List ? data : (data['categories'] ?? data['data'] ?? []);
+      return responseList.map((e) => CategoryModel.fromJson(e)).toList();
+    } catch (e) {
+      throw ApiErrorHandler.handle(e);
+    }
+  }
+
+  // 🚀 دالة جلب كل الأقسام للـ Dropdown
+  Future<List<CategoryModel>> getAllCategories() async {
+    try {
+      final response = await apiService.get(ApiEndpoints.categories);
+      final data = ApiErrorHandler.handleResponse(response);
+      final List responseList = data['categories'] ?? data['data'] ?? [];
+      return responseList.map((e) => CategoryModel.fromJson(e)).toList();
+    } catch (e) {
+      throw ApiErrorHandler.handle(e);
+    }
+  }
+
+  // 🚀 تقديم طلب قسم جديد
+  Future<void> submitCategoryRequest({
+    required int categoryId,
+    required String description,
+    required File document,
+  }) async {
+    try {
+      FormData formData = FormData.fromMap({
+        'category_id': categoryId.toString(),
+        'description': description,
+      });
+
+      formData.files.add(
+        MapEntry(
+          'document',
+          await MultipartFile.fromFile(
+            document.path,
+            filename: document.path.split('/').last,
+          ),
+        ),
+      );
+
+      final response = await apiService.post(
+        ApiEndpoints.providerCategoryRequests,
+        data: formData,
+      );
+      ApiErrorHandler.handleResponse(response);
     } catch (e) {
       throw ApiErrorHandler.handle(e);
     }

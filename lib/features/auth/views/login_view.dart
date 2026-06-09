@@ -266,6 +266,8 @@ import '../../../core/widgets/app_logo.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_textfield.dart';
 import '../viewmodels/login_viewmodel.dart';
+import '../viewmodels/register_viewmodel.dart';
+import 'register_view.dart';
 
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
@@ -509,7 +511,29 @@ class _LoginViewBody extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 24),
+
+                  CustomButton(
+                    text: context.tr('create_account'),
+                    icon: Icons.person_add_alt_1_rounded,
+                    isPrimary: false,
+                    onPressed: () {
+                      final tokenStorage = TokenStorage();
+                      final apiService = ApiService(tokenStorage);
+                      final authRepository = AuthRepository(apiService, tokenStorage);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ChangeNotifierProvider(
+                            create: (_) => RegisterViewModel(authRepository),
+                            child: const RegisterView(),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
 
                   // =====================================
                   // 5. الإصدار

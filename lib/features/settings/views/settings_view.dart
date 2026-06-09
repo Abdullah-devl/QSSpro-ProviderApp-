@@ -3,10 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/qs_color_extension.dart';
+import '../../../core/storage/token_storage.dart';
+import '../../../core/network/api_client.dart';
+import '../repositories/settings_repository.dart';
 import '../viewmodels/settings_provider.dart';
+import '../viewmodels/authorized_categories_viewmodel.dart';
 import '../../complaints/views/complaints_hub_view.dart';
 import 'privacy_policy_view.dart';
 import 'platform_bank_accounts_view.dart';
+import 'authorized_categories_view.dart';
 
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
@@ -94,6 +99,27 @@ class SettingsView extends StatelessWidget {
             // 📜 Section: Legal & About
             _buildSectionTitle(context, 'legal_about'),
             _buildSettingsCard(context, [
+              _buildSettingTile(
+                context,
+                icon: Icons.category_outlined,
+                title: context.tr('authorized_categories_title'),
+                onTap: () {
+                  final tokenStorage = TokenStorage();
+                  final apiService = ApiService(tokenStorage);
+                  final settingsRepo = SettingsRepository(apiService);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChangeNotifierProvider(
+                        create: (_) => AuthorizedCategoriesViewModel(settingsRepo),
+                        child: const AuthorizedCategoriesView(),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const Divider(height: 1),
               _buildSettingTile(
                 context,
                 icon: Icons.privacy_tip_outlined,

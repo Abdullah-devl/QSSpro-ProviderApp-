@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:service_provider_app/core/localization/app_localizations.dart';
+import 'package:service_provider_app/core/network/api_client.dart';
+import 'package:service_provider_app/core/storage/token_storage.dart';
 import 'package:service_provider_app/core/theme/qs_color_extension.dart';
 import 'package:service_provider_app/core/widgets/app_logo.dart';
 import 'package:service_provider_app/core/widgets/custom_button.dart';
+import 'package:service_provider_app/features/auth/repositories/auth_repository.dart';
+import 'package:service_provider_app/features/auth/viewmodels/register_viewmodel.dart';
 import 'package:service_provider_app/features/auth/views/login_view.dart';
+import 'package:service_provider_app/features/auth/views/register_view.dart';
 import 'package:service_provider_app/features/settings/viewmodels/settings_provider.dart';
 
 class WelcomeView extends StatelessWidget {
@@ -138,14 +143,26 @@ class WelcomeView extends StatelessWidget {
               ),
 
               const SizedBox(height: 16),
-              // CustomButton(
-              //   text: context.tr('create_account'),
-              //   icon: Icons.person_add_alt_1_rounded,
-              //   isPrimary: false,
-              //   onPressed: () {
-              //     // سينقله لشاشة التسجيل لاحقاً
-              //   },
-              // ),
+              CustomButton(
+                text: context.tr('create_account'),
+                icon: Icons.person_add_alt_1_rounded,
+                isPrimary: false,
+                onPressed: () {
+                  final tokenStorage = TokenStorage();
+                  final apiService = ApiService(tokenStorage);
+                  final authRepository = AuthRepository(apiService, tokenStorage);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChangeNotifierProvider(
+                        create: (_) => RegisterViewModel(authRepository),
+                        child: const RegisterView(),
+                      ),
+                    ),
+                  );
+                },
+              ),
 
               // SizedBox(height: 30),
 

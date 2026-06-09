@@ -156,16 +156,15 @@ class ManageServicesRepository {
   // مفتاح تخزين الفئات
   final String _categoriesCacheKey = 'cached_main_categories';
 
-  // 🚀 دالة جلب الفئات الرئيسية (GET /categories/main)
+  // 🚀 دالة جلب الفئات الرئيسية المصرحة للمزود (GET /my-authorized-categories)
   Future<List<CategoryModel>> getMainCategories() async {
     var box = Hive.box(HiveKeys.settingsBox);
 
     try {
-      final response = await _apiService.get(ApiEndpoints.mainCategories);
+      final response = await _apiService.get(ApiEndpoints.myAuthorizedCategories);
       final data = ApiErrorHandler.handleResponse(response);
 
-      // final List responseList = data['data'] ?? data;
-      final List responseList = data['categories'] ?? data['data'] ?? [];
+      final List responseList = data is List ? data : (data['categories'] ?? data['data'] ?? []);
       // تخزينها في Hive
       await box.put(_categoriesCacheKey, responseList);
 

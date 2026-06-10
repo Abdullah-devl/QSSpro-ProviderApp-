@@ -29,16 +29,26 @@ class CategoryModel {
   });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
+    // إذا كانت البيانات تحتوي على كائن 'category' داخلي، نستخدمه كـ مصدر رئيسي للبيانات
+    final targetJson = json['category'] is Map<String, dynamic>
+        ? json['category'] as Map<String, dynamic>
+        : json;
+
     return CategoryModel(
       // معالجة الـ ID سواء أرسله السيرفر كـ int أو String
-      id: json['id'] != null ? int.tryParse(json['id'].toString()) ?? 0 : 0,
-      name: json['name'] ?? json['title'] ?? 'بدون اسم',
-      children: json['children'] != null || json['childrenRecursive'] != null
-          ? ((json['children'] ?? json['childrenRecursive']) as List)
+      id: targetJson['id'] != null ? int.tryParse(targetJson['id'].toString()) ?? 0 : 0,
+      name: targetJson['name'] ?? targetJson['title'] ?? 'بدون اسم',
+      children: targetJson['children'] != null || targetJson['childrenRecursive'] != null
+          ? ((targetJson['children'] ?? targetJson['childrenRecursive']) as List)
               .map((e) => CategoryModel.fromJson(e as Map<String, dynamic>))
               .toList()
           : [],
-      maxServices: json['max_services'] != null ? int.tryParse(json['max_services'].toString()) : null,
+      // قد تكون max_services في الكائن الخارجي (pivot) أو الكائن الداخلي (category)
+      maxServices: json['max_services'] != null
+          ? int.tryParse(json['max_services'].toString())
+          : (targetJson['max_services'] != null
+              ? int.tryParse(targetJson['max_services'].toString())
+              : null),
     );
   }
 }

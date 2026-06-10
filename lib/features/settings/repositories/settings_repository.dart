@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import '../../../core/storage/hive_keys.dart';
 import '../../../core/network/api_endpoints.dart';
@@ -83,6 +84,7 @@ class SettingsRepository {
     try {
       final response = await apiService.get(ApiEndpoints.myAuthorizedCategories);
       final data = ApiErrorHandler.handleResponse(response);
+      debugPrint('🔍 getMyAuthorizedCategories response data: $data');
       final List responseList = data is List ? data : (data['categories'] ?? data['data'] ?? []);
       return responseList.map((e) => CategoryModel.fromJson(e)).toList();
     } catch (e) {

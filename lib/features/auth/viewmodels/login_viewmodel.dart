@@ -14,6 +14,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:service_provider_app/core/localization/app_localizations.dart';
 import '../repositories/auth_repository.dart';
 import '../viewmodels/auth_viewmodel.dart';
+import '../viewmodels/register_viewmodel.dart';
+import '../views/email_verification_view.dart';
 import 'package:service_provider_app/core/utils/dialog_helper.dart';
 
 class LoginViewModel extends ChangeNotifier {
@@ -76,11 +78,11 @@ class LoginViewModel extends ChangeNotifier {
         return;
       }
 
-      _isLoading = false;
-      notifyListeners();
-
       // 2. 🛡️ تطبيق شرط التحقق (Middleware / Guard)
       if (user.isVerified) {
+        _isLoading = false;
+        notifyListeners();
+
         // التحقق من الموافقة على السياسة مباشرة من بيانات تسجيل الدخول
         final box = Hive.box(HiveKeys.settingsBox);
         await box.put('provider_policy_agreed', user.providerPolicy);
@@ -104,15 +106,32 @@ class LoginViewModel extends ChangeNotifier {
           );
         }
       } else {
-        // إذا لم يكن موثقاً -> نمنعه من الدخول للرئيسية وننقله لشاشة التوثيق أو الشروط
+        // إذا لم يكن موثقاً -> نرسل الكود أولاً ثم نوجهه لصفحة التحقق
+        try {
+          await _authRepository.resendVerificationCode(emailController.text.trim());
+        } catch (e) {
+          debugPrint('Failed to send verification code automatically on login: $e');
+        }
+
+        _isLoading = false;
+        notifyListeners();
+
         _showAlert(
           context,
-          context.tr('error_verify_or_agree_first'),
-          isError: true,
+          context.tr('email_verification_subtitle'),
+          isError: false,
         );
 
-        // الانتقال لشاشة التوثيق (سنبنيها لاحقاً)
-        // Navigator.push(context, MaterialPageRoute(builder: (_) => const VerificationView()));
+        if (!context.mounted) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChangeNotifierProvider(
+              create: (_) => RegisterViewModel(_authRepository),
+              child: EmailVerificationView(email: emailController.text.trim()),
+            ),
+          ),
+        );
       }
     } on Failure catch (failure) {
       _isLoading = false;
@@ -214,7 +233,24 @@ class LoginViewModel extends ChangeNotifier {
           );
         }
       } else {
-        _showAlert(context, context.tr('error_verify_first'), isError: true);
+        try {
+          await _authRepository.resendVerificationCode(user.email);
+        } catch (e) {
+          debugPrint('Failed to send verification code automatically on google login: $e');
+        }
+
+        _showAlert(context, context.tr('email_verification_subtitle'), isError: false);
+
+        if (!context.mounted) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChangeNotifierProvider(
+              create: (_) => RegisterViewModel(_authRepository),
+              child: EmailVerificationView(email: user.email),
+            ),
+          ),
+        );
       }
     } on Failure catch (failure) {
       _showAlert(context, failure.message, isError: true);

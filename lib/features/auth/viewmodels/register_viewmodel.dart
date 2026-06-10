@@ -8,6 +8,7 @@ import 'package:service_provider_app/core/utils/dialog_helper.dart';
 import '../../services/models/category_model.dart';
 import '../repositories/auth_repository.dart';
 import '../views/email_verification_view.dart';
+import '../views/login_view.dart';
 import 'package:provider/provider.dart';
 
 class RegisterViewModel extends ChangeNotifier {
@@ -165,26 +166,50 @@ class RegisterViewModel extends ChangeNotifier {
         deviceToken: fcmToken,
       );
 
-      _isLoading = false;
-      notifyListeners();
+      if (user.isVerified) {
+        _isLoading = false;
+        notifyListeners();
 
-      // Show success dialog and navigate to verification code screen
-      DialogHelper.showSuccessDialog(
-        context,
-        context.tr('verification_success_msg'),
-        onPressed: () {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (ctx) => ChangeNotifierProvider.value(
-                value: context.read<RegisterViewModel>(),
-                child: EmailVerificationView(email: email),
+        if (!context.mounted) return;
+        DialogHelper.showSuccessDialog(
+          context,
+          context.tr('verification_success_msg'),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginView()),
+              (route) => false,
+            );
+          },
+        );
+      } else {
+        try {
+          await _authRepository.resendVerificationCode(email);
+        } catch (e) {
+          debugPrint('Failed to send verification code automatically on registration: $e');
+        }
+
+        _isLoading = false;
+        notifyListeners();
+
+        if (!context.mounted) return;
+        DialogHelper.showSuccessDialog(
+          context,
+          context.tr('email_verification_subtitle'),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (ctx) => ChangeNotifierProvider(
+                  create: (_) => RegisterViewModel(_authRepository),
+                  child: EmailVerificationView(email: email),
+                ),
               ),
-            ),
-            (route) => false,
-          );
-        },
-      );
+              (route) => false,
+            );
+          },
+        );
+      }
     } on Failure catch (failure) {
       _isLoading = false;
       notifyListeners();
